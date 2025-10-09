@@ -20,9 +20,10 @@ AppUpdatesURL={#MyAppURL}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-; 输出目录和文件名
-OutputDir=userdocs:Output
-OutputBaseFilename={#MyAppSetupName}
+; 输出目录
+OutputDir=output
+; 直接使用预处理器常量来构建文件名
+OutputBaseFilename=MouseClicker-Setup-{#MyAppVersion}
 ; 使用现代化的向导界面
 WizardStyle=modern
 ; 配置最高级别的压缩
@@ -42,8 +43,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 ; 将 dotnet publish 输出的所有文件打包到安装目录 {app}
-; 源路径（Source）需要根据你的 workflow 构建输出路径来调整
-Source: "D:\a\MouseClicker\MouseClicker\release-for-inno\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "release-for-inno\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
 ; 创建开始菜单快捷方式

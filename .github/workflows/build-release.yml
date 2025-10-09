@@ -40,16 +40,17 @@ jobs:
         run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
 
       # --- 使用 Inno Setup 创建高压安装包 ---
+      - name: 在 Inno Setup 脚本中设置版本号
+        # 这是一个更稳健的方法：直接在编译前替换脚本文件中的占位符
+        # 这可以避免因 Action 处理命令行参数的方式不当而导致的问题
+        run: |
+          (Get-Content -path "setup.iss" -Raw) -replace '__APP_VERSION__', "${{ github.ref_name }}" | Set-Content -path "setup.iss"
+
       - name: 编译 Inno Setup 安装包
-        # 使用您找到的可以正常工作的 Action
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
         with:
-          # 指定 Inno Setup 脚本的路径
           path: setup.iss
-          # 传递给编译器的参数
-          # /DAppVersion=... 将版本号传入脚本
-          # /O+"./output"   指定编译产物的输出目录
-          options: /DAppVersion="${{ github.ref_name }}" /O+"./output"
+          # 由于版本号已写入脚本，并且输出目录已在脚本中定义，这里不再需要任何 options
 
       # --- 创建 Release 并上传构建产物 ---
       - name: 创建 GitHub Release
