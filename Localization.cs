@@ -81,7 +81,7 @@ namespace MouseClicker
    - “文件” -> “读取配置”: 从文件中加载之前保存的配置。
 
 7. 语言切换:
-   - “语言”菜单允许您在中文和英文之间切换界面语言。
+   - “语言”菜单允许您在中文和英文以及日语之间切换界面语言。
 
 感谢您的使用！
 """ },
@@ -158,11 +158,88 @@ Welcome to Mouse Clicker!
    - "File" -> "Load Config": Loads a previously saved configuration from a file.
 
 7. Language Switching:
-   - The "Language" menu allows you to switch the interface language between Chinese and English.
+   - The "Language" menu allows you to switch the interface language between Chinese、English and Japanese.
 
 Thank you for using the application!
 """ },
                     { "CloseButton", "Close" }
+                }
+            },
+            // 日本語翻訳
+            {
+                "ja-JP", new Dictionary<string, string>
+                {
+                    { "File", "ファイル" },
+                    { "SaveConfig", "設定を保存" },
+                    { "LoadConfig", "設定を読み込む" },
+                    { "Language", "言語" },
+                    { "Help", "ヘルプ" },
+                    { "ViewHelp", "チュートリアルを見る" },
+                    { "About", "バージョン情報" },
+                    { "Add", "追加" },
+                    { "Remove", "削除" },
+                    { "MoveUp", "上へ" },
+                    { "MoveDown", "下へ" },
+                    { "IntervalLabel", "間隔 (ms):" },
+                    { "JitterLabel", "ジッター (ms):" },
+                    { "SequenceLabel", "クリックシーケンス:" },
+                    { "SequenceLoop", "順番にループ" },
+                    { "SequenceRandom", "ランダムにループ" },
+                    { "SequenceOnce", "順番に1回クリック" },
+                    { "ShowOverlay", "オーバーレイを表示" },
+                    { "StartClicking", "クリックを開始" },
+                    { "StopClicking", "クリックを停止 (ESC)" },
+                    { "WindowTitle", "マウス自動クリッカー" },
+                    { "SaveConfigTitle", "設定ファイルを保存" },
+                    { "JsonFilter", "JSON ファイル|*.json" },
+                    { "ConfigSavedSuccess", "設定が正常に保存されました。" },
+                    { "Success", "成功" },
+                    { "SaveConfigError", "設定の保存に失敗しました: {0}" },
+                    { "Error", "エラー" },
+                    { "LoadConfigTitle", "設定ファイルを読み込む" },
+                    { "ConfigLoadedSuccess", "設定が正常に読み込まれました。" },
+                    { "LoadConfigError", "設定の読み込みに失敗しました: {0}" },
+                    { "AboutMessage", "マウス自動クリッカー v1.0\n" },
+                    { "SetLabelPrompt", "このエリアのラベルを入力してください:" },
+                    { "SetLabelTitle", "ラベルを設定" },
+                    { "AreaLabelDefault", "エリア" },
+                    { "AddAreaFirst", "少なくとも1つのクリックエリアを追加してください。" },
+                    { "HelpTutorialTitle", "ソフトウェアチュートリアル" },
+                    { "HelpTutorialContent", """
+マウス自動クリッカーへようこそ！
+
+1. クリックエリアの追加:
+   - 「追加」ボタンをクリックします。
+   - 画面が暗くなります。マウスの左ボタンを押しながらドラッグして、長方形のエリアを選択します。
+   - マウスを離した後、このエリアに名前を設定できます。
+
+2. クリックエリアの管理:
+   - 「削除」: リストで選択したエリアを削除します。
+   - 「上へ」/「下へ」: リスト内のエリアの順序を調整します。これは「順番にループ」モードでのクリック順序に影響します。
+
+3. クリックパラメータの設定:
+   - 「間隔 (ms)」: 各クリック間の基本待機時間（ミリ秒）。
+   - 「ジッター (ms)」: クリック間隔をより自然にするために、基本間隔にランダムな値を追加または減算します。例：間隔1000、ジッター100の場合、実際の間隔は900から1100の間になります。
+
+4. クリックシーケンスの設定:
+   - 「順番にループ」: リストの上から下へ順番にエリアをクリックし、それを繰り返します。
+   - 「ランダムにループ」: 定義されたすべてのエリアからランダムに1つを選択してクリックし、無限に繰り返します。
+   - 「順番に1回クリック」: エリアを順番に1回ずつクリックした後、自動的に停止します。
+
+5. 開始と停止:
+   - 「クリックを開始」ボタンをクリックして開始します。
+   - クリック中は、ボタンが「クリックを停止 (ESC)」に変わります。このボタンをクリックするか、キーボードのESCキーを押すといつでも停止できます。
+
+6. 設定ファイル:
+   - 「ファイル」 -> 「設定を保存」: 現在のすべてのクリックエリアと設定をファイルに保存します。
+   - 「ファイル」 -> 「設定を読み込む」: 以前に保存した設定をファイルから読み込みます。
+
+7. 言語の切り替え:
+   - 「言語」メニューで、インターフェースの言語を中国語、英語、日本語の間で切り替えることができます。
+
+ご利用いただきありがとうございます！
+""" },
+                    { "CloseButton", "閉じる" }
                 }
             }
         };

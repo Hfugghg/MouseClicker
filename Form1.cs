@@ -200,6 +200,7 @@ namespace MouseClicker
             languageMenuItem = new ToolStripMenuItem();
             var zhMenuItem = new ToolStripMenuItem("中文");
             var enMenuItem = new ToolStripMenuItem("English");
+            var jaMenuItem = new ToolStripMenuItem("日本語");
             helpMenuItem = new ToolStripMenuItem();
             viewHelpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
@@ -224,6 +225,7 @@ namespace MouseClicker
             fileMenuItem.DropDownItems.Add(loadConfigMenuItem);
             languageMenuItem.DropDownItems.Add(zhMenuItem);
             languageMenuItem.DropDownItems.Add(enMenuItem);
+            languageMenuItem.DropDownItems.Add(jaMenuItem);
             helpMenuItem.DropDownItems.Add(viewHelpMenuItem);
             this.menuStrip.Items.Add(fileMenuItem);
             this.menuStrip.Items.Add(languageMenuItem);
@@ -248,6 +250,7 @@ namespace MouseClicker
             loadConfigMenuItem.Click += new EventHandler(loadConfigMenuItem_Click);
             zhMenuItem.Click += (s, e) => { ChangeLanguage("zh-CN"); };
             enMenuItem.Click += (s, e) => { ChangeLanguage("en-US"); };
+            jaMenuItem.Click += (s, e) => { ChangeLanguage("ja-JP"); };
             viewHelpMenuItem.Click += new EventHandler(viewHelpMenuItem_Click);
             aboutMenuItem.Click += new EventHandler(aboutMenuItem_Click);
             addAreaButton.Click += new EventHandler(addAreaButton_Click);

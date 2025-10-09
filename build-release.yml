@@ -1,0 +1,77 @@
+# GitHub Action: .NET 项目自动构建与发布工作流
+#
+# 功能说明:
+# 当你推送一个以 'v' 开头的标签 (例如 v1.0.0, v1.2.3) 到仓库时，
+# 此工作流将自动执行，构建你的 .NET 项目，并发布一个正式的 GitHub Release。
+# 它会生成两种类型的软件包：
+# 1. 绿色免安装版 (Portable): 需要用户电脑上已安装 .NET 8 运行环境。体积小，打包成zip。
+# 2. 独立安装版 (Self-Contained): 单个exe文件，无需用户安装任何依赖。体积较大，不压缩。
+
+name: Build and Release .NET App
+
+on:
+  push:
+    tags:
+      - 'v*' # 触发条件：推送任何以 'v' 开头的标签
+
+# 为工作流作业设置权限，允许它向仓库写入内容（创建Release）
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    name: Build and Release
+    # 使用最新的 Windows 环境来构建，因为这是个 Windows 应用
+    runs-on: windows-latest
+
+    steps:
+      # 第一步：检出你的仓库代码
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 第二步：安装指定版本的 .NET SDK
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # 根据你项目 csproj 文件中的 TargetFramework 设置
+
+      # 第三步：还原项目的 NuGet 包依赖
+      - name: Restore NuGet Packages
+        run: dotnet restore ./MouseClicker/MouseClicker.csproj
+
+      # --- 构建绿色免安装版 (Framework-Dependent) ---
+      - name: Build Portable Version
+        # 使用 dotnet publish 命令构建，--self-contained false 表示不包含 .NET 运行时
+        run: dotnet publish ./MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output ./release-portable
+
+      - name: Package Portable Version
+        # 使用 PowerShell 将构建产物压缩成 zip 文件
+        # ${{ github.ref_name }} 会自动获取当前的标签名 (例如 v1.0.0)
+        run: Compress-Archive -Path ./release-portable/* -DestinationPath MouseClicker-Portable-${{ github.ref_name }}.zip
+
+      # --- 构建独立安装版 (Self-Contained Single File) ---
+      - name: Build Self-Contained Version
+        # --self-contained true 表示包含 .NET 运行时
+        # -p:PublishSingleFile=true 表示将所有文件打包成一个独立的 .exe 文件
+        run: dotnet publish ./MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true --output ./release-installer
+
+      - name: Rename Installer Executable
+        # 将生成的exe重命名，以便在Release中清晰地标识版本
+        run: Rename-Item -Path ./release-installer/MouseClicker.exe -NewName MouseClicker-Installer-${{ github.ref_name }}.exe
+
+      # --- 创建 Release 并上传构建产物 ---
+      - name: Create GitHub Release
+        # 使用一个流行的 action 来简化 Release 的创建和文件上传
+        uses: softprops/action-gh-release@v2
+        with:
+          # 要上传的文件列表：一个绿色版的zip包 和 一个独立的exe安装文件
+          files: |
+            MouseClicker-Portable-${{ github.ref_name }}.zip
+            ./release-installer/MouseClicker-Installer-${{ github.ref_name }}.exe
+          # Release 的标题
+          name: "Release ${{ github.ref_name }}"
+          # Release 的描述内容
+          body: "自动构建发布的版本 ${{ github.ref_name }}."
+          # 设置为 false 表示这是一个正式版本，而不是预发布版
+          prerelease: false
+
