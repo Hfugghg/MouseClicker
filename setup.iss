@@ -12,7 +12,8 @@
 [Setup]
 ; 安装包元数据
 AppName={#MyAppName}
-AppVersion={#MyAppVersion}
+; [重要修改] 直接在此处使用占位符，绕过预处理器
+AppVersion=__APP_VERSION__
 AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
@@ -22,8 +23,8 @@ DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
 ; 输出目录
 OutputDir=output
-; 直接使用预处理器常量来构建文件名
-OutputBaseFilename=MouseClicker-Setup-{#MyAppVersion}
+; 文件名直接拼接占位符
+OutputBaseFilename=MouseClicker-Setup-__APP_VERSION__
 ; 使用现代化的向导界面
 WizardStyle=modern
 ; 配置最高级别的压缩
@@ -38,19 +39,14 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "chinesesimplified"; MessagesFile: "compiler:Languages\ChineseSimplified.isl"
 
 [Tasks]
-; 让用户选择是否创建桌面快捷方式，默认勾选
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-; 将 dotnet publish 输出的所有文件打包到安装目录 {app}
 Source: "release-for-inno\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 
 [Icons]
-; 创建开始菜单快捷方式
 Name: "{group}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
-; 创建桌面快捷方式（如果用户在任务中选择了）
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-; 安装完成后，让用户选择是否立即运行应用
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
