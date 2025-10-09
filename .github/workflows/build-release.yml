@@ -5,14 +5,12 @@ on:
     tags:
       - 'v*' # 触发条件：推送任何以 'v' 开头的标签
 
-# 为工作流作业设置权限，允许它向仓库写入内容（创建Release）
 permissions:
   contents: write
 
 jobs:
   build-release:
     name: 构建和发布
-    # 使用最新的 Windows 环境来构建，因为这是个 Windows 应用
     runs-on: windows-latest
 
     steps:
@@ -24,7 +22,7 @@ jobs:
       - name: 安装 .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x' # 根据你项目 csproj 文件中的 TargetFramework 设置
+          dotnet-version: '8.0.x'
 
       # 第三步：还原项目的 NuGet 包依赖
       - name: 还原 NuGet 包
@@ -37,13 +35,22 @@ jobs:
       - name: 打包绿色免安装版
         run: Compress-Archive -Path ./release-portable/* -DestinationPath MouseClicker-Portable-${{ github.ref_name }}.zip
 
-      # --- 构建独立安装版 (Self-Contained Single File) ---
-      - name: 构建独立安装版
-        # 修正：移除了与 WinForms 不兼容的 -p:PublishTrimmed=true 参数
-        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true --output ./release-installer
+      # --- 构建用于 Inno Setup 打包的独立文件集 ---
+      - name: 构建用于安装包的文件
+        # 注意：这里 self-contained 是 true，但 PublishSingleFile 是 false
+        # 这会把所有依赖（包括.NET运行时）都输出到目录中，方便 Inno Setup 打包
+        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
 
-      - name: 重命名独立安装包
-        run: Rename-Item -Path ./release-installer/MouseClicker.exe -NewName MouseClicker-Installer-${{ github.ref_name }}.exe
+      # --- 使用 Inno Setup 创建高压安装包 ---
+      - name: 安装 Inno Setup
+        uses: minimsft/setup-inno-setup@v1 # 一个用于安装 Inno Setup 的 Action
+
+      - name: 编译 Inno Setup 安装包
+        # 调用 Inno Setup 命令行编译器 iscc.exe
+        # /DAppVersion 将 GitHub 的标签名（如 v1.0.1）传递给 setup.iss 脚本
+        # /O+ 指定输出目录
+        run: |
+          iscc.exe "setup.iss" /DAppVersion="${{ github.ref_name }}" /O+"./output"
 
       # --- 创建 Release 并上传构建产物 ---
       - name: 创建 GitHub Release
@@ -51,6 +58,6 @@ jobs:
         with:
           files: |
             MouseClicker-Portable-${{ github.ref_name }}.zip
-            ./release-installer/MouseClicker-Installer-${{ github.ref_name }}.exe
+            ./output/MouseClicker-Setup-${{ github.ref_name }}.exe
           name: "Release ${{ github.ref_name }}"
           prerelease: false
