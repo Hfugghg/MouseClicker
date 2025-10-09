@@ -28,12 +28,10 @@ jobs:
 
       # 第三步：还原项目的 NuGet 包依赖
       - name: 还原 NuGet 包
-        # 修正路径：直接在根目录找到 csproj 文件
         run: dotnet restore ./MouseClicker.csproj
 
       # --- 构建绿色免安装版 (Framework-Dependent) ---
       - name: 构建绿色免安装版
-        # 修正路径
         run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output ./release-portable
 
       - name: 打包绿色免安装版
@@ -41,8 +39,8 @@ jobs:
 
       # --- 构建独立安装版 (Self-Contained Single File) ---
       - name: 构建独立安装版
-        # 修正路径
-        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true -p:PublishTrimmed=true --output ./release-installer
+        # 修正：移除了与 WinForms 不兼容的 -p:PublishTrimmed=true 参数
+        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=true --output ./release-installer
 
       - name: 重命名独立安装包
         run: Rename-Item -Path ./release-installer/MouseClicker.exe -NewName MouseClicker-Installer-${{ github.ref_name }}.exe
