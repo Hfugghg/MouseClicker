@@ -43,7 +43,7 @@ jobs:
 
       # --- 使用 Inno Setup 创建高压安装包 ---
       - name: 安装 Inno Setup
-        uses: minimsft/setup-inno-setup@v1 # 一个用于安装 Inno Setup 的 Action
+        uses: jrgo/setup-inno-setup-action@v1
 
       - name: 编译 Inno Setup 安装包
         # 调用 Inno Setup 命令行编译器 iscc.exe
