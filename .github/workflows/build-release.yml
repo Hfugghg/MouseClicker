@@ -37,20 +37,19 @@ jobs:
 
       # --- 构建用于 Inno Setup 打包的独立文件集 ---
       - name: 构建用于安装包的文件
-        # 注意：这里 self-contained 是 true，但 PublishSingleFile 是 false
-        # 这会把所有依赖（包括.NET运行时）都输出到目录中，方便 Inno Setup 打包
         run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
 
       # --- 使用 Inno Setup 创建高压安装包 ---
-      - name: 安装 Inno Setup
-        uses: jrgo/setup-inno-setup-action@v1
-
       - name: 编译 Inno Setup 安装包
-        # 调用 Inno Setup 命令行编译器 iscc.exe
-        # /DAppVersion 将 GitHub 的标签名（如 v1.0.1）传递给 setup.iss 脚本
-        # /O+ 指定输出目录
-        run: |
-          iscc.exe "setup.iss" /DAppVersion="${{ github.ref_name }}" /O+"./output"
+        # 使用您找到的可以正常工作的 Action
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        with:
+          # 指定 Inno Setup 脚本的路径
+          path: setup.iss
+          # 传递给编译器的参数
+          # /DAppVersion=... 将版本号传入脚本
+          # /O+"./output"   指定编译产物的输出目录
+          options: /DAppVersion="${{ github.ref_name }}" /O+"./output"
 
       # --- 创建 Release 并上传构建产物 ---
       - name: 创建 GitHub Release
