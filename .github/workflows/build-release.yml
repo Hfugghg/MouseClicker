@@ -40,13 +40,12 @@ jobs:
         run: |
           (Get-Content -path "setup.iss" -Raw) -replace '__APP_VERSION__', "${{ github.ref_name }}" | Set-Content -path "setup.iss"
 
-      - name: [调试] 显示替换后的脚本内容
-        # 这个步骤会打印出脚本内容，让我们可以在日志中确认替换是否成功
+      - name: 'Debug: 显示替换后的脚本内容'
         run: |
           echo "--- Content of setup.iss before compiling ---"
           Get-Content -path "setup.iss"
           echo "-------------------------------------------"
-        shell: pwsh
+        shell: powershell
 
       - name: 编译 Inno Setup 安装包
         uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
