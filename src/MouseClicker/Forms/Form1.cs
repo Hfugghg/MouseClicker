@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
 using Microsoft.VisualBasic;
-using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text.Json;
 using System.Runtime.InteropServices;
@@ -11,71 +10,6 @@ using System.Diagnostics;
 
 namespace MouseClicker
 {
-    // 用于显示点击区域的透明覆盖窗口。
-    public class OverlayForm : Form
-    {
-        private const int WS_EX_TRANSPARENT = 0x20;
-
-        public List<ClickArea> AreasToDraw { get; set; } = new List<ClickArea>();
-
-        public OverlayForm()
-        {
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.WindowState = FormWindowState.Maximized;
-            this.BackColor = Color.Magenta;
-            this.TransparencyKey = this.BackColor;
-            this.TopMost = true;
-            this.ShowInTaskbar = false;
-            this.SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
-        }
-
-        // 使窗口透明，允许鼠标穿透。
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= WS_EX_TRANSPARENT;
-                return cp;
-            }
-        }
-
-        // 在覆盖层上绘制所有点击区域的边框和标签。
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            if (AreasToDraw == null) return;
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-            foreach (var area in AreasToDraw)
-            {
-                using (var pen = new Pen(Color.Red, 2))
-                {
-                    e.Graphics.DrawRectangle(pen, area.Area);
-                }
-                using (var font = new Font("Arial", 16, FontStyle.Bold))
-                using (var brush = new SolidBrush(Color.FromArgb(150, 255, 255, 0)))
-                {
-                    var textSize = e.Graphics.MeasureString(area.Label, font);
-                    var textX = area.Area.X + (area.Area.Width - textSize.Width) / 2;
-                    var textY = area.Area.Y + (area.Area.Height - textSize.Height) / 2;
-                    e.Graphics.DrawString(area.Label, font, brush, textX, textY);
-                }
-            }
-        }
-    }
-
-    // 代表一个可点击的区域，包含矩形范围和标签。
-    public class ClickArea
-    {
-        public Rectangle Area { get; set; }
-        public string Label { get; set; } = string.Empty;
-        public override string ToString()
-        {
-            return $"'{Label}' @ (X:{Area.X}, Y:{Area.Y}, W:{Area.Width}, H:{Area.Height})";
-        }
-    }
-
     public partial class Form1 : Form
     {
         // --- 全局键盘钩子，用于监听停止热键 ---
@@ -121,6 +55,7 @@ namespace MouseClicker
         private NumericUpDown intervalNumericUpDown = null!, jitterNumericUpDown = null!;
         private ComboBox sequenceComboBox = null!;
         private CheckBox showOverlayCheckBox = null!;
+        private CheckBox hardwareModeCheckBox = null!;
         private Button startButton = null!;
 
         // 主窗口构造函数
@@ -128,7 +63,7 @@ namespace MouseClicker
         {
             InitializeComponent();
             _instance = this;
-            _mouseController = new MouseController();
+            _mouseController = new MouseController(new Win32MouseInput());
 
             _clickTimer = new System.Windows.Forms.Timer();
             _clickTimer.Tick += new EventHandler(clickTimer_Tick);
@@ -216,6 +151,7 @@ namespace MouseClicker
             this.sequenceLabel = new Label { AutoSize = true };
             this.sequenceComboBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             this.showOverlayCheckBox = new CheckBox { AutoSize = true, Checked = true };
+            this.hardwareModeCheckBox = new CheckBox { AutoSize = true, Checked = false };
             this.startButton = new Button { Font = new Font(this.Font.FontFamily, 10, FontStyle.Bold) };
 
             // 将控件添加到窗体
@@ -243,6 +179,7 @@ namespace MouseClicker
             this.Controls.Add(this.sequenceLabel);
             this.Controls.Add(this.sequenceComboBox);
             this.Controls.Add(this.showOverlayCheckBox);
+            this.Controls.Add(this.hardwareModeCheckBox);
             this.Controls.Add(this.startButton);
 
             // 附加事件处理器
@@ -299,10 +236,15 @@ namespace MouseClicker
             sequenceComboBox.Size = new Size(180, rowHeight);
 
             showOverlayCheckBox.Location = new Point(sequenceComboBox.Right + controlPadding, currentY + 4);
-            currentY += rowHeight + (controlPadding * 2);
+            currentY += rowHeight + controlPadding;
+
+            hardwareModeCheckBox.Location = new Point(formPadding, currentY);
+            currentY += rowHeight + controlPadding;
 
             int requiredWidth = Math.Max(moveDownButton.Right, jitterNumericUpDown.Right);
-            requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right) + formPadding;
+            requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right);
+            requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
+            requiredWidth += formPadding;
             formWidth = Math.Max(formWidth, requiredWidth);
 
             areasListBox.Width = formWidth - (formPadding * 2);
@@ -344,6 +286,7 @@ namespace MouseClicker
             jitterLabel.Text = Localization.Get("JitterLabel");
             sequenceLabel.Text = Localization.Get("SequenceLabel");
             showOverlayCheckBox.Text = Localization.Get("ShowOverlay");
+            hardwareModeCheckBox.Text = Localization.Get("HardwareMode");
             startButton.Text = _isClicking ? Localization.Get("StopClicking") : Localization.Get("StartClicking");
             this.Text = Localization.Get("WindowTitle");
 
@@ -414,7 +357,8 @@ namespace MouseClicker
                         Interval = intervalNumericUpDown.Value,
                         Jitter = jitterNumericUpDown.Value,
                         SequenceIndex = sequenceComboBox.SelectedIndex,
-                        ShowOverlay = showOverlayCheckBox.Checked
+                        ShowOverlay = showOverlayCheckBox.Checked,
+                        HardwareMode = hardwareModeCheckBox.Checked
                     };
 
                     try
@@ -452,6 +396,7 @@ namespace MouseClicker
                             jitterNumericUpDown.Value = configData.Jitter;
                             sequenceComboBox.SelectedIndex = configData.SequenceIndex;
                             showOverlayCheckBox.Checked = configData.ShowOverlay;
+                            hardwareModeCheckBox.Checked = configData.HardwareMode;
 
                             RefreshAreaList();
                             MessageBox.Show(Localization.Get("ConfigLoadedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -614,6 +559,7 @@ namespace MouseClicker
             jitterNumericUpDown.Enabled = isEnabled;
             sequenceComboBox.Enabled = isEnabled;
             showOverlayCheckBox.Enabled = isEnabled;
+            hardwareModeCheckBox.Enabled = isEnabled;
             menuStrip.Enabled = isEnabled;
         }
 
@@ -627,7 +573,7 @@ namespace MouseClicker
             ClickArea? areaToClick = GetNextArea();
             if (areaToClick == null) { StopClicking(); return; }
 
-            _mouseController.PerformRandomClickInArea(areaToClick.Area);
+            _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
 
             if (_isClicking)
             {

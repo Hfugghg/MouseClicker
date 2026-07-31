@@ -20,19 +20,19 @@ jobs:
       - name: 安装 .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: '10.0.x'
 
       - name: 还原 NuGet 包
-        run: dotnet restore ./MouseClicker.csproj
+        run: dotnet restore ./src/MouseClicker/MouseClicker.csproj
 
       - name: 构建绿色免安装版
-        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output ./release-portable
+        run: dotnet publish ./src/MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output ./release-portable
 
       - name: 打包绿色免安装版
         run: Compress-Archive -Path ./release-portable/* -DestinationPath MouseClicker-Portable-${{ github.ref_name }}.zip
 
       - name: 构建用于安装包的文件
-        run: dotnet publish ./MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
+        run: dotnet publish ./src/MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
 
       # --- 使用 Inno Setup 创建高压安装包 ---
       - name: 在 Inno Setup 脚本中设置版本号

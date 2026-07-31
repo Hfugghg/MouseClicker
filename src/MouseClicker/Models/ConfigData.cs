@@ -19,5 +19,8 @@ namespace MouseClicker
 
         // 是否显示点击区域的覆盖层。
         public bool ShowOverlay { get; set; }
+
+        // 是否启用硬件模拟模式。
+        public bool HardwareMode { get; set; }
     }
 }

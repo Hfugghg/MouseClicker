@@ -16,6 +16,15 @@
 [Bb]in/
 [Oo]bj/
 
+# OMC state
+.omc/
+
+# Build outputs
+# ==================================
+/release-portable/
+/release-for-inno/
+/output/
+
 # Rider files
 # ==================================
 *.sln.iml

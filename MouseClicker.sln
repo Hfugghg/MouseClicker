@@ -1,0 +1,25 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MouseClicker", "src\MouseClicker\MouseClicker.csproj", "{BFD5B6BF-B4D8-42CA-ABD3-7D3C912BE488}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MouseClicker.Tests", "tests\MouseClicker.Tests\MouseClicker.Tests.csproj", "{28D97304-5392-4341-9907-2EDFF234132C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BFD5B6BF-B4D8-42CA-ABD3-7D3C912BE488}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFD5B6BF-B4D8-42CA-ABD3-7D3C912BE488}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFD5B6BF-B4D8-42CA-ABD3-7D3C912BE488}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFD5B6BF-B4D8-42CA-ABD3-7D3C912BE488}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28D97304-5392-4341-9907-2EDFF234132C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28D97304-5392-4341-9907-2EDFF234132C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28D97304-5392-4341-9907-2EDFF234132C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28D97304-5392-4341-9907-2EDFF234132C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
