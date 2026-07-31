@@ -19,6 +19,7 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
     *   **顺序循环**：按列表顺序依次点击，完成后从头开始。
     *   **随机点击**：在所有区域中随机选择一个进行点击。
     *   **点击一次**：按顺序点击完所有区域后自动停止。
+*   **硬件模拟模式**：使用 `SendInput` API + 非零 `dwExtraInfo` 发送点击事件，模拟真实硬件输入，可绕过部分反模拟检测软件。
 *   **可视化辅助**：
     *   **区域覆盖层**：在屏幕上实时显示所有已定义的点击区域边框，并可随时开启或关闭。
 *   **一键启停与热键**：
@@ -27,7 +28,8 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
 *   **配置管理**：
     *   **保存配置**：将当前的点击区域、时间设置和序列模式保存为 JSON 文件。
     *   **加载配置**：随时加载之前保存的配置，快速恢复工作场景。
-*   **多语言支持**：内置中文和英文两种语言界面。
+*   **多语言支持**：界面支持简体中文、English、日本語。
+*   **多语言安装程序**：安装向导支持 10 种语言（中/英/日/韩/繁中/法/德/西/俄/葡）。
 *   **内置帮助文档**：提供详细的使用说明，帮助您快速上手。
 
 ## 🚀 如何使用
@@ -42,6 +44,7 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
 3.  **设置点击参数**：
     *   设置 "**间隔**" 和 "**抖动**" 时间（以毫秒为单位）。
     *   在 "**序列**" 下拉菜单中选择您想要的点击模式（循环、随机或一次）。
+    *   勾选 "**硬件模拟**" 可启用更底层的 SendInput 模式。
 4.  **开始任务**：
     *   点击 "**开始点击**" 按钮启动自动点击。
     *   程序将根据您的设置，在指定区域内模拟鼠标点击。
@@ -52,5 +55,51 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
 ## 🛠️ 技术栈
 
 *   **语言**：C#
-*   **框架**：.NET / Windows Forms
+*   **框架**：.NET 10 / Windows Forms
+*   **测试**：xUnit（84 个单元测试）
 
+## 📁 项目结构
+
+```
+MouseClicker/
+├── src/MouseClicker/
+│   ├── Forms/          # UI 窗体
+│   ├── Models/         # 数据模型
+│   ├── Services/       # 业务逻辑
+│   ├── Resources/      # 图标等资源
+│   └── Languages/      # 语言文件
+├── tests/MouseClicker.Tests/
+│   └── TestDoubles/    # 测试替身
+├── setup.iss           # Inno Setup 安装脚本
+└── .github/workflows/  # CI/CD
+```
+
+## 🔨 构建
+
+### 依赖
+
+*   [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
+*   [Inno Setup 7](https://jrsoftware.org/isinfo.php)（可选，仅用于打包安装程序）
+
+### 构建便携版
+
+```powershell
+dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output .\release-portable
+```
+
+### 构建安装版
+
+```powershell
+dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output .\release-for-inno
+& "D:\Program Files\Inno Setup 7\ISCC.exe" setup.iss
+```
+
+### 运行测试
+
+```powershell
+dotnet test .\MouseClicker.sln --configuration Release
+```
+
+## 📄 许可证
+
+[LICENSE](LICENSE)
