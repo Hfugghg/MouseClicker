@@ -29,7 +29,11 @@ namespace MouseClicker
                 using HttpResponseMessage response = await _httpClient.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 if (!response.IsSuccessStatusCode) return new UpdateCheckResult(false, null);
 
+#if NET48
+                string json = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+#else
                 string json = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+#endif
                 using JsonDocument document = JsonDocument.Parse(json);
                 JsonElement release = document.RootElement;
                 if (release.ValueKind != JsonValueKind.Object ||

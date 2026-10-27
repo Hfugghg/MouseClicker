@@ -2,13 +2,25 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows</TargetFramework>
+    <TargetFrameworks>net10.0-windows;net48</TargetFrameworks>
     <Version>1.2.1</Version>
     <Nullable>enable</Nullable>
-    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>latest</LangVersion>
+    <UseWindowsForms Condition="'$(TargetFramework)' != 'net48'">true</UseWindowsForms>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources/logo.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="System.Net.Http" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="All" />
+    <Using Include="System.Windows.Forms" />
+    <Using Include="System.Drawing" />
+  </ItemGroup>
 
   <ItemGroup>
     <InternalsVisibleTo Include="MouseClicker.Tests" />

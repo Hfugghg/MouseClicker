@@ -6,7 +6,7 @@ namespace MouseClicker
     {
         public static Version Normalize(Version version)
         {
-            ArgumentNullException.ThrowIfNull(version);
+            if (version == null) throw new ArgumentNullException(nameof(version));
             return new Version(version.Major, version.Minor, Math.Max(0, version.Build), Math.Max(0, version.Revision));
         }
 
@@ -14,7 +14,7 @@ namespace MouseClicker
         {
             version = null;
             if (string.IsNullOrEmpty(value)) return false;
-            string number = value[0] is 'v' or 'V' ? value[1..] : value;
+            string number = value![0] is 'v' or 'V' ? value.Substring(1) : value;
             string[] components = number.Split('.');
             if (components.Length is not (3 or 4) || components.Any(component =>
                 component.Length == 0 ||

@@ -27,7 +27,7 @@ namespace MouseClicker
 
         public static string ResolveLanguage(CultureInfo culture)
         {
-            ArgumentNullException.ThrowIfNull(culture);
+            if (culture == null) throw new ArgumentNullException(nameof(culture));
 
             if (culture.TwoLetterISOLanguageName.Equals("zh", StringComparison.OrdinalIgnoreCase))
             {

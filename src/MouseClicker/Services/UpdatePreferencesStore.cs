@@ -38,7 +38,12 @@ namespace MouseClicker
                 {
                     var preferences = new StoredPreferences { SkippedVersions = updated.OrderBy(item => item, StringComparer.Ordinal).ToArray() };
                     File.WriteAllText(temporary, JsonSerializer.Serialize(preferences), new UTF8Encoding(false));
+#if NET48
+                    if (File.Exists(_filePath)) File.Delete(_filePath);
+                    File.Move(temporary, _filePath);
+#else
                     File.Move(temporary, _filePath, overwrite: true);
+#endif
                     // 保存失败时，本次会话余下的时间内不得隐藏该更新。
                     _skippedVersions = updated;
                 }
