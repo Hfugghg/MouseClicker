@@ -45,6 +45,7 @@ namespace MouseClicker
 
         public Keys Hotkey { get; private set; } = Keys.F6;
         public event Action<Keys>? KeyPressed;
+        public Func<bool>? ShouldSuppressEscape { get; set; }
         public static IReadOnlyList<Keys> SupportedKeys { get; } = new[]
         {
             Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12,
@@ -88,6 +89,12 @@ namespace MouseClicker
                 }
                 else if (message == WmKeyUp || message == WmSysKeyUp) instance._pressedKeys.Remove(keyCode);
             }
+            if (instance != null && nCode >= 0 &&
+                (wParam == (IntPtr)WmKeyDown || wParam == (IntPtr)WmSysKeyDown) &&
+                Marshal.ReadInt32(lParam) == (int)Keys.Escape &&
+                instance.ShouldSuppressEscape?.Invoke() == true)
+                return (IntPtr)1;
+
             return CallNextHookEx(instance?._hookId ?? IntPtr.Zero, nCode, wParam, lParam);
         }
 
