@@ -17,6 +17,9 @@ namespace MouseClicker.Tests.TestDoubles
         /// <summary>记录硬件点击次数。</summary>
         public int HardwareClickCount { get; private set; }
 
+        public List<bool> SoftwareClickButtons { get; } = new();
+        public List<bool> HardwareClickButtons { get; } = new();
+
         /// <summary>总点击次数（软件 + 硬件）。</summary>
         public int TotalClickCount => SoftwareClickCount + HardwareClickCount;
 
@@ -25,14 +28,16 @@ namespace MouseClicker.Tests.TestDoubles
             CursorPositions.Add((x, y));
         }
 
-        public void SoftwareClick()
+        public void SoftwareClick(bool rightButton = false)
         {
             SoftwareClickCount++;
+            SoftwareClickButtons.Add(rightButton);
         }
 
-        public void HardwareClick()
+        public void HardwareClick(bool rightButton = false)
         {
             HardwareClickCount++;
+            HardwareClickButtons.Add(rightButton);
         }
 
         /// <summary>重置所有记录。</summary>
@@ -41,6 +46,8 @@ namespace MouseClicker.Tests.TestDoubles
             CursorPositions.Clear();
             SoftwareClickCount = 0;
             HardwareClickCount = 0;
+            SoftwareClickButtons.Clear();
+            HardwareClickButtons.Clear();
         }
     }
 }
