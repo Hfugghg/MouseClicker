@@ -210,10 +210,10 @@ Thank you for using the application!
                         { "JitterLabel", "抖动(ms):" },
                         { "JitterExceedsIntervalHint", "抖动大于间隔时，会延长平均等待时间。" },
                         { "SequenceLabel", "点击顺序:" },
-                        { "SequenceLoop", "自定义顺序循环" },
+                        { "SequenceLoop", "按顺序循环" },
                         { "SequenceRandom", "随机顺序循环" },
                         { "SequenceOnce", "单次顺序点击" },
-                        { "ShowOverlay", "显示浮窗" },
+                        { "ShowOverlay", "显示区域框" },
                         { "HighlightCurrentArea", "点击时高亮区域" },
                         { "HardwareMode", "硬件模拟 (SendInput)" },
                         { "StartClicking", "开始点击" },
@@ -229,8 +229,8 @@ Thank you for using the application!
                         { "ConfigLoadedSuccess", "配置已成功加载。" },
                         { "LoadConfigError", "读取配置失败: {0}" },
                         { "AboutMessage", "鼠标点击器 v{0}\n" },
-                        { "SetLabelPrompt", "请输入此区域的标注字符:" },
-                        { "SetLabelTitle", "设置标注" },
+                        { "SetLabelPrompt", "请输入此区域的名称：" },
+                        { "SetLabelTitle", "设置名称" },
                         { "AreaLabelDefault", "区域" },
                         { "AddAreaFirst", "请至少添加一个点击区域" },
                         { "HelpTutorialTitle", "软件使用教程" },
@@ -253,7 +253,7 @@ Thank you for using the application!
    - 抖动大于间隔时，平均等待时间会变长。例如间隔 1000、抖动 100，等待范围为 900～1100ms。
 
 4. 设置点击顺序：
-   - “自定义顺序循环”：从上到下依次点击列表中的区域并重复。
+   - “按顺序循环”：从上到下依次点击列表中的区域并重复。
    - “随机顺序循环”：每次随机选择一个区域。
    - “单次顺序点击”：每个区域点击一次后自动停止。
 
@@ -278,7 +278,7 @@ Thank you for using the application!
    - 鼠标悬停或选中区域列表中的项目时，会用蓝色边框标出对应区域。
    - 自动点击时，当前点击区域会以绿色边框高亮。
    - “点击时高亮区域”默认开启，并随配置保存；关闭后不再显示绿色高亮。
-   - 这些高亮仅在开启“显示浮窗”时可见。
+   - 这些高亮仅在开启“显示区域框”时可见。
 
 感谢您的使用！
 """ },
@@ -496,12 +496,12 @@ Thank you for using the application!
                         { "ProjectAddress", "프로젝트 페이지" },
                         { "CheckingForUpdates", "업데이트 확인 중…" },
                         { "UpdateAvailable", "업데이트 있음" },
-                        { "UpdateAvailableVersion", "새 버전 {0}을 사용할 수 있습니다." },
+                        { "UpdateAvailableVersion", "새 버전 {0}을(를) 사용할 수 있습니다." },
                         { "NoUpdateAvailable", "사용 가능한 업데이트가 없습니다." },
                         { "UpdateCheckUnavailable", "업데이트를 확인할 수 없습니다." },
                         { "ViewUpdate", "업데이트 보기" },
                         { "SkipThisVersion", "이 버전 건너뛰기" },
-                        { "UpdateSkipped", "버전 {0}을 건너뛰었습니다." },
+                        { "UpdateSkipped", "버전 {0}을(를) 건너뛰었습니다." },
                         { "UpdatePreferencesError", "건너뛰기 설정을 저장할 수 없습니다: {0}" },
                         { "OpenLinkError", "링크를 열 수 없습니다: {0}" },
                         { "MouseInputError", "마우스 입력에 실패하여 자동 클릭을 중지했습니다.\n{0}" }
@@ -642,7 +642,7 @@ Thank you for using the application!
                         { "SaveConfigTitle", "Enregistrer le fichier de configuration" },
                         { "JsonFilter", "Fichiers JSON|*.json" },
                         { "ConfigSavedSuccess", "La configuration a été enregistrée." },
-                        { "Success", "Réussite" },
+                        { "Success", "Succès" },
                         { "SaveConfigError", "Impossible d’enregistrer la configuration : {0}" },
                         { "Error", "Erreur" },
                         { "LoadConfigTitle", "Charger un fichier de configuration" },
@@ -907,8 +907,8 @@ Vielen Dank für die Nutzung!
 9. Localizar y resaltar áreas:
    - Pase el puntero por un elemento de la lista o selecciónelo para localizar su área con un borde azul.
    - Durante los clics automáticos, el área del clic actual se resalta con un borde verde.
-   - « Resaltar el área del clic actual » está activado de forma predeterminada y se guarda con la configuración. Desactívelo para quitar el resaltado verde.
-   - Estos resaltados solo se ven cuando « Mostrar áreas » está activado.
+   - «Resaltar el área del clic actual» está activado de forma predeterminada y se guarda con la configuración. Desactívelo para quitar el resaltado verde.
+   - Estos resaltados solo se ven cuando «Mostrar áreas» está activado.
 
 ¡Gracias por utilizar la aplicación!
 """ },
