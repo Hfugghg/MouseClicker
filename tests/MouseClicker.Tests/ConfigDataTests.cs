@@ -396,5 +396,27 @@ namespace MouseClicker.Tests
             Assert.Throws<System.IO.InvalidDataException>(
                 () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
         }
+
+        [Fact]
+        public void Validate_ClickAreaCoordinateOverflow_Throws()
+        {
+            var config = new ConfigData
+            {
+                ClickAreas = new List<ClickArea>
+                {
+                    new ClickArea
+                    {
+                        Label = "Overflow",
+                        Area = new Rectangle(int.MaxValue - 5, 0, 10, 10)
+                    }
+                },
+                Interval = 100,
+                Jitter = 0,
+                SequenceIndex = 0
+            };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
     }
 }
