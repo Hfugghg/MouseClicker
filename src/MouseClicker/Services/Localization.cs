@@ -175,6 +175,10 @@ Welcome to Mouse Clicker!
    - "Highlight current click area" is on by default and is saved with the configuration. Turn it off to disable the green highlight.
    - These highlights are visible only while "Show Overlay" is enabled.
 
+10. Hotkey and Mouse Button Settings:
+   - "File" → "Hotkey Settings": click the input box, then press the desired key. Supported keys are F6–F12, Insert, Home, End, PageUp, PageDown and Pause. Do not hold Ctrl/Alt/Shift/Win. ESC remains the emergency stop while clicking.
+   - Right-click an area in the list to choose the left or right mouse button. The list shows [L] or [R] for each area.
+
 Thank you for using the application!
 """ },
                         { "CloseButton", "Close" },
@@ -189,6 +193,14 @@ Thank you for using the application!
                         { "UpdateSkipped", "Version {0} was skipped." },
                         { "UpdatePreferencesError", "Unable to save the skipped-version preference: {0}" },
                         { "OpenLinkError", "Unable to open the link: {0}" },
+                        { "HotkeySettings", "Hotkey Settings" },
+                        { "HotkeyLabel", "Start/stop hotkey:" },
+                        { "HotkeyHint", "Click the box above, then press a key. ESC still stops clicking." },
+                        { "HotkeyApply", "Apply" },
+                        { "HotkeyInvalidKey", "Unsupported key or modifier. Use F6–F12, Insert, Home, End, PageUp, PageDown or Pause without Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "Global hotkey is unavailable: {0}" },
+                        { "LeftMouseButton", "Left mouse button" },
+                        { "RightMouseButton", "Right mouse button" },
                         { "MouseInputError", "Mouse input failed. Automatic clicking has stopped.\n{0}" }
                     }
                 },
@@ -280,6 +292,10 @@ Thank you for using the application!
    - “点击时高亮区域”默认开启，并随配置保存；关闭后不再显示绿色高亮。
    - 这些高亮仅在开启“显示区域框”时可见。
 
+10. 热键与鼠标按键设置：
+   - “文件”→“热键设置”：点击输入框后按下所需按键。支持的按键为 F6–F12、Insert、Home、End、PageUp、PageDown 和 Pause；请勿同时按住 Ctrl/Alt/Shift/Win。点击过程中 ESC 仍可紧急停止。
+   - 右键点击列表中的区域，可为该区域选择鼠标左键或右键；列表中以 [L] 或 [R] 显示当前按键。
+
 感谢您的使用！
 """ },
                         { "CloseButton", "关闭" },
@@ -294,6 +310,14 @@ Thank you for using the application!
                         { "UpdateSkipped", "已跳过版本 {0}" },
                         { "UpdatePreferencesError", "无法保存跳过设置：{0}" },
                         { "OpenLinkError", "无法打开链接：{0}" },
+                        { "HotkeySettings", "热键设置" },
+                        { "HotkeyLabel", "启停热键：" },
+                        { "HotkeyHint", "点击上方输入框后按下按键。点击过程中 ESC 仍可紧急停止。" },
+                        { "HotkeyApply", "应用" },
+                        { "HotkeyInvalidKey", "不支持的按键或组合键。请使用 F6–F12、Insert、Home、End、PageUp、PageDown 或 Pause，且不要同时按 Ctrl/Alt/Shift/Win。" },
+                        { "HotkeyUnavailable", "全局热键不可用：{0}" },
+                        { "LeftMouseButton", "鼠标左键" },
+                        { "RightMouseButton", "鼠标右键" },
                         { "MouseInputError", "鼠标输入失败，自动点击已停止。\n{0}" }
                     }
                 },
@@ -385,6 +409,10 @@ Thank you for using the application!
    - 「クリック中のエリアを強調」は既定でオンになっており、設定ファイルに保存されます。オフにすると緑色の強調表示を停止します。
    - これらの強調表示は「オーバーレイを表示」がオンのときだけ見えます。
 
+10. ホットキーとマウスボタンの設定：
+   - 「ファイル」→「ホットキー設定」：入力欄をクリックしてから、目的のキーを押します。使用できるキーは F6～F12、Insert、Home、End、PageUp、PageDown、Pause です。Ctrl/Alt/Shift/Win は押さないでください。クリック中は ESC で緊急停止できます。
+   - リスト内のエリアを右クリックすると、マウスの左ボタンまたは右ボタンを選択できます。リストには各エリアのボタンが [L] または [R] で表示されます。
+
 ご利用いただきありがとうございます！
 """ },
                         { "CloseButton", "閉じる" },
@@ -399,6 +427,14 @@ Thank you for using the application!
                         { "UpdateSkipped", "バージョン {0} をスキップしました。" },
                         { "UpdatePreferencesError", "スキップ設定を保存できません：{0}" },
                         { "OpenLinkError", "リンクを開けません：{0}" },
+                        { "HotkeySettings", "ホットキー設定" },
+                        { "HotkeyLabel", "開始/停止ホットキー：" },
+                        { "HotkeyHint", "上の入力欄をクリックしてキーを押してください。クリック中は ESC で緊急停止できます。" },
+                        { "HotkeyApply", "適用" },
+                        { "HotkeyInvalidKey", "サポートされていないキーまたは修飾キーです。F6～F12、Insert、Home、End、PageUp、PageDown、Pause を Ctrl/Alt/Shift/Win なしで使用してください。" },
+                        { "HotkeyUnavailable", "グローバルホットキーを使用できません：{0}" },
+                        { "LeftMouseButton", "マウスの左ボタン" },
+                        { "RightMouseButton", "マウスの右ボタン" },
                         { "MouseInputError", "マウス入力に失敗したため、自動クリックを停止しました。\n{0}" }
                     }
                 },
@@ -490,6 +526,10 @@ Thank you for using the application!
    - "클릭 중인 영역 강조"는 기본적으로 켜져 있으며 설정 파일에 저장됩니다. 끄면 초록색 강조 표시가 사라집니다.
    - 이러한 강조 표시는 "영역 표시"를 켰을 때만 보입니다.
 
+10. 단축키 및 마우스 버튼 설정:
+   - "파일" → "단축키 설정": 입력란을 클릭한 뒤 원하는 키를 누릅니다. 지원되는 키는 F6–F12, Insert, Home, End, PageUp, PageDown, Pause입니다. Ctrl/Alt/Shift/Win을 함께 누르지 마세요. 클릭 중에는 ESC로 긴급 정지할 수 있습니다.
+   - 목록에서 영역을 마우스 오른쪽 버튼으로 클릭하여 마우스 왼쪽 또는 오른쪽 버튼을 선택합니다. 목록에는 각 영역의 버튼이 [L] 또는 [R]로 표시됩니다.
+
 이용해 주셔서 감사합니다!
 """ },
                         { "CloseButton", "닫기" },
@@ -504,6 +544,14 @@ Thank you for using the application!
                         { "UpdateSkipped", "버전 {0}을(를) 건너뛰었습니다." },
                         { "UpdatePreferencesError", "건너뛰기 설정을 저장할 수 없습니다: {0}" },
                         { "OpenLinkError", "링크를 열 수 없습니다: {0}" },
+                        { "HotkeySettings", "단축키 설정" },
+                        { "HotkeyLabel", "시작/중지 단축키:" },
+                        { "HotkeyHint", "위 입력란을 클릭한 뒤 키를 누르세요. 클릭 중에는 ESC로 긴급 정지할 수 있습니다." },
+                        { "HotkeyApply", "적용" },
+                        { "HotkeyInvalidKey", "지원되지 않는 키 또는 조합입니다. Ctrl/Alt/Shift/Win 없이 F6–F12, Insert, Home, End, PageUp, PageDown, Pause를 사용하세요." },
+                        { "HotkeyUnavailable", "전역 단축키를 사용할 수 없습니다: {0}" },
+                        { "LeftMouseButton", "마우스 왼쪽 버튼" },
+                        { "RightMouseButton", "마우스 오른쪽 버튼" },
                         { "MouseInputError", "마우스 입력에 실패하여 자동 클릭을 중지했습니다.\n{0}" }
                     }
                 },
@@ -595,6 +643,10 @@ Thank you for using the application!
    - 「點擊時醒目標示區域」預設開啟，並隨設定檔儲存；關閉後不再顯示綠色標示。
    - 這些標示僅在開啟「顯示區域框」時可見。
 
+10. 熱鍵與滑鼠按鍵設定：
+   - 「檔案」→「熱鍵設定」：點擊輸入框後按下所需按鍵。支援的按鍵為 F6–F12、Insert、Home、End、PageUp、PageDown 及 Pause；請勿同時按住 Ctrl/Alt/Shift/Win。點擊過程中 ESC 仍可緊急停止。
+   - 在清單中的區域上按滑鼠右鍵，可為該區域選擇滑鼠左鍵或右鍵；清單會以 [L] 或 [R] 顯示目前按鍵。
+
 感謝您的使用！
 """ },
                         { "CloseButton", "關閉" },
@@ -609,6 +661,14 @@ Thank you for using the application!
                         { "UpdateSkipped", "已略過版本 {0}" },
                         { "UpdatePreferencesError", "無法儲存略過設定：{0}" },
                         { "OpenLinkError", "無法開啟連結：{0}" },
+                        { "HotkeySettings", "熱鍵設定" },
+                        { "HotkeyLabel", "啟停熱鍵：" },
+                        { "HotkeyHint", "點擊上方輸入框後按下按鍵。點擊過程中 ESC 仍可緊急停止。" },
+                        { "HotkeyApply", "套用" },
+                        { "HotkeyInvalidKey", "不支援的按鍵或組合鍵。請使用 F6–F12、Insert、Home、End、PageUp、PageDown 或 Pause，且不要同時按 Ctrl/Alt/Shift/Win。" },
+                        { "HotkeyUnavailable", "全域熱鍵無法使用：{0}" },
+                        { "LeftMouseButton", "滑鼠左鍵" },
+                        { "RightMouseButton", "滑鼠右鍵" },
                         { "MouseInputError", "滑鼠輸入失敗，自動點擊已停止。\n{0}" }
                     }
                 },
@@ -700,6 +760,10 @@ Bienvenue dans le cliqueur automatique !
    - « Surligner la zone du clic en cours » est activé par défaut et enregistré dans la configuration. Désactivez cette option pour masquer le surlignage vert.
    - Ces surlignages sont visibles uniquement lorsque « Afficher les zones » est activé.
 
+10. Raccourci clavier et bouton de la souris :
+   - « Fichier » → « Paramètres des raccourcis » : cliquez dans la zone de saisie, puis appuyez sur la touche souhaitée. Les touches prises en charge sont F6–F12, Insert, Home, End, PageUp, PageDown et Pause. Ne maintenez pas Ctrl/Alt/Shift/Win. ESC reste disponible pour arrêter d'urgence pendant les clics.
+   - Cliquez avec le bouton droit sur une zone de la liste pour choisir le bouton gauche ou droit de la souris. La liste affiche [L] ou [R] pour chaque zone.
+
 Merci d’utiliser cette application !
 """ },
                         { "CloseButton", "Fermer" },
@@ -714,6 +778,14 @@ Merci d’utiliser cette application !
                         { "UpdateSkipped", "La version {0} a été ignorée." },
                         { "UpdatePreferencesError", "Impossible d’enregistrer la version à ignorer : {0}" },
                         { "OpenLinkError", "Impossible d’ouvrir le lien : {0}" },
+                        { "HotkeySettings", "Paramètres des raccourcis" },
+                        { "HotkeyLabel", "Raccourci démarrer/arrêter :" },
+                        { "HotkeyHint", "Cliquez dans la zone ci-dessus, puis appuyez sur une touche. ESC reste disponible pour arrêter d'urgence pendant les clics." },
+                        { "HotkeyApply", "Appliquer" },
+                        { "HotkeyInvalidKey", "Touche ou combinaison non prise en charge. Utilisez F6–F12, Insert, Home, End, PageUp, PageDown ou Pause sans Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "Le raccourci global n'est pas disponible : {0}" },
+                        { "LeftMouseButton", "Bouton gauche" },
+                        { "RightMouseButton", "Bouton droit" },
                         { "MouseInputError", "Échec de la saisie de la souris. Les clics automatiques ont été arrêtés.\n{0}" }
                     }
                 },
@@ -805,6 +877,10 @@ Willkommen beim automatischen Mausklicker!
    - „Aktuellen Klickbereich hervorheben“ ist standardmäßig aktiviert und wird in der Konfiguration gespeichert. Deaktivieren Sie die Option, um die grüne Hervorhebung auszuschalten.
    - Die Hervorhebungen sind nur sichtbar, wenn „Bereiche anzeigen“ aktiviert ist.
 
+10. Tastenkürzel und Maustaste:
+   - „Datei“ → „Tastenkürzel“: Klicken Sie in das Eingabefeld und drücken Sie die gewünschte Taste. Unterstützt werden F6–F12, Insert, Home, End, PageUp, PageDown und Pause. Halten Sie Ctrl/Alt/Shift/Win nicht gedrückt. ESC bleibt während des Klickens der Notstopp.
+   - Klicken Sie mit der rechten Maustaste auf einen Bereich in der Liste, um die linke oder rechte Maustaste zu wählen. Die Liste zeigt [L] oder [R] für jeden Bereich.
+
 Vielen Dank für die Nutzung!
 """ },
                         { "CloseButton", "Schließen" },
@@ -819,6 +895,14 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Version {0} wurde übersprungen." },
                         { "UpdatePreferencesError", "Die Einstellung zum Überspringen konnte nicht gespeichert werden: {0}" },
                         { "OpenLinkError", "Der Link konnte nicht geöffnet werden: {0}" },
+                        { "HotkeySettings", "Tastenkürzel" },
+                        { "HotkeyLabel", "Start/Stopp-Taste:" },
+                        { "HotkeyHint", "Klicken Sie oben in das Feld und drücken Sie eine Taste. ESC bleibt während des Klickens als Notstopp verfügbar." },
+                        { "HotkeyApply", "Übernehmen" },
+                        { "HotkeyInvalidKey", "Nicht unterstützte Taste oder Tastenkombination. Verwenden Sie F6–F12, Insert, Home, End, PageUp, PageDown oder Pause ohne Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "Der globale Hotkey ist nicht verfügbar: {0}" },
+                        { "LeftMouseButton", "Linke Maustaste" },
+                        { "RightMouseButton", "Rechte Maustaste" },
                         { "MouseInputError", "Die Mauseingabe ist fehlgeschlagen. Das automatische Klicken wurde gestoppt.\n{0}" }
                     }
                 },
@@ -910,6 +994,10 @@ Vielen Dank für die Nutzung!
    - «Resaltar el área del clic actual» está activado de forma predeterminada y se guarda con la configuración. Desactívelo para quitar el resaltado verde.
    - Estos resaltados solo se ven cuando «Mostrar áreas» está activado.
 
+10. Tecla de atajo y botón del ratón:
+   - «Archivo» → «Ajustes de teclas»: haz clic en el cuadro de entrada y pulsa la tecla deseada. Las teclas compatibles son F6–F12, Insert, Home, End, PageUp, PageDown y Pause. No mantengas pulsado Ctrl/Alt/Shift/Win. ESC sigue disponible como parada de emergencia durante los clics.
+   - Haz clic con el botón derecho en un área de la lista para elegir el botón izquierdo o derecho del ratón. La lista muestra [L] o [R] para cada área.
+
 ¡Gracias por utilizar la aplicación!
 """ },
                         { "CloseButton", "Cerrar" },
@@ -924,6 +1012,14 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Se ha omitido la versión {0}." },
                         { "UpdatePreferencesError", "No se pudo guardar la versión que se desea omitir: {0}" },
                         { "OpenLinkError", "No se pudo abrir el enlace: {0}" },
+                        { "HotkeySettings", "Ajustes de teclas" },
+                        { "HotkeyLabel", "Tecla de inicio/parada:" },
+                        { "HotkeyHint", "Haz clic en el cuadro superior y pulsa una tecla. ESC sigue disponible como parada de emergencia durante los clics." },
+                        { "HotkeyApply", "Aplicar" },
+                        { "HotkeyInvalidKey", "Tecla o combinación no compatible. Usa F6–F12, Insert, Home, End, PageUp, PageDown o Pause sin Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "El atajo global no está disponible: {0}" },
+                        { "LeftMouseButton", "Botón izquierdo" },
+                        { "RightMouseButton", "Botón derecho" },
                         { "MouseInputError", "La entrada del ratón ha fallado. Los clics automáticos se han detenido.\n{0}" }
                     }
                 },
@@ -1015,6 +1111,10 @@ Vielen Dank für die Nutzung!
    - Параметр «Выделять текущую область нажатия» включён по умолчанию и сохраняется в файле настроек. Отключите его, чтобы убрать зелёное выделение.
    - Выделение видно только при включённом параметре «Показать области».
 
+10. Горячая клавиша и кнопка мыши:
+   - «Файл» → «Настройки горячих клавиш»: щёлкните поле ввода и нажмите нужную клавишу. Поддерживаются клавиши F6–F12, Insert, Home, End, PageUp, PageDown и Pause. Не удерживайте Ctrl/Alt/Shift/Win. Во время нажатий ESC остаётся аварийной остановкой.
+   - Щёлкните правой кнопкой мыши по области в списке, чтобы выбрать левую или правую кнопку мыши. В списке отображается [L] или [R] для каждой области.
+
 Спасибо за использование программы!
 """ },
                         { "CloseButton", "Закрыть" },
@@ -1029,6 +1129,14 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Версия {0} пропущена." },
                         { "UpdatePreferencesError", "Не удалось сохранить настройку пропуска версии: {0}" },
                         { "OpenLinkError", "Не удалось открыть ссылку: {0}" },
+                        { "HotkeySettings", "Настройки горячих клавиш" },
+                        { "HotkeyLabel", "Клавиша запуска/остановки:" },
+                        { "HotkeyHint", "Щёлкните поле выше и нажмите клавишу. Во время нажатий ESC остаётся аварийной остановкой." },
+                        { "HotkeyApply", "Применить" },
+                        { "HotkeyInvalidKey", "Неподдерживаемая клавиша или сочетание. Используйте F6–F12, Insert, Home, End, PageUp, PageDown или Pause без Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "Глобальная горячая клавиша недоступна: {0}" },
+                        { "LeftMouseButton", "Левая кнопка мыши" },
+                        { "RightMouseButton", "Правая кнопка мыши" },
                         { "MouseInputError", "Ошибка ввода мыши. Автоматические нажатия остановлены.\n{0}" }
                     }
                 },
@@ -1120,6 +1228,10 @@ Bem-vindo ao Clicador automático!
    - “Destacar a área do clique atual” fica ativado por padrão e é salvo com a configuração. Desative a opção para remover o destaque verde.
    - Esses destaques só aparecem quando “Mostrar áreas” está ativado.
 
+10. Atalho e botão do mouse:
+   - “Arquivo” → “Configurações de atalhos”: clique na caixa de entrada e pressione a tecla desejada. As teclas compatíveis são F6–F12, Insert, Home, End, PageUp, PageDown e Pause. Não mantenha Ctrl/Alt/Shift/Win pressionado. ESC continua disponível como parada de emergência durante os cliques.
+   - Clique com o botão direito em uma área da lista para escolher o botão esquerdo ou direito do mouse. A lista mostra [L] ou [R] para cada área.
+
 Obrigado por usar o aplicativo!
 """ },
                         { "CloseButton", "Fechar" },
@@ -1134,6 +1246,14 @@ Obrigado por usar o aplicativo!
                         { "UpdateSkipped", "A versão {0} foi ignorada." },
                         { "UpdatePreferencesError", "Não foi possível salvar a preferência de ignorar a versão: {0}" },
                         { "OpenLinkError", "Não foi possível abrir o link: {0}" },
+                        { "HotkeySettings", "Configurações de atalhos" },
+                        { "HotkeyLabel", "Atalho iniciar/parar:" },
+                        { "HotkeyHint", "Clique na caixa acima e pressione uma tecla. ESC continua disponível como parada de emergência durante os cliques." },
+                        { "HotkeyApply", "Aplicar" },
+                        { "HotkeyInvalidKey", "Tecla ou combinação não suportada. Use F6–F12, Insert, Home, End, PageUp, PageDown ou Pause sem Ctrl/Alt/Shift/Win." },
+                        { "HotkeyUnavailable", "O atalho global não está disponível: {0}" },
+                        { "LeftMouseButton", "Botão esquerdo do mouse" },
+                        { "RightMouseButton", "Botão direito do mouse" },
                         { "MouseInputError", "Falha na entrada do mouse. Os cliques automáticos foram interrompidos.\n{0}" }
                     }
                 }

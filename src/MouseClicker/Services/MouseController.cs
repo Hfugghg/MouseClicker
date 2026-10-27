@@ -17,7 +17,7 @@ namespace MouseClicker
         }
 
         /// <param name="hardwareMode">true 使用硬件模拟点击，false 使用软件点击</param>
-        public void PerformRandomClickInArea(Rectangle area, bool hardwareMode = false)
+        public void PerformRandomClickInArea(Rectangle area, bool hardwareMode = false, bool rightButton = false)
         {
             if (area.Width <= 0 || area.Height <= 0) return;
             int randomX = _random.Next(area.Left, area.Right);
@@ -25,9 +25,9 @@ namespace MouseClicker
             _mouseInput.SetCursorPosition(randomX, randomY);
 
             if (hardwareMode)
-                _mouseInput.HardwareClick();
+                _mouseInput.HardwareClick(rightButton);
             else
-                _mouseInput.SoftwareClick();
+                _mouseInput.SoftwareClick(rightButton);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace MouseClicker
     public interface IMouseInput
     {
         void SetCursorPosition(int x, int y);
-        void SoftwareClick();
-        void HardwareClick();
+        void SoftwareClick(bool rightButton = false);
+        void HardwareClick(bool rightButton = false);
     }
 }
