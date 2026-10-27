@@ -7,7 +7,7 @@ namespace MouseClicker
         public Rectangle Area { get; set; }
         public string Label { get; set; } = string.Empty;
 
-        // Missing property in older JSON configurations defaults to false (left button).
+        // 旧版 JSON 配置缺少此属性时默认为 false（鼠标左键）。
         public bool RightButton { get; set; }
 
         public override string ToString()

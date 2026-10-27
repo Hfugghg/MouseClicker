@@ -175,6 +175,10 @@ Welcome to Mouse Clicker!
    - "Highlight current click area" is on by default and is saved with the configuration. Turn it off to disable the green highlight.
    - These highlights are visible only while "Show Overlay" is enabled.
 
+10. Hotkey and Mouse Button Settings:
+   - "File" → "Hotkey Settings": click the input box, then press the desired key. Supported keys are F6–F12, Insert, Home, End, PageUp, PageDown and Pause. Do not hold Ctrl/Alt/Shift/Win. ESC remains the emergency stop while clicking.
+   - Right-click an area in the list to choose the left or right mouse button. The list shows [L] or [R] for each area.
+
 Thank you for using the application!
 """ },
                         { "CloseButton", "Close" },
@@ -287,6 +291,10 @@ Thank you for using the application!
    - 自动点击时，当前点击区域会以绿色边框高亮。
    - “点击时高亮区域”默认开启，并随配置保存；关闭后不再显示绿色高亮。
    - 这些高亮仅在开启“显示区域框”时可见。
+
+10. 热键与鼠标按键设置：
+   - “文件”→“热键设置”：点击输入框后按下所需按键。支持的按键为 F6–F12、Insert、Home、End、PageUp、PageDown 和 Pause；请勿同时按住 Ctrl/Alt/Shift/Win。点击过程中 ESC 仍可紧急停止。
+   - 右键点击列表中的区域，可为该区域选择鼠标左键或右键；列表中以 [L] 或 [R] 显示当前按键。
 
 感谢您的使用！
 """ },
@@ -401,6 +409,10 @@ Thank you for using the application!
    - 「クリック中のエリアを強調」は既定でオンになっており、設定ファイルに保存されます。オフにすると緑色の強調表示を停止します。
    - これらの強調表示は「オーバーレイを表示」がオンのときだけ見えます。
 
+10. ホットキーとマウスボタンの設定：
+   - 「ファイル」→「ホットキー設定」：入力欄をクリックしてから、目的のキーを押します。使用できるキーは F6～F12、Insert、Home、End、PageUp、PageDown、Pause です。Ctrl/Alt/Shift/Win は押さないでください。クリック中は ESC で緊急停止できます。
+   - リスト内のエリアを右クリックすると、マウスの左ボタンまたは右ボタンを選択できます。リストには各エリアのボタンが [L] または [R] で表示されます。
+
 ご利用いただきありがとうございます！
 """ },
                         { "CloseButton", "閉じる" },
@@ -513,6 +525,10 @@ Thank you for using the application!
    - 자동 클릭 중에는 현재 클릭하는 영역을 초록색 테두리로 강조합니다.
    - "클릭 중인 영역 강조"는 기본적으로 켜져 있으며 설정 파일에 저장됩니다. 끄면 초록색 강조 표시가 사라집니다.
    - 이러한 강조 표시는 "영역 표시"를 켰을 때만 보입니다.
+
+10. 단축키 및 마우스 버튼 설정:
+   - "파일" → "단축키 설정": 입력란을 클릭한 뒤 원하는 키를 누릅니다. 지원되는 키는 F6–F12, Insert, Home, End, PageUp, PageDown, Pause입니다. Ctrl/Alt/Shift/Win을 함께 누르지 마세요. 클릭 중에는 ESC로 긴급 정지할 수 있습니다.
+   - 목록에서 영역을 마우스 오른쪽 버튼으로 클릭하여 마우스 왼쪽 또는 오른쪽 버튼을 선택합니다. 목록에는 각 영역의 버튼이 [L] 또는 [R]로 표시됩니다.
 
 이용해 주셔서 감사합니다!
 """ },
@@ -627,6 +643,10 @@ Thank you for using the application!
    - 「點擊時醒目標示區域」預設開啟，並隨設定檔儲存；關閉後不再顯示綠色標示。
    - 這些標示僅在開啟「顯示區域框」時可見。
 
+10. 熱鍵與滑鼠按鍵設定：
+   - 「檔案」→「熱鍵設定」：點擊輸入框後按下所需按鍵。支援的按鍵為 F6–F12、Insert、Home、End、PageUp、PageDown 及 Pause；請勿同時按住 Ctrl/Alt/Shift/Win。點擊過程中 ESC 仍可緊急停止。
+   - 在清單中的區域上按滑鼠右鍵，可為該區域選擇滑鼠左鍵或右鍵；清單會以 [L] 或 [R] 顯示目前按鍵。
+
 感謝您的使用！
 """ },
                         { "CloseButton", "關閉" },
@@ -739,6 +759,10 @@ Bienvenue dans le cliqueur automatique !
    - Pendant les clics automatiques, la zone du clic en cours est entourée d’un cadre vert.
    - « Surligner la zone du clic en cours » est activé par défaut et enregistré dans la configuration. Désactivez cette option pour masquer le surlignage vert.
    - Ces surlignages sont visibles uniquement lorsque « Afficher les zones » est activé.
+
+10. Raccourci clavier et bouton de la souris :
+   - « Fichier » → « Paramètres des raccourcis » : cliquez dans la zone de saisie, puis appuyez sur la touche souhaitée. Les touches prises en charge sont F6–F12, Insert, Home, End, PageUp, PageDown et Pause. Ne maintenez pas Ctrl/Alt/Shift/Win. ESC reste disponible pour arrêter d'urgence pendant les clics.
+   - Cliquez avec le bouton droit sur une zone de la liste pour choisir le bouton gauche ou droit de la souris. La liste affiche [L] ou [R] pour chaque zone.
 
 Merci d’utiliser cette application !
 """ },
@@ -853,6 +877,10 @@ Willkommen beim automatischen Mausklicker!
    - „Aktuellen Klickbereich hervorheben“ ist standardmäßig aktiviert und wird in der Konfiguration gespeichert. Deaktivieren Sie die Option, um die grüne Hervorhebung auszuschalten.
    - Die Hervorhebungen sind nur sichtbar, wenn „Bereiche anzeigen“ aktiviert ist.
 
+10. Tastenkürzel und Maustaste:
+   - „Datei“ → „Tastenkürzel“: Klicken Sie in das Eingabefeld und drücken Sie die gewünschte Taste. Unterstützt werden F6–F12, Insert, Home, End, PageUp, PageDown und Pause. Halten Sie Ctrl/Alt/Shift/Win nicht gedrückt. ESC bleibt während des Klickens der Notstopp.
+   - Klicken Sie mit der rechten Maustaste auf einen Bereich in der Liste, um die linke oder rechte Maustaste zu wählen. Die Liste zeigt [L] oder [R] für jeden Bereich.
+
 Vielen Dank für die Nutzung!
 """ },
                         { "CloseButton", "Schließen" },
@@ -965,6 +993,10 @@ Vielen Dank für die Nutzung!
    - Durante los clics automáticos, el área del clic actual se resalta con un borde verde.
    - «Resaltar el área del clic actual» está activado de forma predeterminada y se guarda con la configuración. Desactívelo para quitar el resaltado verde.
    - Estos resaltados solo se ven cuando «Mostrar áreas» está activado.
+
+10. Tecla de atajo y botón del ratón:
+   - «Archivo» → «Ajustes de teclas»: haz clic en el cuadro de entrada y pulsa la tecla deseada. Las teclas compatibles son F6–F12, Insert, Home, End, PageUp, PageDown y Pause. No mantengas pulsado Ctrl/Alt/Shift/Win. ESC sigue disponible como parada de emergencia durante los clics.
+   - Haz clic con el botón derecho en un área de la lista para elegir el botón izquierdo o derecho del ratón. La lista muestra [L] o [R] para cada área.
 
 ¡Gracias por utilizar la aplicación!
 """ },
@@ -1079,6 +1111,10 @@ Vielen Dank für die Nutzung!
    - Параметр «Выделять текущую область нажатия» включён по умолчанию и сохраняется в файле настроек. Отключите его, чтобы убрать зелёное выделение.
    - Выделение видно только при включённом параметре «Показать области».
 
+10. Горячая клавиша и кнопка мыши:
+   - «Файл» → «Настройки горячих клавиш»: щёлкните поле ввода и нажмите нужную клавишу. Поддерживаются клавиши F6–F12, Insert, Home, End, PageUp, PageDown и Pause. Не удерживайте Ctrl/Alt/Shift/Win. Во время нажатий ESC остаётся аварийной остановкой.
+   - Щёлкните правой кнопкой мыши по области в списке, чтобы выбрать левую или правую кнопку мыши. В списке отображается [L] или [R] для каждой области.
+
 Спасибо за использование программы!
 """ },
                         { "CloseButton", "Закрыть" },
@@ -1191,6 +1227,10 @@ Bem-vindo ao Clicador automático!
    - Durante os cliques automáticos, a área do clique atual é destacada com uma borda verde.
    - “Destacar a área do clique atual” fica ativado por padrão e é salvo com a configuração. Desative a opção para remover o destaque verde.
    - Esses destaques só aparecem quando “Mostrar áreas” está ativado.
+
+10. Atalho e botão do mouse:
+   - “Arquivo” → “Configurações de atalhos”: clique na caixa de entrada e pressione a tecla desejada. As teclas compatíveis são F6–F12, Insert, Home, End, PageUp, PageDown e Pause. Não mantenha Ctrl/Alt/Shift/Win pressionado. ESC continua disponível como parada de emergência durante os cliques.
+   - Clique com o botão direito em uma área da lista para escolher o botão esquerdo ou direito do mouse. A lista mostra [L] ou [R] para cada área.
 
 Obrigado por usar o aplicativo!
 """ },
