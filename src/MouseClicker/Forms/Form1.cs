@@ -7,6 +7,7 @@ using System.IO;
 using System.Text.Json;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
+using System.Net.Http;
 
 namespace MouseClicker
 {
@@ -45,6 +46,21 @@ namespace MouseClicker
         private bool _isClicking = false;
         private int _currentClickIndex = 0;
 
+        private readonly HttpClient _updateHttpClient;
+        private readonly bool _ownsUpdateHttpClient;
+        private readonly GitHubUpdateService _updateService;
+        private readonly UpdatePreferencesStore _updatePreferences;
+        private readonly CancellationTokenSource _updateCancellation = new();
+        private readonly Version _currentVersion;
+        private Task? _updateCheckTask;
+        private bool _updateCheckStarted;
+        private bool _checkingForUpdates = true;
+        private bool _updateCheckSucceeded;
+        private bool _isClosing;
+        private bool _updateResourcesDisposed;
+        private UpdateInfo? _availableUpdate;
+        private Version? _skippedUpdateVersion;
+
         // --- UI 控件字段 ---
         private MenuStrip menuStrip = null!;
         private ToolStripMenuItem fileMenuItem = null!, languageMenuItem = null!, helpMenuItem = null!, aboutMenuItem = null!;
@@ -58,10 +74,18 @@ namespace MouseClicker
         private CheckBox showOverlayCheckBox = null!;
         private CheckBox hardwareModeCheckBox = null!;
         private Button startButton = null!;
+        private LinkLabel updateAvailableLinkLabel = null!;
 
         // 主窗口构造函数
-        public Form1()
+        public Form1() : this(null, null) { }
+
+        internal Form1(HttpClient? updateClient, UpdatePreferencesStore? preferences, Version? currentVersion = null)
         {
+            _ownsUpdateHttpClient = updateClient == null;
+            _updateHttpClient = updateClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
+            _updateService = new GitHubUpdateService(_updateHttpClient);
+            _updatePreferences = preferences ?? new UpdatePreferencesStore();
+            _currentVersion = UpdateVersion.Normalize(currentVersion ?? typeof(Form1).Assembly.GetName().Version ?? new Version(0, 0, 0));
             InitializeComponent();
             _instance = this;
             _mouseController = new MouseController(new Win32MouseInput());
@@ -87,11 +111,136 @@ namespace MouseClicker
 
             _overlayForm = new OverlayForm();
             _overlayForm.Show();
-            this.FormClosing += (s, e) => 
+            this.Disposed += (_, _) => DisposeUpdateResources();
+        }
+
+
+        internal event EventHandler? UpdateStateChanged;
+        internal Version CurrentVersion => _currentVersion;
+        internal string DisplayVersion => _currentVersion.ToString(_currentVersion.Revision > 0 ? 4 : 3);
+        internal bool CheckingForUpdates => _checkingForUpdates;
+        internal bool UpdateCheckSucceeded => _updateCheckSucceeded;
+        internal UpdateInfo? AvailableUpdate => _availableUpdate;
+        internal Version? SkippedUpdateVersion => _skippedUpdateVersion;
+        internal Task? UpdateCheckTask => _updateCheckTask;
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            if (_updateCheckStarted) return;
+            _updateCheckStarted = true;
+            _updateCheckTask = CheckForUpdatesAsync();
+        }
+
+        private async Task CheckForUpdatesAsync()
+        {
+            bool succeeded = false;
+            UpdateInfo? availableUpdate = null;
+            Version? skippedVersion = null;
+            try
             {
-                if (_hookID != IntPtr.Zero) UnhookWindowsHookEx(_hookID);
-                _overlayForm.Close(); 
-            };
+                var result = await _updateService.CheckForUpdateAsync(_currentVersion, _updateCancellation.Token);
+                succeeded = result.Succeeded;
+                if (succeeded && result.Update != null)
+                {
+                    if (_updatePreferences.IsSkipped(result.Update.Version))
+                        skippedVersion = result.Update.Version;
+                    else
+                        availableUpdate = result.Update;
+                }
+            }
+            catch (OperationCanceledException) when (_isClosing || _updateCancellation.IsCancellationRequested)
+            {
+                return;
+            }
+            catch
+            {
+                // Startup checks are optional: failures become an About status, never a popup.
+                succeeded = false;
+            }
+
+            if (_isClosing || IsDisposed || Disposing) return;
+            _checkingForUpdates = false;
+            _updateCheckSucceeded = succeeded;
+            _availableUpdate = availableUpdate;
+            _skippedUpdateVersion = skippedVersion;
+            RefreshUpdateState();
+        }
+
+        private void RefreshUpdateState()
+        {
+            updateAvailableLinkLabel.Text = Localization.Get("UpdateAvailable");
+            updateAvailableLinkLabel.Enabled = !_isClicking;
+            PerformLayoutLayout();
+            UpdateStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        internal bool SkipAvailableUpdate(IWin32Window owner)
+        {
+            if (_availableUpdate == null) return false;
+            var version = _availableUpdate.Version;
+            try
+            {
+                // Only hide the notice after the preference has been saved successfully.
+                _updatePreferences.Skip(version);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(owner,
+                    string.Format(Localization.Get("UpdatePreferencesError"), ex.Message),
+                    Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+            _availableUpdate = null;
+            _skippedUpdateVersion = version;
+            RefreshUpdateState();
+            return true;
+        }
+
+        internal static void OpenExternalLink(Uri uri, IWin32Window owner)
+        {
+            try
+            {
+                Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true })?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(owner, string.Format(Localization.Get("OpenLinkError"), ex.Message),
+                    Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            if (e.Cancel) return;
+            _isClosing = true;
+            _updateCancellation.Cancel();
+            StopClicking();
+            if (_hookID != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_hookID);
+                _hookID = IntPtr.Zero;
+            }
+            _clickTimer.Stop();
+            _overlayForm.Close();
+        }
+
+        private void DisposeUpdateResources()
+        {
+            if (_updateResourcesDisposed) return;
+            _updateResourcesDisposed = true;
+            _isClosing = true;
+            _updateCancellation.Cancel();
+            _updateCancellation.Dispose();
+            if (_ownsUpdateHttpClient) _updateHttpClient.Dispose();
+            _clickTimer.Dispose();
+            if (!_overlayForm.IsDisposed) _overlayForm.Dispose();
+            if (ReferenceEquals(_instance, this) && _hookID != IntPtr.Zero)
+            {
+                UnhookWindowsHookEx(_hookID);
+                _hookID = IntPtr.Zero;
+            }
         }
 
         // 键盘钩子回调，用于监听停止热键 (ESC)。
@@ -134,9 +283,13 @@ namespace MouseClicker
             saveConfigMenuItem = new ToolStripMenuItem();
             loadConfigMenuItem = new ToolStripMenuItem();
             languageMenuItem = new ToolStripMenuItem();
-            var zhMenuItem = new ToolStripMenuItem("中文");
-            var enMenuItem = new ToolStripMenuItem("English");
-            var jaMenuItem = new ToolStripMenuItem("日本語");
+            foreach (var language in Localization.SupportedLanguages)
+            {
+                string languageCode = language.Key;
+                var item = new ToolStripMenuItem(language.Value) { Tag = languageCode };
+                item.Click += (_, _) => ChangeLanguage(languageCode);
+                languageMenuItem.DropDownItems.Add(item);
+            }
             helpMenuItem = new ToolStripMenuItem();
             viewHelpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
@@ -155,20 +308,24 @@ namespace MouseClicker
             this.showOverlayCheckBox = new CheckBox { AutoSize = true, Checked = true };
             this.hardwareModeCheckBox = new CheckBox { AutoSize = true, Checked = false };
             this.startButton = new Button { Font = new Font(this.Font.FontFamily, 10, FontStyle.Bold) };
+            this.updateAvailableLinkLabel = new LinkLabel
+            {
+                AutoSize = true, Visible = false,
+                Font = new Font(this.Font.FontFamily, Math.Max(7.0f, this.Font.Size - 1), FontStyle.Regular)
+            };
+            updateAvailableLinkLabel.LinkClicked += (_, _) => ShowAbout();
 
             // 将控件添加到窗体
             this.Controls.Add(this.menuStrip);
             this.MainMenuStrip = this.menuStrip;
             fileMenuItem.DropDownItems.Add(saveConfigMenuItem);
             fileMenuItem.DropDownItems.Add(loadConfigMenuItem);
-            languageMenuItem.DropDownItems.Add(zhMenuItem);
-            languageMenuItem.DropDownItems.Add(enMenuItem);
-            languageMenuItem.DropDownItems.Add(jaMenuItem);
             helpMenuItem.DropDownItems.Add(viewHelpMenuItem);
             this.menuStrip.Items.Add(fileMenuItem);
             this.menuStrip.Items.Add(languageMenuItem);
             this.menuStrip.Items.Add(helpMenuItem);
             this.menuStrip.Items.Add(aboutMenuItem);
+            this.Controls.Add(this.updateAvailableLinkLabel);
             this.Controls.Add(this.areasListBox);
             this.Controls.Add(this.addAreaButton);
             this.Controls.Add(this.removeAreaButton);
@@ -188,9 +345,6 @@ namespace MouseClicker
             // 附加事件处理器
             saveConfigMenuItem.Click += new EventHandler(saveConfigMenuItem_Click);
             loadConfigMenuItem.Click += new EventHandler(loadConfigMenuItem_Click);
-            zhMenuItem.Click += (s, e) => { ChangeLanguage("zh-CN"); };
-            enMenuItem.Click += (s, e) => { ChangeLanguage("en-US"); };
-            jaMenuItem.Click += (s, e) => { ChangeLanguage("ja-JP"); };
             viewHelpMenuItem.Click += new EventHandler(viewHelpMenuItem_Click);
             aboutMenuItem.Click += new EventHandler(aboutMenuItem_Click);
             addAreaButton.Click += new EventHandler(addAreaButton_Click);
@@ -208,9 +362,14 @@ namespace MouseClicker
             int controlPadding = 5;
             int rowHeight = 30;
             int formPadding = 10;
-            int currentY = menuStrip.Height + formPadding;
+            bool showUpdateBadge = _availableUpdate != null;
+            updateAvailableLinkLabel.Visible = showUpdateBadge;
+            int badgeHeight = showUpdateBadge ? updateAvailableLinkLabel.PreferredSize.Height + controlPadding : 0;
+            int currentY = menuStrip.Height + formPadding + badgeHeight;
 
-            int formWidth = 430;
+            int minimumButtonWidth = new[] { addAreaButton, removeAreaButton, moveUpButton, moveDownButton }
+                .Max(button => TextRenderer.MeasureText(button.Text, button.Font).Width + 20);
+            int formWidth = Math.Max(430, minimumButtonWidth * 4 + formPadding * 2 + controlPadding * 3);
 
             areasListBox.Location = new Point(formPadding, currentY);
             areasListBox.Size = new Size(formWidth - (formPadding * 2), 120);
@@ -239,7 +398,11 @@ namespace MouseClicker
 
             sequenceLabel.Location = new Point(formPadding, currentY + 4);
             sequenceComboBox.Location = new Point(sequenceLabel.Right + controlPadding, currentY);
-            sequenceComboBox.Size = new Size(180, rowHeight);
+            int sequenceWidth = Math.Max(180, sequenceComboBox.Items.Cast<string>()
+                .Select(text => TextRenderer.MeasureText(text, sequenceComboBox.Font).Width)
+                .DefaultIfEmpty(0).Max() + SystemInformation.VerticalScrollBarWidth + 12);
+            sequenceComboBox.Size = new Size(sequenceWidth, rowHeight);
+            sequenceComboBox.DropDownWidth = sequenceWidth;
 
             showOverlayCheckBox.Location = new Point(sequenceComboBox.Right + controlPadding, currentY + 4);
             currentY += rowHeight + controlPadding;
@@ -251,6 +414,9 @@ namespace MouseClicker
             requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right);
             requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
             requiredWidth += formPadding;
+            int menuWidth = menuStrip.Items.Cast<ToolStripItem>().Sum(item => item.GetPreferredSize(Size.Empty).Width) + menuStrip.Padding.Horizontal + formPadding * 2;
+            requiredWidth = Math.Max(requiredWidth, menuWidth);
+            requiredWidth = Math.Max(requiredWidth, aboutMenuItem.Bounds.Left + updateAvailableLinkLabel.PreferredSize.Width + formPadding);
             formWidth = Math.Max(formWidth, requiredWidth);
 
             // Measure at the final width so translated hints wrap without covering the next row.
@@ -280,6 +446,10 @@ namespace MouseClicker
             startButton.Size = new Size(formWidth - (formPadding * 2), 40);
 
             this.ClientSize = new Size(formWidth, startButton.Bottom + formPadding);
+            menuStrip.PerformLayout();
+            updateAvailableLinkLabel.Location = new Point(
+                Math.Max(formPadding, Math.Min(aboutMenuItem.Bounds.Left, formWidth - updateAvailableLinkLabel.PreferredSize.Width - formPadding)),
+                menuStrip.Height + 2);
         }
 
         // 更改应用程序语言。
@@ -299,6 +469,9 @@ namespace MouseClicker
             helpMenuItem.Text = Localization.Get("Help");
             viewHelpMenuItem.Text = Localization.Get("ViewHelp");
             aboutMenuItem.Text = Localization.Get("About");
+            updateAvailableLinkLabel.Text = Localization.Get("UpdateAvailable");
+            foreach (ToolStripMenuItem item in languageMenuItem.DropDownItems)
+                item.Checked = string.Equals(item.Tag as string, Localization.Language, StringComparison.OrdinalIgnoreCase);
             addAreaButton.Text = Localization.Get("Add");
             removeAreaButton.Text = Localization.Get("Remove");
             moveUpButton.Text = Localization.Get("MoveUp");
@@ -322,6 +495,7 @@ namespace MouseClicker
             if (selectedIndex >= 0) sequenceComboBox.SelectedIndex = selectedIndex; else if (sequenceComboBox.Items.Count > 0) { sequenceComboBox.SelectedIndex = 0; }
 
             PerformLayoutLayout();
+            UpdateStateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         // “查看帮助”菜单项的点击事件。
@@ -445,10 +619,16 @@ namespace MouseClicker
             }
         }
 
+        private void ShowAbout()
+        {
+            using var about = new AboutForm(this);
+            about.ShowDialog(this);
+        }
+
         // “关于”菜单项的点击事件。
         private void aboutMenuItem_Click(object? sender, EventArgs e)
         {
-            MessageBox.Show(Localization.Get("AboutMessage"), Localization.Get("About"));
+            ShowAbout();
         }
 
         // 刷新点击区域列表的显示。
@@ -599,6 +779,7 @@ namespace MouseClicker
             showOverlayCheckBox.Enabled = isEnabled;
             hardwareModeCheckBox.Enabled = isEnabled;
             menuStrip.Enabled = isEnabled;
+            updateAvailableLinkLabel.Enabled = isEnabled;
         }
 
         // 负等待时间取绝对值，同时保留 10 毫秒下限。
@@ -626,7 +807,7 @@ namespace MouseClicker
                 // Surface native input failures without leaving the timer or global hook active.
                 StopClicking();
                 MessageBox.Show(
-                    $"鼠标输入失败，自动点击已停止。\n{ex.Message}",
+                    string.Format(Localization.Get("MouseInputError"), ex.Message),
                     this.Text,
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
