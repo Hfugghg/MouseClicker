@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -21,6 +22,8 @@ namespace MouseClicker
         private bool _disposed;
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
 
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        private static extern IntPtr GetModuleHandle(string moduleName);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr SetWindowsHookEx(int idHook, LowLevelKeyboardProc callback, IntPtr module, uint threadId);
         [DllImport("user32.dll", SetLastError = true)]
@@ -35,7 +38,14 @@ namespace MouseClicker
             Hotkey = LoadHotkey();
             if (_instance != null) throw new InvalidOperationException("Only one global hotkey manager can be active.");
             _instance = this;
-            _hookId = SetWindowsHookEx(WhKeyboardLl, HookProc, IntPtr.Zero, 0);
+            IntPtr moduleHandle = IntPtr.Zero;
+            using (Process currentProcess = Process.GetCurrentProcess())
+            using (ProcessModule? currentModule = currentProcess.MainModule)
+            {
+                if (currentModule?.ModuleName is string moduleName)
+                    moduleHandle = GetModuleHandle(moduleName);
+            }
+            _hookId = SetWindowsHookEx(WhKeyboardLl, HookProc, moduleHandle, 0);
             if (_hookId == IntPtr.Zero)
             {
                 _instance = null;
