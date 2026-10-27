@@ -312,5 +312,89 @@ namespace MouseClicker.Tests
             Assert.Equal(interval, result.Interval);
             Assert.Equal(jitter, result.Jitter);
         }
+
+        // Configuration validation is exercised independently of the WinForms UI.
+        [Fact]
+        public void Validate_ValidConfiguration_DoesNotThrow()
+        {
+            var config = new ConfigData
+            {
+                ClickAreas = new List<ClickArea>
+                {
+                    new ClickArea { Label = "Button", Area = new Rectangle(-100, 10, 20, 30) }
+                },
+                Interval = 100,
+                Jitter = 10,
+                SequenceIndex = 1
+            };
+
+            config.Validate(10, 600000, 0, 10000, sequenceCount: 3);
+        }
+
+        [Theory]
+        [InlineData(9)]
+        [InlineData(600001)]
+        public void Validate_IntervalOutsideRange_Throws(decimal interval)
+        {
+            var config = new ConfigData { Interval = interval, Jitter = 0, SequenceIndex = 0 };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(10001)]
+        public void Validate_JitterOutsideRange_Throws(decimal jitter)
+        {
+            var config = new ConfigData { Interval = 100, Jitter = jitter, SequenceIndex = 0 };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
+
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(3)]
+        public void Validate_InvalidSequenceIndex_Throws(int sequenceIndex)
+        {
+            var config = new ConfigData { Interval = 100, Jitter = 0, SequenceIndex = sequenceIndex };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
+
+        [Fact]
+        public void Validate_NullClickAreaList_Throws()
+        {
+            var config = new ConfigData
+            {
+                ClickAreas = null!,
+                Interval = 100,
+                Jitter = 0,
+                SequenceIndex = 0
+            };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
+
+        [Fact]
+        public void Validate_InvalidClickArea_Throws()
+        {
+            var config = new ConfigData
+            {
+                ClickAreas = new List<ClickArea>
+                {
+                    new ClickArea { Label = "Invalid", Area = new Rectangle(0, 0, 0, 10) }
+                },
+                Interval = 100,
+                Jitter = 0,
+                SequenceIndex = 0
+            };
+
+            Assert.Throws<System.IO.InvalidDataException>(
+                () => config.Validate(10, 600000, 0, 10000, sequenceCount: 3));
+        }
     }
 }
