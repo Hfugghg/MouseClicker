@@ -392,21 +392,12 @@ namespace MouseClicker
                         if (configData != null)
                         {
                             // Validate the entire file before changing the current UI or configuration.
-                            if (configData.ClickAreas == null ||
-                                configData.Interval < intervalNumericUpDown.Minimum ||
-                                configData.Interval > intervalNumericUpDown.Maximum ||
-                                configData.Jitter < jitterNumericUpDown.Minimum ||
-                                configData.Jitter > jitterNumericUpDown.Maximum ||
-                                configData.SequenceIndex < 0 ||
-                                configData.SequenceIndex >= sequenceComboBox.Items.Count ||
-                                configData.ClickAreas.Exists(area =>
-                                    area == null ||
-                                    area.Area.Width <= 0 ||
-                                    area.Area.Height <= 0 ||
-                                    area.Label == null))
-                            {
-                                throw new InvalidDataException("Configuration contains invalid or out-of-range values.");
-                            }
+                            configData.Validate(
+                                intervalNumericUpDown.Minimum,
+                                intervalNumericUpDown.Maximum,
+                                jitterNumericUpDown.Minimum,
+                                jitterNumericUpDown.Maximum,
+                                sequenceComboBox.Items.Count);
 
                             // Apply only after every field has passed validation.
                             _clickAreas = configData.ClickAreas;
