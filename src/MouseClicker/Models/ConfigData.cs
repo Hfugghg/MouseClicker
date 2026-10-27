@@ -22,6 +22,9 @@ namespace MouseClicker
         // 是否显示点击区域的覆盖层。
         public bool ShowOverlay { get; set; }
 
+        // 缺少该字段的旧配置默认保留当前点击区域高亮。
+        public bool HighlightCurrentArea { get; set; } = true;
+
         // 是否启用 SendInput 附加标记模式。
         public bool HardwareMode { get; set; }
 

@@ -1,221 +1,83 @@
+using System.Globalization;
 using System.Reflection;
+using System.Runtime.Loader;
+using System.Text;
 using Xunit;
 
 namespace MouseClicker.Tests
 {
     public class LocalizationTests : IDisposable
     {
-        private readonly string _originalLanguage;
+        private readonly string _originalLanguage = Localization.Language;
 
-        public LocalizationTests()
-        {
-            // 每个测试前保存原始语言，以便测试后恢复。
-            _originalLanguage = Localization.Language;
-        }
+        public void Dispose() => Localization.Language = _originalLanguage;
 
-        public void Dispose()
-        {
-            // 每个测试后恢复原始语言。
-            Localization.Language = _originalLanguage;
-        }
-
-        // 辅助方法：反射访问私有静态 Translations 字典。
         private static Dictionary<string, Dictionary<string, string>> GetTranslations()
         {
-            var field = typeof(Localization).GetField(
-                "Translations",
-                BindingFlags.NonPublic | BindingFlags.Static);
-
+            var field = typeof(Localization).GetField("Translations", BindingFlags.NonPublic | BindingFlags.Static);
             Assert.NotNull(field);
-            var value = field!.GetValue(null);
-            Assert.NotNull(value);
-            return (Dictionary<string, Dictionary<string, string>>)value!;
+            return Assert.IsType<Dictionary<string, Dictionary<string, string>>>(field.GetValue(null));
         }
 
-        // ----------------------------------------------------------------
-        // 测试1：默认语言为 "zh-CN"
-        // ----------------------------------------------------------------
-        [Fact]
-        public void DefaultLanguage_IsZhCN()
+        [Theory]
+        [InlineData("zh-CN", "鼠标点击器", "文件", "开始点击")]
+        [InlineData("en-US", "Mouse Clicker", "File", "Start Clicking")]
+        [InlineData("ja-JP", "マウス自動クリッカー", "ファイル", "クリックを開始")]
+        [InlineData("ko-KR", "마우스 자동 클릭기", "파일", "클릭 시작")]
+        [InlineData("zh-TW", "滑鼠自動點擊器", "檔案", "開始點擊")]
+        [InlineData("fr-FR", "Cliqueur automatique", "Fichier", "Démarrer les clics")]
+        [InlineData("de-DE", "Automatischer Mausklicker", "Datei", "Klicken starten")]
+        [InlineData("es-ES", "Clic automático", "Archivo", "Iniciar clics")]
+        [InlineData("ru-RU", "Автокликер мыши", "Файл", "Начать нажатия")]
+        [InlineData("pt-BR", "Clicador automático", "Arquivo", "Iniciar cliques")]
+        public void Get_ReturnsNativeUiText(string language, string title, string file, string start)
         {
-            // 重置为类初始化器的默认值，然后读取。
-            Localization.Language = "zh-CN";
-            Assert.Equal("zh-CN", Localization.Language);
+            Localization.Language = language;
+            Assert.Equal(title, Localization.Get("WindowTitle"));
+            Assert.Equal(file, Localization.Get("File"));
+            Assert.Equal(start, Localization.Get("StartClicking"));
         }
 
-        // ----------------------------------------------------------------
-        // 测试2：Get() 返回正确的中文字符串
-        // ----------------------------------------------------------------
-        [Fact]
-        public void Get_ReturnsChineseString_WhenLanguageIsZhCN()
-        {
-            Localization.Language = "zh-CN";
-
-            Assert.Equal("鼠标点击器", Localization.Get("WindowTitle"));
-            Assert.Equal("文件", Localization.Get("File"));
-            Assert.Equal("开始点击", Localization.Get("StartClicking"));
-            Assert.Equal("停止点击 (ESC)", Localization.Get("StopClicking"));
-        }
-
-        // ----------------------------------------------------------------
-        // 测试3：Get() 返回正确的英文字符串
-        // ----------------------------------------------------------------
-        [Fact]
-        public void Get_ReturnsEnglishString_WhenLanguageIsEnUS()
-        {
-            Localization.Language = "en-US";
-
-            Assert.Equal("Mouse Clicker", Localization.Get("WindowTitle"));
-            Assert.Equal("File", Localization.Get("File"));
-            Assert.Equal("Start Clicking", Localization.Get("StartClicking"));
-            Assert.Equal("Stop Clicking (ESC)", Localization.Get("StopClicking"));
-        }
-
-        // ----------------------------------------------------------------
-        // 测试4：Get() 返回正确的日文字符串
-        // ----------------------------------------------------------------
-        [Fact]
-        public void Get_ReturnsJapaneseString_WhenLanguageIsJaJP()
-        {
-            Localization.Language = "ja-JP";
-
-            Assert.Equal("マウス自動クリッカー", Localization.Get("WindowTitle"));
-            Assert.Equal("ファイル", Localization.Get("File"));
-            Assert.Equal("クリックを開始", Localization.Get("StartClicking"));
-            Assert.Equal("クリックを停止 (ESC)", Localization.Get("StopClicking"));
-        }
-
-        // ----------------------------------------------------------------
-        // 测试5：切换语言返回不同翻译
-        //         针对同一键。
-        // ----------------------------------------------------------------
-        [Fact]
-        public void SwitchingLanguage_ReturnsDifferentTranslationsForSameKey()
-        {
-            const string key = "StartClicking";
-
-            Localization.Language = "zh-CN";
-            string zh = Localization.Get(key);
-
-            Localization.Language = "en-US";
-            string en = Localization.Get(key);
-
-            Localization.Language = "ja-JP";
-            string ja = Localization.Get(key);
-
-            // 三种语言必须返回不同的翻译。
-            Assert.NotEqual(zh, en);
-            Assert.NotEqual(en, ja);
-            Assert.NotEqual(zh, ja);
-
-            // 抽查预期值。
-            Assert.Equal("开始点击", zh);
-            Assert.Equal("Start Clicking", en);
-            Assert.Equal("クリックを開始", ja);
-        }
-
-        // ----------------------------------------------------------------
-        // 测试6：未知语言代码时 Get() 回退到英文。
-        // ----------------------------------------------------------------
         [Fact]
         public void Get_FallsBackToEnglish_ForUnknownLanguageCode()
         {
-            // "fr-FR" 未在 Translations 字典中注册。
-            Localization.Language = "fr-FR";
-
-            // 对于英文中存在的键，返回英文值。
+            Localization.Language = "xx-XX";
             Assert.Equal("Mouse Clicker", Localization.Get("WindowTitle"));
-            Assert.Equal("File", Localization.Get("File"));
             Assert.Equal("Configuration saved successfully.", Localization.Get("ConfigSavedSuccess"));
         }
 
-        // ----------------------------------------------------------------
-        // 测试7：当前语言的键缺失时 Get() 回退到英文
-        //         当前语言字典的键，但存在于英文中。
-        //         由于三种已注册语言具有相同的键集，
-        //         此路径通过设置未知语言代码来触发 —
-        //         首次 ContainsKey 检查失败，因此
-        //         方法会回退到英文字典。
-        // ----------------------------------------------------------------
         [Fact]
-        public void Get_FallsBackToEnglish_WhenKeyMissingFromCurrentLanguage()
+        public void Get_ReturnsKeyItself_WhenNoTranslationExists()
         {
-            // 设置为非英文的有效语言。
-            Localization.Language = "zh-CN";
-
-            // 所有语言共享相同的键集，因此仅英文独有的
-            // 回退路径在有效语言下自然不可达。然而，
-            // 我们可以验证当某个键缺失时，英文仍然是
-            // 安全网：请求一个在任何语言中都不存在的键，
-            // 并确保方法返回键本身（而非异常或 null）。
-            // 实现中在进行最终回退前会先检查英文。
-            string result = Localization.Get("NonExistentKey_XYZ");
-            Assert.Equal("NonExistentKey_XYZ", result);
-
-            // 现在切换到未知语言，并确认
-            // 存在于英文中的键仍能解析到英文值。
-            Localization.Language = "xx-XX";
-            Assert.Equal("Success", Localization.Get("Success"));
-            Assert.Equal("Error", Localization.Get("Error"));
+            const string unknownKey = "NonExistentKey_XYZ";
+            foreach (var language in Localization.SupportedLanguages.Keys.Append("xx-XX"))
+            {
+                Localization.Language = language;
+                Assert.Equal(unknownKey, Localization.Get(unknownKey));
+            }
         }
 
-        // ----------------------------------------------------------------
-        // 测试8：当键不存在于任何语言字典中时，
-        //         Get() 返回键本身。
-        // ----------------------------------------------------------------
         [Fact]
-        public void Get_ReturnsKeyItself_WhenKeyNotInAnyLanguage()
+        public void SupportedLanguages_AndTranslationsMatchAllInstallerLanguages()
         {
-            const string unknownKey = "ThisKeyDoesNotExistAnywhere_12345";
-
-            // 使用有效语言测试。
-            Localization.Language = "zh-CN";
-            Assert.Equal(unknownKey, Localization.Get(unknownKey));
-
-            // 使用英文测试。
-            Localization.Language = "en-US";
-            Assert.Equal(unknownKey, Localization.Get(unknownKey));
-
-            // 使用未知语言测试 — 在尝试当前语言和英文查找
-            // 都失败后，仍应返回键本身。
-            Localization.Language = "fr-FR";
-            Assert.Equal(unknownKey, Localization.Get(unknownKey));
-        }
-
-        // ----------------------------------------------------------------
-        // 测试9：三种已注册语言具有一致的
-        //         （相同的）键集。
-        // ----------------------------------------------------------------
-        [Fact]
-        public void AllLanguages_HaveConsistentKeySet()
-        {
+            string[] expected = { "en-US", "zh-CN", "ja-JP", "ko-KR", "zh-TW", "fr-FR", "de-DE", "es-ES", "ru-RU", "pt-BR" };
             var translations = GetTranslations();
+            Assert.Equal(expected.OrderBy(code => code), Localization.SupportedLanguages.Keys.OrderBy(code => code));
+            Assert.Equal(expected.OrderBy(code => code), translations.Keys.OrderBy(code => code));
 
-            // 预期正好三种语言。
-            Assert.True(translations.ContainsKey("zh-CN"));
-            Assert.True(translations.ContainsKey("en-US"));
-            Assert.True(translations.ContainsKey("ja-JP"));
-            Assert.Equal(3, translations.Count);
-
-            var zhKeys = new HashSet<string>(translations["zh-CN"].Keys);
-            var enKeys = new HashSet<string>(translations["en-US"].Keys);
-            var jaKeys = new HashSet<string>(translations["ja-JP"].Keys);
-
-            // 三者必须相等。
-            Assert.True(zhKeys.SetEquals(enKeys),
-                "zh-CN and en-US key sets differ.");
-            Assert.True(enKeys.SetEquals(jaKeys),
-                "en-US and ja-JP key sets differ.");
-
-            // 同时验证任何语言中都没有多余的键。
-            Assert.Equal(zhKeys.Count, enKeys.Count);
-            Assert.Equal(enKeys.Count, jaKeys.Count);
+            var englishKeys = translations["en-US"].Keys.ToHashSet();
+            foreach (var language in expected)
+            {
+                Assert.False(string.IsNullOrWhiteSpace(Localization.SupportedLanguages[language]));
+                Assert.True(englishKeys.SetEquals(translations[language].Keys), $"Translation keys differ for {language}.");
+                Assert.Equal(language, Localization.ResolveLanguage(CultureInfo.GetCultureInfo(language)));
+                if (language != "en-US")
+                {
+                    Assert.NotEqual(translations["en-US"]["HelpTutorialContent"], translations[language]["HelpTutorialContent"]);
+                }
+            }
         }
 
-        // ----------------------------------------------------------------
-        // 测试10：应用依赖的特定 UI 键
-        //          在每种语言中都存在（翻译为非键值）。
-        // ----------------------------------------------------------------
         [Theory]
         [InlineData("File")]
         [InlineData("SaveConfig")]
@@ -230,11 +92,14 @@ namespace MouseClicker.Tests
         [InlineData("MoveDown")]
         [InlineData("IntervalLabel")]
         [InlineData("JitterLabel")]
+        [InlineData("JitterExceedsIntervalHint")]
         [InlineData("SequenceLabel")]
         [InlineData("SequenceLoop")]
         [InlineData("SequenceRandom")]
         [InlineData("SequenceOnce")]
         [InlineData("ShowOverlay")]
+        [InlineData("HighlightCurrentArea")]
+        [InlineData("HardwareMode")]
         [InlineData("StartClicking")]
         [InlineData("StopClicking")]
         [InlineData("WindowTitle")]
@@ -255,54 +120,125 @@ namespace MouseClicker.Tests
         [InlineData("HelpTutorialTitle")]
         [InlineData("HelpTutorialContent")]
         [InlineData("CloseButton")]
-        public void RequiredKeys_ExistInAllLanguages(string key)
+        [InlineData("ProjectAddress")]
+        [InlineData("CheckingForUpdates")]
+        [InlineData("UpdateAvailable")]
+        [InlineData("UpdateAvailableVersion")]
+        [InlineData("NoUpdateAvailable")]
+        [InlineData("UpdateCheckUnavailable")]
+        [InlineData("ViewUpdate")]
+        [InlineData("SkipThisVersion")]
+        [InlineData("UpdateSkipped")]
+        [InlineData("UpdatePreferencesError")]
+        [InlineData("OpenLinkError")]
+        [InlineData("MouseInputError")]
+        public void RequiredKeys_ExistInAllTenLanguages(string key)
         {
-            // 在每个受支持的语言中，键必须解析为真实的
-            // 翻译字符串（非 null 或空）。对于 zh-CN 和 ja-JP，
-            // 结果始终与英文键名不同。对于 en-US，
-            // 某些键合法地使用相同的词
-            // （例如 "File" -> "File"），因此我们只检查非 null/非空。
-
-            Localization.Language = "zh-CN";
-            string zh = Localization.Get(key);
-            Assert.False(string.IsNullOrEmpty(zh),
-                $"Key '{key}' returned null or empty for zh-CN.");
-            Assert.NotEqual(key, zh);
-
-            Localization.Language = "en-US";
-            string en = Localization.Get(key);
-            Assert.False(string.IsNullOrEmpty(en),
-                $"Key '{key}' returned null or empty for en-US.");
-
-            Localization.Language = "ja-JP";
-            string ja = Localization.Get(key);
-            Assert.False(string.IsNullOrEmpty(ja),
-                $"Key '{key}' returned null or empty for ja-JP.");
-            Assert.NotEqual(key, ja);
+            var translations = GetTranslations();
+            foreach (var language in Localization.SupportedLanguages.Keys)
+            {
+                Assert.True(translations[language].TryGetValue(key, out var value), $"{language} is missing {key}.");
+                Assert.False(string.IsNullOrWhiteSpace(value), $"{language}/{key} is empty.");
+                Localization.Language = language;
+                Assert.Equal(value, Localization.Get(key));
+            }
         }
 
-        // ----------------------------------------------------------------
-        // 测试11：HardwareMode 键在三种语言中都存在。
-        // ----------------------------------------------------------------
         [Fact]
-        public void HardwareModeKey_ExistsInAllThreeLanguages()
+        public void FormattedMessages_HaveExactlyTheArgumentsRequiredByTheUi()
         {
-            const string key = "HardwareMode";
+            var formattedKeys = new HashSet<string>
+            {
+                "SaveConfigError", "LoadConfigError", "AboutMessage", "UpdateAvailableVersion",
+                "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "MouseInputError"
+            };
+            foreach (var language in GetTranslations())
+            {
+                foreach (var entry in language.Value)
+                {
+                    var format = CompositeFormat.Parse(entry.Value);
+                    bool requiresArgument = formattedKeys.Contains(entry.Key);
+                    Assert.Equal(requiresArgument ? 1 : 0, format.MinimumArgumentCount);
+                    if (requiresArgument)
+                    {
+                        Assert.Contains("test-value", string.Format(CultureInfo.InvariantCulture, entry.Value, "test-value"));
+                    }
+                }
+            }
+        }
 
-            Localization.Language = "zh-CN";
-            string zh = Localization.Get(key);
-            Assert.NotEqual(key, zh);
-            Assert.Equal("硬件模拟 (SendInput)", zh);
-
-            Localization.Language = "en-US";
-            string en = Localization.Get(key);
-            Assert.NotEqual(key, en);
-            Assert.Equal("Hardware Simulation (SendInput)", en);
-
+        [Theory]
+        [InlineData("en", "en-US")]
+        [InlineData("en-GB", "en-US")]
+        [InlineData("en-AU", "en-US")]
+        [InlineData("zh", "zh-CN")]
+        [InlineData("zh-Hans", "zh-CN")]
+        [InlineData("zh-Hans-SG", "zh-CN")]
+        [InlineData("zh-SG", "zh-CN")]
+        [InlineData("zh-Hant", "zh-TW")]
+        [InlineData("zh-Hant-HK", "zh-TW")]
+        [InlineData("zh-HK", "zh-TW")]
+        [InlineData("zh-MO", "zh-TW")]
+        [InlineData("zh-Hans-HK", "zh-CN")]
+        [InlineData("zh-Hant-CN", "zh-TW")]
+        [InlineData("zh-CHS", "zh-CN")]
+        [InlineData("zh-CHT", "zh-TW")]
+        [InlineData("ja", "ja-JP")]
+        [InlineData("ko", "ko-KR")]
+        [InlineData("fr", "fr-FR")]
+        [InlineData("fr-CA", "fr-FR")]
+        [InlineData("fr-CH", "fr-FR")]
+        [InlineData("de", "de-DE")]
+        [InlineData("de-AT", "de-DE")]
+        [InlineData("es", "es-ES")]
+        [InlineData("es-MX", "es-ES")]
+        [InlineData("es-AR", "es-ES")]
+        [InlineData("ru", "ru-RU")]
+        [InlineData("ru-BY", "ru-RU")]
+        [InlineData("pt", "pt-BR")]
+        [InlineData("pt-PT", "pt-BR")]
+        [InlineData("pt-AO", "pt-BR")]
+        [InlineData("ar-EG", "en-US")]
+        [InlineData("hi-IN", "en-US")]
+        [InlineData("", "en-US")]
+        public void ResolveLanguage_MatchesCultureFamilyAndChineseScript(string cultureName, string expected)
+        {
             Localization.Language = "ja-JP";
-            string ja = Localization.Get(key);
-            Assert.NotEqual(key, ja);
-            Assert.Equal("ハードウェアシミュレーション (SendInput)", ja);
+            Assert.Equal(expected, Localization.ResolveLanguage(CultureInfo.GetCultureInfo(cultureName)));
+            Assert.Equal("ja-JP", Localization.Language);
+        }
+
+        [Fact]
+        public void ResolveLanguage_RejectsNullCulture()
+        {
+            Assert.Throws<ArgumentNullException>(() => Localization.ResolveLanguage(null!));
+        }
+
+        [Theory]
+        [InlineData("fr-CA", "fr-FR")]
+        [InlineData("zh-HK", "zh-TW")]
+        [InlineData("zh-SG", "zh-CN")]
+        [InlineData("pt-PT", "pt-BR")]
+        [InlineData("ar-EG", "en-US")]
+        [InlineData("", "en-US")]
+        public void Language_DefaultsToDeviceUiCultureOnFirstInitialization(string cultureName, string expected)
+        {
+            var originalCulture = CultureInfo.CurrentUICulture;
+            var context = new AssemblyLoadContext("localization-device-default", isCollectible: true);
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(cultureName);
+                // 全新的上下文会执行生产代码的静态初始化器，而测试本身不会给 Language 赋值。
+                var assembly = context.LoadFromAssemblyPath(typeof(Localization).Assembly.Location);
+                var type = assembly.GetType("MouseClicker.Localization", throwOnError: true)!;
+                var field = type.GetField("Language", BindingFlags.Public | BindingFlags.Static)!;
+                Assert.Equal(expected, Assert.IsType<string>(field.GetValue(null)));
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalCulture;
+                context.Unload();
+            }
         }
     }
 }

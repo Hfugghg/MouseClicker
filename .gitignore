@@ -1,30 +1,30 @@
-# IDE and build generated files
+# IDE 和构建生成的文件
 # ==================================
 /bin
 /obj
 .idea/
 .vs/
 
-# User-specific files
+# 用户特定文件
 # ==================================
 *.suo
 *.user
 *.csproj.user
 
-# Build results
+# 构建结果
 # ==================================
 [Bb]in/
 [Oo]bj/
 
-# OMC state
+# OMC 状态
 .omc/
 
-# Build outputs
+# 构建输出
 # ==================================
 /release-portable/
 /release-for-inno/
 /output/
 
-# Rider files
+# Rider 文件
 # ==================================
 *.sln.iml

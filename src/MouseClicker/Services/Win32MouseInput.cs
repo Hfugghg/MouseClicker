@@ -53,13 +53,13 @@ namespace MouseClicker
 
         public void SoftwareClick()
         {
-            // The legacy mouse_event API has no return value to inspect.
+            // 旧版 mouse_event API 没有可供检查的返回值。
             mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
         }
 
         public void HardwareClick()
         {
-            // dwExtraInfo is metadata only; it does not make synthetic input physical hardware input.
+            // dwExtraInfo 只是附加元数据；它不会把合成输入变成真实的硬件输入。
             SendMouseClick(HardwareExtraInfo);
         }
 
@@ -95,8 +95,8 @@ namespace MouseClicker
 
             int error = Marshal.GetLastWin32Error();
 
-            // SendInput reports a prefix count. If only the button-down event was accepted,
-            // make a best-effort attempt to release the button before reporting failure.
+            // SendInput 会返回成功注入的事件数量。如果只接受了按下事件，
+            // 则在报告失败前尽力尝试释放鼠标按键。
             if (sent == 1)
             {
                 var release = new[]
