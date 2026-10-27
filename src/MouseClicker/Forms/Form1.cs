@@ -255,6 +255,9 @@ namespace MouseClicker
         private void HotkeyManager_KeyPressed(Keys key)
         {
             if (_hotkeyManager == null || _isClosing || IsDisposed || Disposing || !IsHandleCreated) return;
+            // 在按下瞬间记录模态状态；否则按键排队期间对话框若被关闭，排队的启动动作会漏过保护。
+            bool modalAtPress = _isSelectingArea || _modalDepth > 0 ||
+                                (!InvokeRequired && HasOpenModalForm());
             try
             {
                 BeginInvoke(new Action(() =>
@@ -267,7 +270,8 @@ namespace MouseClicker
                     }
                     var manager = _hotkeyManager;
                     if (manager == null || key != manager.Hotkey) return;
-                    switch (ResolveHotkeyAction(_isClicking, _isSelectingArea, _modalDepth, HasOpenModalForm()))
+                    switch (ResolveHotkeyAction(_isClicking, _isSelectingArea, _modalDepth,
+                        modalAtPress || HasOpenModalForm()))
                     {
                         case HotkeyAction.Start:
                             StartClicking();
