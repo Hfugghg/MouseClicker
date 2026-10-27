@@ -13,6 +13,9 @@ namespace MouseClicker
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool SetCursorPos(int x, int y);
 
+        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
+        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+
         [DllImport("user32.dll", SetLastError = true)]
         private static extern uint SendInput(uint nInputs, INPUT[] pInputs, int cbSize);
 
@@ -50,7 +53,8 @@ namespace MouseClicker
 
         public void SoftwareClick()
         {
-            SendMouseClick(IntPtr.Zero);
+            // The legacy mouse_event API has no return value to inspect.
+            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
         }
 
         public void HardwareClick()
