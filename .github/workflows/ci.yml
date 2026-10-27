@@ -21,7 +21,7 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: 还原 NuGet 包
-        run: dotnet restore
+        run: dotnet restore MouseClicker.sln
 
       - name: 构建
         run: dotnet build MouseClicker.sln --configuration Release -warnaserror
