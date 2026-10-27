@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 
 namespace MouseClicker
 {
-    // 用于存储和序列化应用程序的配置。
+    // 用于存储、验证和序列化应用程序的配置。
     public class ConfigData
     {
         // 定义的所有点击区域的列表。
@@ -20,7 +22,47 @@ namespace MouseClicker
         // 是否显示点击区域的覆盖层。
         public bool ShowOverlay { get; set; }
 
-        // 是否启用硬件模拟模式。
+        // 是否启用 SendInput 附加标记模式。
         public bool HardwareMode { get; set; }
+
+        /// <summary>
+        /// 验证配置是否符合当前 UI 支持的范围。
+        /// </summary>
+        public void Validate(
+            decimal minimumInterval,
+            decimal maximumInterval,
+            decimal minimumJitter,
+            decimal maximumJitter,
+            int sequenceCount)
+        {
+            if (ClickAreas == null)
+            {
+                throw new InvalidDataException("Configuration must contain a click-area list.");
+            }
+
+            if (Interval < minimumInterval || Interval > maximumInterval)
+            {
+                throw new InvalidDataException("Configuration interval is outside the supported range.");
+            }
+
+            if (Jitter < minimumJitter || Jitter > maximumJitter)
+            {
+                throw new InvalidDataException("Configuration jitter is outside the supported range.");
+            }
+
+            if (sequenceCount <= 0 || SequenceIndex < 0 || SequenceIndex >= sequenceCount)
+            {
+                throw new InvalidDataException("Configuration sequence index is invalid.");
+            }
+
+            if (ClickAreas.Any(area =>
+                area == null ||
+                area.Area.Width <= 0 ||
+                area.Area.Height <= 0 ||
+                area.Label == null))
+            {
+                throw new InvalidDataException("Configuration contains an invalid click area.");
+            }
+        }
     }
 }
