@@ -330,6 +330,25 @@ namespace MouseClicker.Tests
             Assert.NotNull(restored);
             Assert.False(restored.HighlightCurrentArea);
         }
+        [Fact]
+        public void ClickArea_RightButton_RoundTripsAndOldJsonDefaultsToLeft()
+        {
+            var source = new ClickArea
+            {
+                Label = "Right",
+                Area = new Rectangle(1, 2, 3, 4),
+                RightButton = true
+            };
+            var restored = JsonSerializer.Deserialize<ClickArea>(JsonSerializer.Serialize(source));
+            Assert.NotNull(restored);
+            Assert.True(restored.RightButton);
+
+            const string oldJson = "{\"Label\":\"Legacy\",\"Area\":{\"X\":1,\"Y\":2,\"Width\":3,\"Height\":4}}";
+            var legacy = JsonSerializer.Deserialize<ClickArea>(oldJson);
+            Assert.NotNull(legacy);
+            Assert.False(legacy.RightButton);
+        }
+
         // 配置校验独立于 WinForms 界面进行测试。
         [Fact]
         public void Validate_ValidConfiguration_DoesNotThrow()
