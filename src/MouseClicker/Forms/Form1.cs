@@ -299,7 +299,8 @@ namespace MouseClicker
             helpMenuItem = new ToolStripMenuItem();
             viewHelpMenuItem = new ToolStripMenuItem();
             aboutMenuItem = new ToolStripMenuItem();
-            this.areasListBox = new ListBox();
+            var toggleSelectionListBox = new ToggleSelectionListBox();
+            this.areasListBox = toggleSelectionListBox;
             this.addAreaButton = new Button();
             this.removeAreaButton = new Button();
             this.moveUpButton = new Button();
@@ -362,6 +363,7 @@ namespace MouseClicker
             startButton.Click += new EventHandler(startButton_Click);
             intervalNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
             jitterNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
+            toggleSelectionListBox.SelectionClearedByClick += (s, e) => ClearHoveredArea();
             areasListBox.MouseMove += areasListBox_MouseMove;
             areasListBox.MouseWheel += areasListBox_MouseWheel;
             areasListBox.MouseLeave += (s, e) => ClearHoveredArea();
