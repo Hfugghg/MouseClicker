@@ -52,6 +52,7 @@ namespace MouseClicker
         private ListBox areasListBox = null!;
         private Button addAreaButton = null!, removeAreaButton = null!, moveUpButton = null!, moveDownButton = null!;
         private Label intervalLabel = null!, jitterLabel = null!, sequenceLabel = null!;
+        private Label jitterExceedsIntervalHintLabel = null!;
         private NumericUpDown intervalNumericUpDown = null!, jitterNumericUpDown = null!;
         private ComboBox sequenceComboBox = null!;
         private CheckBox showOverlayCheckBox = null!;
@@ -148,6 +149,7 @@ namespace MouseClicker
             this.intervalNumericUpDown = new NumericUpDown { Maximum = 600000, Minimum = 10, Value = 1000 };
             this.jitterLabel = new Label { AutoSize = true };
             this.jitterNumericUpDown = new NumericUpDown { Maximum = 10000, Value = 100 };
+            this.jitterExceedsIntervalHintLabel = new Label { AutoSize = true, ForeColor = SystemColors.GrayText, Visible = false };
             this.sequenceLabel = new Label { AutoSize = true };
             this.sequenceComboBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             this.showOverlayCheckBox = new CheckBox { AutoSize = true, Checked = true };
@@ -176,6 +178,7 @@ namespace MouseClicker
             this.Controls.Add(this.intervalNumericUpDown);
             this.Controls.Add(this.jitterLabel);
             this.Controls.Add(this.jitterNumericUpDown);
+            this.Controls.Add(this.jitterExceedsIntervalHintLabel);
             this.Controls.Add(this.sequenceLabel);
             this.Controls.Add(this.sequenceComboBox);
             this.Controls.Add(this.showOverlayCheckBox);
@@ -195,6 +198,8 @@ namespace MouseClicker
             moveUpButton.Click += new EventHandler(moveUpButton_Click);
             moveDownButton.Click += new EventHandler(moveDownButton_Click);
             startButton.Click += new EventHandler(startButton_Click);
+            intervalNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
+            jitterNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
         }
 
         // 动态调整UI控件的布局。
@@ -230,6 +235,7 @@ namespace MouseClicker
             jitterNumericUpDown.Location = new Point(jitterLabel.Right + controlPadding, currentY);
             jitterNumericUpDown.Size = new Size(100, rowHeight);
             currentY += rowHeight + controlPadding;
+            int jitterHintY = currentY;
 
             sequenceLabel.Location = new Point(formPadding, currentY + 4);
             sequenceComboBox.Location = new Point(sequenceLabel.Right + controlPadding, currentY);
@@ -246,6 +252,21 @@ namespace MouseClicker
             requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
             requiredWidth += formPadding;
             formWidth = Math.Max(formWidth, requiredWidth);
+
+            // Measure at the final width so translated hints wrap without covering the next row.
+            jitterExceedsIntervalHintLabel.Location = new Point(formPadding, jitterHintY);
+            jitterExceedsIntervalHintLabel.MaximumSize = new Size(formWidth - (formPadding * 2), 0);
+            bool showJitterHint = jitterNumericUpDown.Value > intervalNumericUpDown.Value;
+            jitterExceedsIntervalHintLabel.Visible = showJitterHint;
+            if (showJitterHint)
+            {
+                int hintOffset = jitterExceedsIntervalHintLabel.PreferredSize.Height + controlPadding;
+                sequenceLabel.Top += hintOffset;
+                sequenceComboBox.Top += hintOffset;
+                showOverlayCheckBox.Top += hintOffset;
+                hardwareModeCheckBox.Top += hintOffset;
+                currentY += hintOffset;
+            }
 
             areasListBox.Width = formWidth - (formPadding * 2);
             startButton.Width = formWidth - (formPadding * 2);
@@ -284,6 +305,7 @@ namespace MouseClicker
             moveDownButton.Text = Localization.Get("MoveDown");
             intervalLabel.Text = Localization.Get("IntervalLabel");
             jitterLabel.Text = Localization.Get("JitterLabel");
+            jitterExceedsIntervalHintLabel.Text = Localization.Get("JitterExceedsIntervalHint");
             sequenceLabel.Text = Localization.Get("SequenceLabel");
             showOverlayCheckBox.Text = Localization.Get("ShowOverlay");
             hardwareModeCheckBox.Text = Localization.Get("HardwareMode");
@@ -579,6 +601,12 @@ namespace MouseClicker
             menuStrip.Enabled = isEnabled;
         }
 
+        // 负等待时间取绝对值，同时保留 10 毫秒下限。
+        internal static int CalculateClickInterval(int baseInterval, int randomJitter)
+        {
+            return Math.Max(10, Math.Abs(baseInterval + randomJitter));
+        }
+
         // 定时器事件，用于执行点击。
         private void clickTimer_Tick(object? sender, EventArgs e)
         {
@@ -610,7 +638,7 @@ namespace MouseClicker
                 int baseInterval = (int)intervalNumericUpDown.Value;
                 int jitter = (int)jitterNumericUpDown.Value;
                 int randomJitter = _random.Next(-jitter, jitter + 1);
-                _clickTimer.Interval = Math.Max(10, baseInterval + randomJitter);
+                _clickTimer.Interval = CalculateClickInterval(baseInterval, randomJitter);
                 _clickTimer.Start();
             }
         }

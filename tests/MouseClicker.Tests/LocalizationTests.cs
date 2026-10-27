@@ -230,6 +230,7 @@ namespace MouseClicker.Tests
         [InlineData("MoveDown")]
         [InlineData("IntervalLabel")]
         [InlineData("JitterLabel")]
+        [InlineData("JitterExceedsIntervalHint")]
         [InlineData("SequenceLabel")]
         [InlineData("SequenceLoop")]
         [InlineData("SequenceRandom")]
