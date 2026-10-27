@@ -88,7 +88,7 @@ namespace MouseClicker
                     mi = new MOUSEINPUT
                     {
                         dwFlags = up,
-                        dwExtraInfo = extra
+                        dwExtraInfo = extraInfo
                     }
                 }
             };
