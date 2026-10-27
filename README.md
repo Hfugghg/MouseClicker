@@ -7,11 +7,19 @@
 
 MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动执行鼠标点击任务。无论您是需要执行重复性点击任务，还是希望在指定屏幕区域内实现自动化操作，MouseClicker 都能为您提供灵活、可靠的解决方案。
 
+## 📥 下载
+
+从 [GitHub Releases](https://github.com/Hfugghg/MouseClicker/releases) 获取最新版本：
+
+*   **安装版（推荐）**：`MouseClicker-Setup-*.exe`，自包含，已内置 .NET 10 运行时，下载后直接安装。
+*   **便携版**：`MouseClicker-Portable-*.zip`，体积小，但需要先安装 [.NET 10 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/10.0)。Windows 自带的是 .NET Framework 4.8，不自带 .NET 10。
+
 ## ✨ 功能特性
 
 *   **多区域点击**：自由添加、管理多个屏幕点击区域。
 *   **可视化区域选择**：通过拖拽矩形框，直观地在屏幕上选择您希望点击的范围。
 *   **自定义标签**：为每个点击区域设置清晰的名称，方便管理。
+*   **快速取消选择**：再次点击列表中已选中的区域即可取消选择。
 *   **灵活的时间控制**：
     *   **点击间隔**：自定义每次点击之间的基础间隔时间（毫秒）。
     *   **随机抖动**：为基础间隔加上或减去可配置的随机偏移量；总等待时间为负数时取绝对值，并保留最短 10ms 等待。抖动大于间隔时，界面会提示平均等待时间变长。
@@ -47,6 +55,7 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
 2.  **管理区域列表**：
     *   在主界面的列表中，您可以查看所有已添加的区域。
     *   使用 "**移除**"、"**上移**"、"**下移**" 按钮来管理您的点击列表。
+    *   再次点击已选中的区域可取消选择。
     *   开启“显示区域框”后，可将鼠标停在列表项目上或选中项目，通过蓝色边框定位区域；自动点击时，绿色边框标出当前区域，可用“点击时高亮区域”开关控制。
 3.  **设置点击参数**：
     *   设置 "**间隔**" 和 "**抖动**" 时间（以毫秒为单位）；抖动可以大于间隔，此时会显示平均等待时间变长的提示。
@@ -62,7 +71,7 @@ MouseClicker 是一款功能强大的 Windows 桌面应用程序，旨在自动�
 ## 🛠️ 技术栈
 
 *   **语言**：C#
-*   **框架**：.NET 10 / Windows Forms
+*   **框架**：.NET 10 / Windows Forms（正式版本）；.NET Framework 4.8 / Windows Forms（实验分支）
 *   **测试**：xUnit 自动化测试（包括配置数据与边界条件验证）
 
 ## 📁 项目结构
@@ -86,7 +95,7 @@ MouseClicker/
 ### 依赖
 
 *   [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0)
-*   [Inno Setup 7](https://jrsoftware.org/isinfo.php)（可选，仅用于打包安装程序）
+*   [Inno Setup 6.5+](https://jrsoftware.org/isinfo.php)（可选，仅用于打包安装程序；安装包使用 LZMA2/ultra64 压缩）
 
 ### 构建便携版
 
@@ -98,7 +107,7 @@ dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --
 
 ```powershell
 dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output .\release-for-inno
-& "D:\Program Files\Inno Setup 7\ISCC.exe" setup.iss
+& "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
 ```
 
 ### 运行测试
@@ -106,6 +115,14 @@ dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --
 ```powershell
 dotnet test .\MouseClicker.sln --configuration Release
 ```
+
+## 🧪 实验分支：.NET Framework 4.8
+
+[`codex/net48-spike`](https://github.com/Hfugghg/MouseClicker/tree/codex/net48-spike) 分支验证了保留 WinForms、将目标框架改为 .NET Framework 4.8 的可行性：
+
+*   发布体积约 1.4 MB，zip 约 550 KB（不含运行时）
+*   依赖 Windows 自带的 .NET Framework 4.8（Windows 10 1903+ / Windows 11）
+*   已完成构建、启动和配置 JSON 冒烟验证；完整 UI / 高 DPI 回归尚未完成，暂不作为正式发布版本
 
 ## 📄 许可证
 
