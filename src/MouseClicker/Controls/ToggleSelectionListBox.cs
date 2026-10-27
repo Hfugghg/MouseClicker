@@ -19,7 +19,7 @@ namespace MouseClicker
                 long coordinates = m.LParam.ToInt64();
                 var point = new Point((short)(coordinates & 0xFFFF), (short)((coordinates >> 16) & 0xFFFF));
                 if (ClientRectangle.Contains(point)) hitIndex = IndexFromPoint(point);
-                // Native processing can change selection before managed MouseDown is raised.
+                // 原生处理可能会在托管 MouseDown 事件触发前改变选中项。
                 clearSelection = hitIndex != NoMatches && hitIndex == SelectedIndex;
             }
 

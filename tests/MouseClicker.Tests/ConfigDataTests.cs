@@ -8,7 +8,7 @@ namespace MouseClicker.Tests
     public class ConfigDataTests
     {
         // ──────────────────────────────────────
-        // 1. Default values on new ConfigData
+        // 1. 新建 ConfigData 的默认值
         // ──────────────────────────────────────
         [Fact]
         public void NewConfigData_HasDefaultValues()
@@ -31,7 +31,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 2. Serialize – verify JSON structure
+        // 2. 序列化 – 验证 JSON 结构
         // ──────────────────────────────────────
         [Fact]
         public void Serialize_WithData_ProducesCorrectJsonStructure()
@@ -85,7 +85,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 3. Deserialize – verify all properties
+        // 3. 反序列化 – 验证所有属性
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_ValidJson_RestoresAllProperties()
@@ -131,7 +131,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 4. Round-trip: serialize → deserialize
+        // 4. 往返：序列化 → 反序列化
         // ──────────────────────────────────────
         [Fact]
         public void RoundTrip_SerializeThenDeserialize_ProducesEquivalentObject()
@@ -181,7 +181,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 5. HardwareMode: true
+        // 5. HardwareMode 为 true
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_HardwareModeTrue_ReturnsTrue()
@@ -195,7 +195,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 6. HardwareMode missing (backward compat)
+        // 6. 缺少 HardwareMode（向后兼容）
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_MissingHardwareMode_DefaultsToFalse()
@@ -209,7 +209,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 7. Empty JSON object → all defaults
+        // 7. 空 JSON 对象 → 所有字段使用默认值
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_EmptyJsonObject_ReturnsDefaultValues()
@@ -229,7 +229,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 7b. Null JSON → should return null
+        // 7b. JSON 为 null → 应返回 null
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_NullJson_ReturnsNull()
@@ -242,7 +242,7 @@ namespace MouseClicker.Tests
         }
 
         // ──────────────────────────────────────
-        // 8. ClickArea ToString() format
+        // 8. ClickArea ToString() 格式
         // ──────────────────────────────────────
         [Theory]
         [InlineData("MyLabel", 5, 10, 100, 50, "'MyLabel' @ (X:5, Y:10, W:100, H:50)")]
@@ -279,9 +279,8 @@ namespace MouseClicker.Tests
 
         // ──────────────────────────────────────
         // 边界：JSON 中 ClickAreas 列表为 null
-        //   (Form1.cs guards with ?? at load time,
-        //    but the raw deserialized object should
-        //    respect JSON null)
+        //   （Form1.cs 在加载时用 ?? 做了保护，
+        //    但原始反序列化对象应保留 JSON 中的 null）
         // ──────────────────────────────────────
         [Fact]
         public void Deserialize_ClickAreasNull_ListIsNull()
@@ -331,7 +330,7 @@ namespace MouseClicker.Tests
             Assert.NotNull(restored);
             Assert.False(restored.HighlightCurrentArea);
         }
-        // Configuration validation is exercised independently of the WinForms UI.
+        // 配置校验独立于 WinForms 界面进行测试。
         [Fact]
         public void Validate_ValidConfiguration_DoesNotThrow()
         {

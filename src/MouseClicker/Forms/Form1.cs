@@ -161,7 +161,7 @@ namespace MouseClicker
             }
             catch
             {
-                // Startup checks are optional: failures become an About status, never a popup.
+                // 启动检查是可选功能：失败时只更新“关于”中的状态，绝不弹窗。
                 succeeded = false;
             }
 
@@ -187,7 +187,7 @@ namespace MouseClicker
             var version = _availableUpdate.Version;
             try
             {
-                // Only hide the notice after the preference has been saved successfully.
+                // 只有成功保存偏好设置后，才隐藏该提示。
                 _updatePreferences.Skip(version);
             }
             catch (Exception ex)
@@ -443,7 +443,7 @@ namespace MouseClicker
             requiredWidth = Math.Max(requiredWidth, aboutMenuItem.Bounds.Left + updateAvailableLinkLabel.PreferredSize.Width + formPadding);
             formWidth = Math.Max(formWidth, requiredWidth);
 
-            // Measure at the final width so translated hints wrap without covering the next row.
+            // 按最终宽度进行测量，确保翻译后的提示换行时不会覆盖下一行控件。
             jitterExceedsIntervalHintLabel.Location = new Point(formPadding, jitterHintY);
             jitterExceedsIntervalHintLabel.MaximumSize = new Size(formWidth - (formPadding * 2), 0);
             bool showJitterHint = jitterNumericUpDown.Value > intervalNumericUpDown.Value;
@@ -614,7 +614,7 @@ namespace MouseClicker
 
                         if (configData != null)
                         {
-                            // Validate the entire file before changing the current UI or configuration.
+                            // 在修改当前界面或配置之前，先校验整个文件。
                             configData.Validate(
                                 intervalNumericUpDown.Minimum,
                                 intervalNumericUpDown.Maximum,
@@ -622,7 +622,7 @@ namespace MouseClicker
                                 jitterNumericUpDown.Maximum,
                                 sequenceComboBox.Items.Count);
 
-                            // Apply only after every field has passed validation.
+                            // 只有所有字段都通过校验后才应用。
                             ClearHoveredArea();
                             _activeClickArea = null;
                             _clickAreas = configData.ClickAreas;
@@ -711,7 +711,7 @@ namespace MouseClicker
                 !IsHandleCreated || areasListBox.IsDisposed || !areasListBox.IsHandleCreated) return;
             int revision = ++_hoverRevision;
             Point point = _hoverPoint.Value;
-            // Native wheel and keyboard scrolling finish after their events have been raised.
+            // 原生滚轮和键盘滚动会在其事件触发后才完成。
             BeginInvoke(new Action(() =>
             {
                 if (revision != _hoverRevision || !_hoverPoint.HasValue || _isClicking || _isClosing ||
@@ -908,7 +908,7 @@ namespace MouseClicker
             }
             catch (Exception ex)
             {
-                // Surface native input failures without leaving the timer or global hook active.
+                // 上报原生输入失败，并确保计时器和全局钩子不会继续处于活动状态。
                 StopClicking();
                 MessageBox.Show(
                     string.Format(Localization.Get("MouseInputError"), ex.Message),

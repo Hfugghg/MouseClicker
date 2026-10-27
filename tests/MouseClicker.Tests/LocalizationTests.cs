@@ -228,7 +228,7 @@ namespace MouseClicker.Tests
             try
             {
                 CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(cultureName);
-                // A fresh context runs the production static initializer without assigning Language in the test.
+                // 全新的上下文会执行生产代码的静态初始化器，而测试本身不会给 Language 赋值。
                 var assembly = context.LoadFromAssemblyPath(typeof(Localization).Assembly.Location);
                 var type = assembly.GetType("MouseClicker.Localization", throwOnError: true)!;
                 var field = type.GetField("Language", BindingFlags.Public | BindingFlags.Static)!;

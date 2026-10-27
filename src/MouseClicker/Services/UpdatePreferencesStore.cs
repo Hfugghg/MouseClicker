@@ -39,7 +39,7 @@ namespace MouseClicker
                     var preferences = new StoredPreferences { SkippedVersions = updated.OrderBy(item => item, StringComparer.Ordinal).ToArray() };
                     File.WriteAllText(temporary, JsonSerializer.Serialize(preferences), new UTF8Encoding(false));
                     File.Move(temporary, _filePath, overwrite: true);
-                    // A failed save must not hide the update for the remainder of this session.
+                    // 保存失败时，本次会话余下的时间内不得隐藏该更新。
                     _skippedVersions = updated;
                 }
                 finally
@@ -63,7 +63,7 @@ namespace MouseClicker
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
             {
-                // Missing, unreadable, or damaged preferences should not prevent startup.
+                // 偏好设置缺失、无法读取或损坏时，不应阻止程序启动。
             }
             return skipped;
         }

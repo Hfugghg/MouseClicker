@@ -47,7 +47,7 @@ namespace MouseClicker
         public OverlayForm()
         {
             this.FormBorderStyle = FormBorderStyle.None;
-            // Span the complete virtual desktop, including monitors left/above the primary display.
+            // 覆盖整个虚拟桌面，包括主显示器左侧或上方的显示器。
             this.StartPosition = FormStartPosition.Manual;
             this.Bounds = SystemInformation.VirtualScreen;
             this.BackColor = Color.Magenta;
@@ -83,7 +83,7 @@ namespace MouseClicker
             ClickArea? active = ActiveArea;
             foreach (var area in GetDrawOrder(AreasToDraw, preview, active))
             {
-                // Painting coordinates are local to the overlay window; click areas use screen coordinates.
+                // 绘制坐标相对于覆盖层窗口，而点击区域使用屏幕坐标。
                 var localArea = new Rectangle(
                     area.Area.X - virtualScreen.Left,
                     area.Area.Y - virtualScreen.Top,

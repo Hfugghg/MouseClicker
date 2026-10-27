@@ -7,7 +7,7 @@ namespace MouseClicker
 {
     public static class Localization
     {
-        // Keep this list aligned with the installer languages; values are native display names.
+        // 此列表需与安装程序的语言保持一致；值使用各语言的本地名称。
         public static IReadOnlyDictionary<string, string> SupportedLanguages { get; } =
             new ReadOnlyDictionary<string, string>(new Dictionary<string, string>
             {
@@ -34,7 +34,7 @@ namespace MouseClicker
                 for (var current = culture; current.Name.Length > 0; current = current.Parent)
                 {
                     var tags = current.Name.Split('-');
-                    // An explicit script is more specific than a region, for example zh-Hans-HK.
+                    // 显式指定的文字系统比区域更具体，例如 zh-Hans-HK。
                     foreach (var tag in tags)
                     {
                         if (tag.Equals("Hant", StringComparison.OrdinalIgnoreCase) ||
