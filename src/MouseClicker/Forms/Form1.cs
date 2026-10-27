@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Collections.Generic;
@@ -13,8 +14,10 @@ namespace MouseClicker
 {
     public partial class Form1 : Form
     {
-        // Global keyboard handling is isolated in GlobalHotkeyManager.cs.
-        private GlobalHotkeyManager _hotkeyManager = null!;
+        // 全局键盘处理已隔离在 GlobalHotkeyManager.cs 中。
+        private GlobalHotkeyManager? _hotkeyManager;
+        private Exception? _hotkeyInitializationError;
+        private bool _hotkeyFailureShown;
 
         // --- 核心逻辑字段 ---
         private readonly MouseController _mouseController;
@@ -25,6 +28,7 @@ namespace MouseClicker
         private int _hoverRevision;
         private ClickArea? _activeClickArea;
         private bool _isSelectingArea;
+        private int _modalDepth;
 
         // --- 定时器和状态字段 ---
         private System.Windows.Forms.Timer _clickTimer;
@@ -97,9 +101,19 @@ namespace MouseClicker
             InitializeCustomComponents();
             UpdateUIStrings();
 
-            _hotkeyManager = new GlobalHotkeyManager();
-            _hotkeyManager.KeyPressed += HotkeyManager_KeyPressed;
-            _hotkeyManager.ShouldSuppressEscape = () => _isClicking;
+            try
+            {
+                _hotkeyManager = new GlobalHotkeyManager();
+                _hotkeyManager.KeyPressed += HotkeyManager_KeyPressed;
+                _hotkeyManager.ShouldSuppressEscape = () => _isClicking;
+            }
+            catch (Win32Exception ex)
+            {
+                // 钩子安装失败时保持其余功能可用，并在窗口显示后提示一次。
+                _hotkeyManager = null;
+                _hotkeyInitializationError = ex;
+                hotkeySettingsMenuItem.Enabled = false;
+            }
 
             _overlayForm = new OverlayForm();
             UpdateOverlayState();
@@ -119,6 +133,17 @@ namespace MouseClicker
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            var hotkeyError = _hotkeyInitializationError;
+            if (hotkeyError != null && !_hotkeyFailureShown)
+            {
+                _hotkeyFailureShown = true;
+                using (BeginModalScope())
+                {
+                    MessageBox.Show(this,
+                        string.Format(Localization.Get("HotkeyUnavailable"), hotkeyError.Message),
+                        Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
             if (_updateCheckStarted) return;
             _updateCheckStarted = true;
             _updateCheckTask = CheckForUpdatesAsync();
@@ -222,13 +247,14 @@ namespace MouseClicker
             _updateCancellation.Dispose();
             if (_ownsUpdateHttpClient) _updateHttpClient.Dispose();
             _clickTimer.Dispose();
+            areaClickButtonMenu?.Dispose();
             if (!_overlayForm.IsDisposed) _overlayForm.Dispose();
             _hotkeyManager?.Dispose();
         }
 
         private void HotkeyManager_KeyPressed(Keys key)
         {
-            if (_isClosing || IsDisposed || Disposing || !IsHandleCreated) return;
+            if (_hotkeyManager == null || _isClosing || IsDisposed || Disposing || !IsHandleCreated) return;
             try
             {
                 BeginInvoke(new Action(() =>
@@ -239,16 +265,78 @@ namespace MouseClicker
                         StopClicking();
                         return;
                     }
-                    if (key == _hotkeyManager.Hotkey)
+                    var manager = _hotkeyManager;
+                    if (manager == null || key != manager.Hotkey) return;
+                    switch (ResolveHotkeyAction(_isClicking, _isSelectingArea, _modalDepth, HasOpenModalForm()))
                     {
-                        if (_isClicking) StopClicking();
-                        else StartClicking();
+                        case HotkeyAction.Start:
+                            StartClicking();
+                            break;
+                        case HotkeyAction.Stop:
+                            StopClicking();
+                            break;
                     }
                 }));
             }
             catch (InvalidOperationException)
             {
-                // The form may be closing while a global hotkey event is queued.
+                // 窗口关闭时，全局热键事件可能仍在排队。
+            }
+        }
+
+        internal enum HotkeyAction
+        {
+            None,
+            Start,
+            Stop
+        }
+
+        /// <summary>
+        /// 根据当前界面状态决定热键应开始、停止还是不处理。
+        /// 应用自身的模态界面打开时只允许停止，避免在对话框后面开始点击。
+        /// </summary>
+        internal static HotkeyAction ResolveHotkeyAction(bool isClicking, bool isSelectingArea, int modalDepth, bool hasOpenModalForm)
+        {
+            if (isClicking) return HotkeyAction.Stop;
+            if (isSelectingArea || modalDepth > 0 || hasOpenModalForm) return HotkeyAction.None;
+            return HotkeyAction.Start;
+        }
+
+        // 必须在 UI 线程调用：Application.OpenForms 不是线程安全的。
+        private static bool HasOpenModalForm()
+        {
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form.Modal) return true;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// 记录应用自身模态界面的嵌套深度；进入时递增，释放时递减。
+        /// 仅在 UI 线程使用。
+        /// </summary>
+        private readonly struct ModalScope : IDisposable
+        {
+            private readonly Form1 _owner;
+
+            public ModalScope(Form1 owner)
+            {
+                _owner = owner;
+                owner._modalDepth++;
+            }
+
+            public void Dispose() => _owner._modalDepth--;
+        }
+
+        private ModalScope BeginModalScope() => new ModalScope(this);
+
+        // 显示消息框期间同样视为模态界面，阻止热键在后台开始点击。
+        private void ShowMessageBox(string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon)
+        {
+            using (BeginModalScope())
+            {
+                MessageBox.Show(message, caption, buttons, icon);
             }
         }
 
@@ -265,12 +353,16 @@ namespace MouseClicker
             leftClickMenuItem = new ToolStripMenuItem();
             rightClickMenuItem = new ToolStripMenuItem();
             areaClickButtonMenu.Items.AddRange(new ToolStripItem[] { leftClickMenuItem, rightClickMenuItem });
-            areaClickButtonMenu.Opening += (_, _) =>
+            areaClickButtonMenu.Opening += (_, e) =>
             {
-                var selectedArea = areasListBox.SelectedItem as ClickArea;
-                leftClickMenuItem.Checked = selectedArea != null && !selectedArea.RightButton;
-                rightClickMenuItem.Checked = selectedArea != null && selectedArea.RightButton;
-                leftClickMenuItem.Enabled = rightClickMenuItem.Enabled = selectedArea != null && !_isClicking;
+                if (areasListBox.SelectedItem is not ClickArea selectedArea)
+                {
+                    e.Cancel = true;
+                    return;
+                }
+                leftClickMenuItem.Checked = !selectedArea.RightButton;
+                rightClickMenuItem.Checked = selectedArea.RightButton;
+                leftClickMenuItem.Enabled = rightClickMenuItem.Enabled = !_isClicking;
             };
             leftClickMenuItem.Click += (_, _) => SetSelectedAreaRightButton(false);
             rightClickMenuItem.Click += (_, _) => SetSelectedAreaRightButton(true);
@@ -520,8 +612,10 @@ namespace MouseClicker
 
         private void hotkeySettingsMenuItem_Click(object? sender, EventArgs e)
         {
-            using var settings = new HotkeySettingsForm(_hotkeyManager);
-            settings.ShowDialog(this);
+            var manager = _hotkeyManager;
+            if (manager == null) return;
+            using var settings = new HotkeySettingsForm(manager);
+            using (BeginModalScope()) settings.ShowDialog(this);
         }
 
         private void areasListBox_MouseDown(object? sender, MouseEventArgs e)
@@ -575,7 +669,7 @@ namespace MouseClicker
                 tutorialForm.Controls.Add(buttonPanel);
                 tutorialForm.AcceptButton = closeButton;
 
-                tutorialForm.ShowDialog(this);
+                using (BeginModalScope()) tutorialForm.ShowDialog(this);
             }
         }
 
@@ -586,7 +680,9 @@ namespace MouseClicker
             {
                 saveFileDialog.Filter = Localization.Get("JsonFilter");
                 saveFileDialog.Title = Localization.Get("SaveConfigTitle");
-                if (saveFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(saveFileDialog.FileName))
+                DialogResult dialogResult;
+                using (BeginModalScope()) dialogResult = saveFileDialog.ShowDialog();
+                if (dialogResult == DialogResult.OK && !string.IsNullOrWhiteSpace(saveFileDialog.FileName))
                 {
                     var configData = new ConfigData
                     {
@@ -603,11 +699,11 @@ namespace MouseClicker
                     {
                         string jsonString = JsonSerializer.Serialize(configData, new JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText(saveFileDialog.FileName, jsonString);
-                        MessageBox.Show(Localization.Get("ConfigSavedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        ShowMessageBox(Localization.Get("ConfigSavedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(string.Format(Localization.Get("SaveConfigError"), ex.Message), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowMessageBox(string.Format(Localization.Get("SaveConfigError"), ex.Message), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -620,7 +716,9 @@ namespace MouseClicker
             {
                 openFileDialog.Filter = Localization.Get("JsonFilter");
                 openFileDialog.Title = Localization.Get("LoadConfigTitle");
-                if (openFileDialog.ShowDialog() == DialogResult.OK && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
+                DialogResult dialogResult;
+                using (BeginModalScope()) dialogResult = openFileDialog.ShowDialog();
+                if (dialogResult == DialogResult.OK && !string.IsNullOrWhiteSpace(openFileDialog.FileName))
                 {
                     try
                     {
@@ -649,16 +747,16 @@ namespace MouseClicker
                             hardwareModeCheckBox.Checked = configData.HardwareMode;
 
                             RefreshAreaList();
-                            MessageBox.Show(Localization.Get("ConfigLoadedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            ShowMessageBox(Localization.Get("ConfigLoadedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
                         {
-                            MessageBox.Show(string.Format(Localization.Get("LoadConfigError"), "Invalid config file format."), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            ShowMessageBox(string.Format(Localization.Get("LoadConfigError"), "Invalid config file format."), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                         }
                     }
                     catch (Exception ex)
                     {
-                        MessageBox.Show(string.Format(Localization.Get("LoadConfigError"), ex.Message), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        ShowMessageBox(string.Format(Localization.Get("LoadConfigError"), ex.Message), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
             }
@@ -667,7 +765,7 @@ namespace MouseClicker
         private void ShowAbout()
         {
             using var about = new AboutForm(this);
-            about.ShowDialog(this);
+            using (BeginModalScope()) about.ShowDialog(this);
         }
 
         // “关于”菜单项的点击事件。
@@ -778,11 +876,16 @@ namespace MouseClicker
                 System.Threading.Thread.Sleep(200);
                 using (var selectionForm = new SelectionForm())
                 {
-                    DialogResult result = selectionForm.ShowDialog();
+                    DialogResult result;
+                    using (BeginModalScope()) result = selectionForm.ShowDialog();
                     this.Show();
                     if (result == DialogResult.OK)
                     {
-                        string label = Interaction.InputBox(Localization.Get("SetLabelPrompt"), Localization.Get("SetLabelTitle"), Localization.Get("AreaLabelDefault") + (_clickAreas.Count + 1));
+                        string label;
+                        using (BeginModalScope())
+                        {
+                            label = Interaction.InputBox(Localization.Get("SetLabelPrompt"), Localization.Get("SetLabelTitle"), Localization.Get("AreaLabelDefault") + (_clickAreas.Count + 1));
+                        }
                         if (!string.IsNullOrWhiteSpace(label))
                         {
                             _clickAreas.Add(new ClickArea { Area = selectionForm.SelectedArea, Label = label });
@@ -846,7 +949,11 @@ namespace MouseClicker
         // 开始自动点击。
         private void StartClicking()
         {
-            if (_clickAreas.Count == 0) { MessageBox.Show(Localization.Get("AddAreaFirst")); return; }
+            if (_clickAreas.Count == 0)
+            {
+                using (BeginModalScope()) MessageBox.Show(Localization.Get("AddAreaFirst"));
+                return;
+            }
 
             _isClicking = true;
             ClearHoveredArea();
@@ -918,7 +1025,7 @@ namespace MouseClicker
             {
                 // 上报原生输入失败，并确保计时器和全局钩子不会继续处于活动状态。
                 StopClicking();
-                MessageBox.Show(
+                ShowMessageBox(
                     string.Format(Localization.Get("MouseInputError"), ex.Message),
                     this.Text,
                     MessageBoxButtons.OK,

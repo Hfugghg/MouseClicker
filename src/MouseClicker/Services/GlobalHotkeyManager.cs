@@ -10,10 +10,13 @@ using System.Windows.Forms;
 
 namespace MouseClicker
 {
-    /// <summary>Owns the global keyboard hook and persists the user's selected toggle key.</summary>
+    /// <summary>
+    /// 负责全局键盘钩子，并保存用户选择的切换热键。
+    /// </summary>
     internal sealed class GlobalHotkeyManager : IDisposable
     {
         private const int WhKeyboardLl = 13, WmKeyDown = 0x0100, WmKeyUp = 0x0101, WmSysKeyDown = 0x0104, WmSysKeyUp = 0x0105;
+        private const int VkShift = 0x10, VkControl = 0x11, VkMenu = 0x12, VkLWin = 0x5B, VkRWin = 0x5C;
         private static readonly LowLevelKeyboardProc HookProc = HookCallback;
         private static GlobalHotkeyManager? _instance;
         private readonly HashSet<int> _pressedKeys = new();
@@ -31,6 +34,8 @@ namespace MouseClicker
         private static extern bool UnhookWindowsHookEx(IntPtr hook);
         [DllImport("user32.dll", SetLastError = true)]
         private static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr wParam, IntPtr lParam);
+        [DllImport("user32.dll")]
+        private static extern short GetAsyncKeyState(int virtualKey);
 
         public GlobalHotkeyManager()
         {
@@ -78,8 +83,37 @@ namespace MouseClicker
                 var preferences = JsonSerializer.Deserialize<HotkeyPreferences>(File.ReadAllText(_settingsPath));
                 if (preferences != null && Enum.TryParse(preferences.Hotkey, true, out Keys key) && SupportedKeys.Contains(key)) return key;
             }
-            catch { /* Ignore a missing or invalid preference and use the default. */ }
+            catch { /* 忽略缺失或无效的偏好设置，改用默认值。 */ }
             return Keys.F6;
+        }
+
+        /// <summary>
+        /// 钩子对一次按键的处置方式。
+        /// </summary>
+        [Flags]
+        internal enum HookKeyDecision
+        {
+            PassThrough = 0,
+            Invoke = 1,
+            Suppress = 2,
+            InvokeAndSuppress = Invoke | Suppress
+        }
+
+        /// <summary>
+        /// 判断一次按键应触发热键、拦截，还是原样交给前台程序。
+        /// 只有未按任何修饰键时才响应；ESC 仅在点击过程中拦截。
+        /// </summary>
+        internal static HookKeyDecision DecideKeyDown(
+            Keys key, Keys hotkey,
+            bool controlDown, bool altDown, bool shiftDown, bool windowsDown,
+            bool isClicking)
+        {
+            // 带修饰键的按键属于前台程序的组合键，不触发也不拦截。
+            if (controlDown || altDown || shiftDown || windowsDown) return HookKeyDecision.PassThrough;
+            if (key == Keys.Escape)
+                return isClicking ? HookKeyDecision.InvokeAndSuppress : HookKeyDecision.Invoke;
+            if (key == hotkey) return HookKeyDecision.Invoke;
+            return HookKeyDecision.PassThrough;
         }
 
         private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
@@ -91,22 +125,34 @@ namespace MouseClicker
                 int keyCode = Marshal.ReadInt32(lParam);
                 if (message == WmKeyDown || message == WmSysKeyDown)
                 {
-                    if (instance._pressedKeys.Add(keyCode))
+                    // 记录按下状态，按住按键时的重复事件不再触发。
+                    bool firstPress = instance._pressedKeys.Add(keyCode);
+                    var key = (Keys)keyCode;
+                    if (key == instance.Hotkey || key == Keys.Escape)
                     {
-                        var key = (Keys)keyCode;
-                        if (key == instance.Hotkey || key == Keys.Escape) instance.KeyPressed?.Invoke(key);
+                        // 使用异步按键状态判断修饰键，避免钩子线程的消息队列状态滞后。
+                        bool controlDown = IsKeyDown(VkControl);
+                        bool altDown = IsKeyDown(VkMenu);
+                        bool shiftDown = IsKeyDown(VkShift);
+                        bool windowsDown = IsKeyDown(VkLWin) || IsKeyDown(VkRWin);
+                        bool isClicking = key == Keys.Escape && instance.ShouldSuppressEscape?.Invoke() == true;
+                        var decision = DecideKeyDown(key, instance.Hotkey, controlDown, altDown, shiftDown, windowsDown, isClicking);
+                        if (firstPress && (decision & HookKeyDecision.Invoke) == HookKeyDecision.Invoke)
+                            instance.KeyPressed?.Invoke(key);
+                        if ((decision & HookKeyDecision.Suppress) == HookKeyDecision.Suppress)
+                            return (IntPtr)1;
                     }
                 }
-                else if (message == WmKeyUp || message == WmSysKeyUp) instance._pressedKeys.Remove(keyCode);
+                else if (message == WmKeyUp || message == WmSysKeyUp)
+                {
+                    instance._pressedKeys.Remove(keyCode);
+                }
             }
-            if (instance != null && nCode >= 0 &&
-                (wParam == (IntPtr)WmKeyDown || wParam == (IntPtr)WmSysKeyDown) &&
-                Marshal.ReadInt32(lParam) == (int)Keys.Escape &&
-                instance.ShouldSuppressEscape?.Invoke() == true)
-                return (IntPtr)1;
 
             return CallNextHookEx(instance?._hookId ?? IntPtr.Zero, nCode, wParam, lParam);
         }
+
+        private static bool IsKeyDown(int virtualKey) => (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
 
         public void Dispose()
         {
