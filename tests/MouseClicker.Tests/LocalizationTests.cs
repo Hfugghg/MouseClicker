@@ -131,6 +131,14 @@ namespace MouseClicker.Tests
         [InlineData("UpdateSkipped")]
         [InlineData("UpdatePreferencesError")]
         [InlineData("OpenLinkError")]
+        [InlineData("HotkeySettings")]
+        [InlineData("HotkeyLabel")]
+        [InlineData("HotkeyHint")]
+        [InlineData("HotkeyApply")]
+        [InlineData("HotkeyInvalidKey")]
+        [InlineData("HotkeyUnavailable")]
+        [InlineData("LeftMouseButton")]
+        [InlineData("RightMouseButton")]
         [InlineData("MouseInputError")]
         public void RequiredKeys_ExistInAllTenLanguages(string key)
         {
@@ -150,7 +158,8 @@ namespace MouseClicker.Tests
             var formattedKeys = new HashSet<string>
             {
                 "SaveConfigError", "LoadConfigError", "AboutMessage", "UpdateAvailableVersion",
-                "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "MouseInputError"
+                "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "HotkeyUnavailable",
+                "MouseInputError"
             };
             foreach (var language in GetTranslations())
             {
