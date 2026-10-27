@@ -24,9 +24,10 @@ namespace MouseClicker.Tests
             Assert.Equal(0m, config.Jitter);
             Assert.Equal(0, config.SequenceIndex);
 
-            // 布尔字段默认为 false
+            // 现有开关默认关闭，当前区域高亮默认开启。
             Assert.False(config.ShowOverlay);
             Assert.False(config.HardwareMode);
+            Assert.True(config.HighlightCurrentArea);
         }
 
         // ──────────────────────────────────────
@@ -313,6 +314,23 @@ namespace MouseClicker.Tests
             Assert.Equal(jitter, result.Jitter);
         }
 
+        [Fact]
+        public void Deserialize_OldConfigurationWithoutHighlightOption_DefaultsToEnabled()
+        {
+            var config = JsonSerializer.Deserialize<ConfigData>("{\"Interval\":100,\"Jitter\":0,\"ShowOverlay\":true,\"HardwareMode\":false}");
+            Assert.NotNull(config);
+            Assert.True(config.HighlightCurrentArea);
+        }
+
+        [Fact]
+        public void HighlightCurrentArea_Disabled_RoundTripsWithoutReenabling()
+        {
+            var original = new ConfigData { HighlightCurrentArea = false };
+            string json = JsonSerializer.Serialize(original);
+            var restored = JsonSerializer.Deserialize<ConfigData>(json);
+            Assert.NotNull(restored);
+            Assert.False(restored.HighlightCurrentArea);
+        }
         // Configuration validation is exercised independently of the WinForms UI.
         [Fact]
         public void Validate_ValidConfiguration_DoesNotThrow()

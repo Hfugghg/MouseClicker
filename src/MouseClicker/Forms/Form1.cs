@@ -38,7 +38,12 @@ namespace MouseClicker
         // --- 核心逻辑字段 ---
         private readonly MouseController _mouseController;
         private List<ClickArea> _clickAreas = new List<ClickArea>();
-        private OverlayForm _overlayForm;
+        private OverlayForm _overlayForm = null!;
+        private ClickArea? _hoveredArea;
+        private Point? _hoverPoint;
+        private int _hoverRevision;
+        private ClickArea? _activeClickArea;
+        private bool _isSelectingArea;
 
         // --- 定时器和状态字段 ---
         private System.Windows.Forms.Timer _clickTimer;
@@ -72,6 +77,7 @@ namespace MouseClicker
         private NumericUpDown intervalNumericUpDown = null!, jitterNumericUpDown = null!;
         private ComboBox sequenceComboBox = null!;
         private CheckBox showOverlayCheckBox = null!;
+        private CheckBox highlightCurrentAreaCheckBox = null!;
         private CheckBox hardwareModeCheckBox = null!;
         private Button startButton = null!;
         private LinkLabel updateAvailableLinkLabel = null!;
@@ -110,7 +116,7 @@ namespace MouseClicker
             UpdateUIStrings();
 
             _overlayForm = new OverlayForm();
-            _overlayForm.Show();
+            UpdateOverlayState();
             this.Disposed += (_, _) => DisposeUpdateResources();
         }
 
@@ -306,6 +312,7 @@ namespace MouseClicker
             this.sequenceLabel = new Label { AutoSize = true };
             this.sequenceComboBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             this.showOverlayCheckBox = new CheckBox { AutoSize = true, Checked = true };
+            this.highlightCurrentAreaCheckBox = new CheckBox { AutoSize = true, Checked = true };
             this.hardwareModeCheckBox = new CheckBox { AutoSize = true, Checked = false };
             this.startButton = new Button { Font = new Font(this.Font.FontFamily, 10, FontStyle.Bold) };
             this.updateAvailableLinkLabel = new LinkLabel
@@ -339,6 +346,7 @@ namespace MouseClicker
             this.Controls.Add(this.sequenceLabel);
             this.Controls.Add(this.sequenceComboBox);
             this.Controls.Add(this.showOverlayCheckBox);
+            this.Controls.Add(this.highlightCurrentAreaCheckBox);
             this.Controls.Add(this.hardwareModeCheckBox);
             this.Controls.Add(this.startButton);
 
@@ -354,6 +362,16 @@ namespace MouseClicker
             startButton.Click += new EventHandler(startButton_Click);
             intervalNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
             jitterNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
+            areasListBox.MouseMove += areasListBox_MouseMove;
+            areasListBox.MouseWheel += areasListBox_MouseWheel;
+            areasListBox.MouseLeave += (s, e) => ClearHoveredArea();
+            areasListBox.SelectedIndexChanged += (s, e) =>
+            {
+                UpdateOverlayState();
+                QueueHoverRefresh();
+            };
+            showOverlayCheckBox.CheckedChanged += (s, e) => UpdateOverlayState();
+            highlightCurrentAreaCheckBox.CheckedChanged += (s, e) => UpdateOverlayState();
         }
 
         // 动态调整UI控件的布局。
@@ -407,12 +425,16 @@ namespace MouseClicker
             showOverlayCheckBox.Location = new Point(sequenceComboBox.Right + controlPadding, currentY + 4);
             currentY += rowHeight + controlPadding;
 
+            highlightCurrentAreaCheckBox.Location = new Point(formPadding, currentY);
+            currentY += rowHeight + controlPadding;
+
             hardwareModeCheckBox.Location = new Point(formPadding, currentY);
             currentY += rowHeight + controlPadding;
 
             int requiredWidth = Math.Max(moveDownButton.Right, jitterNumericUpDown.Right);
             requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right);
             requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
+            requiredWidth = Math.Max(requiredWidth, highlightCurrentAreaCheckBox.Right);
             requiredWidth += formPadding;
             int menuWidth = menuStrip.Items.Cast<ToolStripItem>().Sum(item => item.GetPreferredSize(Size.Empty).Width) + menuStrip.Padding.Horizontal + formPadding * 2;
             requiredWidth = Math.Max(requiredWidth, menuWidth);
@@ -431,6 +453,7 @@ namespace MouseClicker
                 sequenceComboBox.Top += hintOffset;
                 showOverlayCheckBox.Top += hintOffset;
                 hardwareModeCheckBox.Top += hintOffset;
+                highlightCurrentAreaCheckBox.Top += hintOffset;
                 currentY += hintOffset;
             }
 
@@ -481,6 +504,7 @@ namespace MouseClicker
             jitterExceedsIntervalHintLabel.Text = Localization.Get("JitterExceedsIntervalHint");
             sequenceLabel.Text = Localization.Get("SequenceLabel");
             showOverlayCheckBox.Text = Localization.Get("ShowOverlay");
+            highlightCurrentAreaCheckBox.Text = Localization.Get("HighlightCurrentArea");
             hardwareModeCheckBox.Text = Localization.Get("HardwareMode");
             startButton.Text = _isClicking ? Localization.Get("StopClicking") : Localization.Get("StartClicking");
             this.Text = Localization.Get("WindowTitle");
@@ -554,6 +578,7 @@ namespace MouseClicker
                         Jitter = jitterNumericUpDown.Value,
                         SequenceIndex = sequenceComboBox.SelectedIndex,
                         ShowOverlay = showOverlayCheckBox.Checked,
+                        HighlightCurrentArea = highlightCurrentAreaCheckBox.Checked,
                         HardwareMode = hardwareModeCheckBox.Checked
                     };
 
@@ -596,11 +621,14 @@ namespace MouseClicker
                                 sequenceComboBox.Items.Count);
 
                             // Apply only after every field has passed validation.
+                            ClearHoveredArea();
+                            _activeClickArea = null;
                             _clickAreas = configData.ClickAreas;
                             intervalNumericUpDown.Value = configData.Interval;
                             jitterNumericUpDown.Value = configData.Jitter;
                             sequenceComboBox.SelectedIndex = configData.SequenceIndex;
                             showOverlayCheckBox.Checked = configData.ShowOverlay;
+                            highlightCurrentAreaCheckBox.Checked = configData.HighlightCurrentArea;
                             hardwareModeCheckBox.Checked = configData.HardwareMode;
 
                             RefreshAreaList();
@@ -634,45 +662,124 @@ namespace MouseClicker
         // 刷新点击区域列表的显示。
         private void RefreshAreaList()
         {
-            int selectedIndex = areasListBox.SelectedIndex;
+            int previousIndex = areasListBox.SelectedIndex;
+            var selected = areasListBox.SelectedItem as ClickArea;
+            ClearHoveredArea();
+            if (!_clickAreas.Any(area => ReferenceEquals(area, _activeClickArea))) _activeClickArea = null;
             areasListBox.Items.Clear();
-            foreach (var area in _clickAreas)
-            {
-                areasListBox.Items.Add(area);
-            }
-            if(selectedIndex != -1 && selectedIndex < areasListBox.Items.Count)
-            {
-                areasListBox.SelectedIndex = selectedIndex;
-            }
+            foreach (var area in _clickAreas) areasListBox.Items.Add(area);
+            int selectedIndex = _clickAreas.FindIndex(area => ReferenceEquals(area, selected));
+            if (selectedIndex < 0 && previousIndex >= 0 && previousIndex < _clickAreas.Count) selectedIndex = previousIndex;
+            areasListBox.SelectedIndex = selectedIndex;
             _overlayForm.AreasToDraw = new List<ClickArea>(_clickAreas);
             _overlayForm.Invalidate();
+            UpdateOverlayState();
+        }
+
+        private void areasListBox_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (_isClicking || _isClosing) { ClearHoveredArea(); return; }
+            _hoverPoint = e.Location;
+            _hoverRevision++;
+            UpdateHoveredAreaAtPoint(e.Location);
+        }
+
+        private void areasListBox_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (_isClicking || _isClosing || !areasListBox.ClientRectangle.Contains(e.Location))
+            {
+                ClearHoveredArea();
+                return;
+            }
+            _hoverPoint = e.Location;
+            SetHoveredArea(null);
+            QueueHoverRefresh();
+        }
+
+        private void ClearHoveredArea()
+        {
+            _hoverPoint = null;
+            _hoverRevision++;
+            SetHoveredArea(null);
+        }
+
+        private void QueueHoverRefresh()
+        {
+            if (!_hoverPoint.HasValue || _isClicking || _isClosing || IsDisposed || Disposing ||
+                !IsHandleCreated || areasListBox.IsDisposed || !areasListBox.IsHandleCreated) return;
+            int revision = ++_hoverRevision;
+            Point point = _hoverPoint.Value;
+            // Native wheel and keyboard scrolling finish after their events have been raised.
+            BeginInvoke(new Action(() =>
+            {
+                if (revision != _hoverRevision || !_hoverPoint.HasValue || _isClicking || _isClosing ||
+                    IsDisposed || Disposing || !IsHandleCreated || areasListBox.IsDisposed || !areasListBox.IsHandleCreated) return;
+                UpdateHoveredAreaAtPoint(point);
+            }));
+        }
+
+        private void UpdateHoveredAreaAtPoint(Point point)
+        {
+            int index = areasListBox.ClientRectangle.Contains(point) ? areasListBox.IndexFromPoint(point) : ListBox.NoMatches;
+            SetHoveredArea(index >= 0 && index < areasListBox.Items.Count ? areasListBox.Items[index] as ClickArea : null);
+        }
+
+        private void SetHoveredArea(ClickArea? area)
+        {
+            if (ReferenceEquals(_hoveredArea, area)) return;
+            _hoveredArea = area;
+            UpdateOverlayState();
+        }
+
+        private void UpdateOverlayState()
+        {
+            highlightCurrentAreaCheckBox.Enabled = showOverlayCheckBox.Checked;
+            if (_overlayForm == null || _overlayForm.IsDisposed) return;
+            bool showOverlay = showOverlayCheckBox.Checked && !_isSelectingArea && !_isClosing;
+            ClickArea? preview = _hoveredArea ?? areasListBox.SelectedItem as ClickArea;
+            if (!_clickAreas.Any(area => ReferenceEquals(area, preview))) preview = null;
+            _overlayForm.PreviewArea = showOverlay && !_isClicking ? preview : null;
+            _overlayForm.ActiveArea = showOverlay && _isClicking && highlightCurrentAreaCheckBox.Checked ? _activeClickArea : null;
+            if (showOverlay)
+            {
+                if (!_overlayForm.Visible) _overlayForm.Show();
+            }
+            else
+            {
+                _overlayForm.Hide();
+            }
         }
 
         // “添加”按钮的点击事件。
         private void addAreaButton_Click(object? sender, EventArgs e)
         {
+            _isSelectingArea = true;
             this.Hide();
             _overlayForm.Hide();
-            System.Threading.Thread.Sleep(200);
-            using (var selectionForm = new SelectionForm())
+            try
             {
-                if (selectionForm.ShowDialog() == DialogResult.OK)
+                System.Threading.Thread.Sleep(200);
+                using (var selectionForm = new SelectionForm())
                 {
+                    DialogResult result = selectionForm.ShowDialog();
                     this.Show();
-                    string label = Interaction.InputBox(Localization.Get("SetLabelPrompt"), Localization.Get("SetLabelTitle"), Localization.Get("AreaLabelDefault") + (_clickAreas.Count + 1));
-                    if (!string.IsNullOrWhiteSpace(label))
+                    if (result == DialogResult.OK)
                     {
-                        _clickAreas.Add(new ClickArea { Area = selectionForm.SelectedArea, Label = label });
-                        RefreshAreaList();
+                        string label = Interaction.InputBox(Localization.Get("SetLabelPrompt"), Localization.Get("SetLabelTitle"), Localization.Get("AreaLabelDefault") + (_clickAreas.Count + 1));
+                        if (!string.IsNullOrWhiteSpace(label))
+                        {
+                            _clickAreas.Add(new ClickArea { Area = selectionForm.SelectedArea, Label = label });
+                            RefreshAreaList();
+                        }
                     }
                 }
-                else
-                {
-                    this.Show();
-                }
             }
-            _overlayForm.Show();
-            _overlayForm.Invalidate();
+            finally
+            {
+                _isSelectingArea = false;
+                this.Show();
+                UpdateOverlayState();
+            }
         }
 
         // “移除”按钮的点击事件。
@@ -725,14 +832,13 @@ namespace MouseClicker
             if (_clickAreas.Count == 0) { MessageBox.Show(Localization.Get("AddAreaFirst")); return; }
 
             _isClicking = true;
+            ClearHoveredArea();
+            _activeClickArea = null;
             _currentClickIndex = 0;
             startButton.Text = Localization.Get("StopClicking");
             SetUIEnabled(false);
             
-            if (!showOverlayCheckBox.Checked)
-            {
-                _overlayForm.Hide();
-            }
+            UpdateOverlayState();
 
             SetHook();
 
@@ -742,7 +848,9 @@ namespace MouseClicker
         // 停止自动点击。
         private void StopClicking()
         {
-            if (!_isClicking) return;
+            _activeClickArea = null;
+            ClearHoveredArea();
+            if (!_isClicking) { UpdateOverlayState(); return; }
 
             if (_hookID != IntPtr.Zero)
             {
@@ -754,15 +862,6 @@ namespace MouseClicker
             _isClicking = false;
             startButton.Text = Localization.Get("StartClicking");
             SetUIEnabled(true);
-            if (showOverlayCheckBox.Checked)
-            {
-                _overlayForm.Show();
-                _overlayForm.Invalidate();
-            }
-            else
-            {
-                _overlayForm.Hide();
-            }
         }
 
         // 在点击过程中禁用或启用UI控件。
@@ -776,10 +875,11 @@ namespace MouseClicker
             intervalNumericUpDown.Enabled = isEnabled;
             jitterNumericUpDown.Enabled = isEnabled;
             sequenceComboBox.Enabled = isEnabled;
-            showOverlayCheckBox.Enabled = isEnabled;
+            showOverlayCheckBox.Enabled = true;
             hardwareModeCheckBox.Enabled = isEnabled;
             menuStrip.Enabled = isEnabled;
             updateAvailableLinkLabel.Enabled = isEnabled;
+            UpdateOverlayState();
         }
 
         // 负等待时间取绝对值，同时保留 10 毫秒下限。
@@ -801,6 +901,8 @@ namespace MouseClicker
             try
             {
                 _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
+                _activeClickArea = _isClicking ? areaToClick : null;
+                UpdateOverlayState();
             }
             catch (Exception ex)
             {

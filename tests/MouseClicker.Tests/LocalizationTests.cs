@@ -98,6 +98,7 @@ namespace MouseClicker.Tests
         [InlineData("SequenceRandom")]
         [InlineData("SequenceOnce")]
         [InlineData("ShowOverlay")]
+        [InlineData("HighlightCurrentArea")]
         [InlineData("HardwareMode")]
         [InlineData("StartClicking")]
         [InlineData("StopClicking")]

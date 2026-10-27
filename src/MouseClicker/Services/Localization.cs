@@ -109,6 +109,7 @@ namespace MouseClicker
                         { "SequenceRandom", "Loop in Random Order" },
                         { "SequenceOnce", "Click Once in Order" },
                         { "ShowOverlay", "Show Overlay" },
+                        { "HighlightCurrentArea", "Highlight current click area" },
                         { "HardwareMode", "Hardware Simulation (SendInput)" },
                         { "StartClicking", "Start Clicking" },
                         { "StopClicking", "Stop Clicking (ESC)" },
@@ -168,6 +169,12 @@ Welcome to Mouse Clicker!
    - "About" provides the project page and information about new versions.
    - "View update" opens the release page. "Skip this version" hides notifications for that version.
 
+9. Locate and Highlight Areas:
+   - Hover over or select an item in the area list to locate it with a blue border.
+   - During automatic clicking, the current click area is marked with a green border.
+   - "Highlight current click area" is on by default and is saved with the configuration. Turn it off to disable the green highlight.
+   - These highlights are visible only while "Show Overlay" is enabled.
+
 Thank you for using the application!
 """ },
                         { "CloseButton", "Close" },
@@ -207,6 +214,7 @@ Thank you for using the application!
                         { "SequenceRandom", "随机顺序循环" },
                         { "SequenceOnce", "单次顺序点击" },
                         { "ShowOverlay", "显示浮窗" },
+                        { "HighlightCurrentArea", "点击时高亮区域" },
                         { "HardwareMode", "硬件模拟 (SendInput)" },
                         { "StartClicking", "开始点击" },
                         { "StopClicking", "停止点击 (ESC)" },
@@ -266,6 +274,12 @@ Thank you for using the application!
    - “关于”提供项目地址和新版本信息。
    - 可点击“查看更新”打开发行页面，或“跳过此版本”隐藏该版本的通知。
 
+9. 区域定位与高亮：
+   - 鼠标悬停或选中区域列表中的项目时，会用蓝色边框标出对应区域。
+   - 自动点击时，当前点击区域会以绿色边框高亮。
+   - “点击时高亮区域”默认开启，并随配置保存；关闭后不再显示绿色高亮。
+   - 这些高亮仅在开启“显示浮窗”时可见。
+
 感谢您的使用！
 """ },
                         { "CloseButton", "关闭" },
@@ -305,6 +319,7 @@ Thank you for using the application!
                         { "SequenceRandom", "ランダムにループ" },
                         { "SequenceOnce", "順番に1回クリック" },
                         { "ShowOverlay", "オーバーレイを表示" },
+                        { "HighlightCurrentArea", "クリック中のエリアを強調" },
                         { "HardwareMode", "ハードウェアシミュレーション (SendInput)" },
                         { "StartClicking", "クリックを開始" },
                         { "StopClicking", "クリックを停止 (ESC)" },
@@ -364,6 +379,12 @@ Thank you for using the application!
    - 「バージョン情報」でプロジェクトページや新しいバージョンの情報を確認できます。
    - 「更新を見る」はリリースページを開きます。「このバージョンをスキップ」はそのバージョンの通知を非表示にします。
 
+9. エリアの位置確認と強調表示：
+   - リストの項目にマウスを合わせるか選択すると、対応するエリアを青い枠線で表示します。
+   - 自動クリック中は、現在クリックしているエリアを緑の枠線で強調表示します。
+   - 「クリック中のエリアを強調」は既定でオンになっており、設定ファイルに保存されます。オフにすると緑色の強調表示を停止します。
+   - これらの強調表示は「オーバーレイを表示」がオンのときだけ見えます。
+
 ご利用いただきありがとうございます！
 """ },
                         { "CloseButton", "閉じる" },
@@ -403,6 +424,7 @@ Thank you for using the application!
                         { "SequenceRandom", "무작위로 반복" },
                         { "SequenceOnce", "순서대로 한 번" },
                         { "ShowOverlay", "영역 표시" },
+                        { "HighlightCurrentArea", "클릭 중인 영역 강조" },
                         { "HardwareMode", "하드웨어 시뮬레이션 (SendInput)" },
                         { "StartClicking", "클릭 시작" },
                         { "StopClicking", "클릭 중지 (ESC)" },
@@ -462,6 +484,12 @@ Thank you for using the application!
    - "프로그램 정보"에서 프로젝트 페이지와 새 버전 정보를 확인합니다.
    - "업데이트 보기"로 릴리스 페이지를 열거나 "이 버전 건너뛰기"로 해당 버전의 알림을 숨길 수 있습니다.
 
+9. 영역 위치 확인과 강조 표시:
+   - 영역 목록의 항목에 마우스를 올리거나 선택하면 해당 영역을 파란색 테두리로 표시합니다.
+   - 자동 클릭 중에는 현재 클릭하는 영역을 초록색 테두리로 강조합니다.
+   - "클릭 중인 영역 강조"는 기본적으로 켜져 있으며 설정 파일에 저장됩니다. 끄면 초록색 강조 표시가 사라집니다.
+   - 이러한 강조 표시는 "영역 표시"를 켰을 때만 보입니다.
+
 이용해 주셔서 감사합니다!
 """ },
                         { "CloseButton", "닫기" },
@@ -501,6 +529,7 @@ Thank you for using the application!
                         { "SequenceRandom", "隨機循環" },
                         { "SequenceOnce", "依序點擊一次" },
                         { "ShowOverlay", "顯示區域框" },
+                        { "HighlightCurrentArea", "點擊時醒目標示區域" },
                         { "HardwareMode", "硬體模擬 (SendInput)" },
                         { "StartClicking", "開始點擊" },
                         { "StopClicking", "停止點擊 (ESC)" },
@@ -560,6 +589,12 @@ Thank you for using the application!
    - 「關於」提供專案網址與新版本資訊。
    - 可按「查看更新」開啟發行頁，或按「略過此版本」隱藏該版本的通知。
 
+9. 區域定位與醒目標示：
+   - 將滑鼠移到區域清單項目上或選取項目時，會以藍色外框標出對應區域。
+   - 自動點擊時，目前點擊區域會以綠色外框醒目顯示。
+   - 「點擊時醒目標示區域」預設開啟，並隨設定檔儲存；關閉後不再顯示綠色標示。
+   - 這些標示僅在開啟「顯示區域框」時可見。
+
 感謝您的使用！
 """ },
                         { "CloseButton", "關閉" },
@@ -599,6 +634,7 @@ Thank you for using the application!
                         { "SequenceRandom", "Boucle aléatoire" },
                         { "SequenceOnce", "Un passage dans l’ordre" },
                         { "ShowOverlay", "Afficher les zones" },
+                        { "HighlightCurrentArea", "Surligner la zone du clic en cours" },
                         { "HardwareMode", "Simulation matérielle (SendInput)" },
                         { "StartClicking", "Démarrer les clics" },
                         { "StopClicking", "Arrêter les clics (ESC)" },
@@ -658,6 +694,12 @@ Bienvenue dans le cliqueur automatique !
    - « À propos » donne accès à la page du projet et aux informations sur les nouvelles versions.
    - « Voir la mise à jour » ouvre la page de publication. « Ignorer cette version » masque les notifications de cette version.
 
+9. Repérer et surligner les zones :
+   - Survolez ou sélectionnez un élément de la liste pour repérer sa zone avec un cadre bleu.
+   - Pendant les clics automatiques, la zone du clic en cours est entourée d’un cadre vert.
+   - « Surligner la zone du clic en cours » est activé par défaut et enregistré dans la configuration. Désactivez cette option pour masquer le surlignage vert.
+   - Ces surlignages sont visibles uniquement lorsque « Afficher les zones » est activé.
+
 Merci d’utiliser cette application !
 """ },
                         { "CloseButton", "Fermer" },
@@ -697,6 +739,7 @@ Merci d’utiliser cette application !
                         { "SequenceRandom", "Zufällig wiederholen" },
                         { "SequenceOnce", "Einmal der Reihe nach" },
                         { "ShowOverlay", "Bereiche anzeigen" },
+                        { "HighlightCurrentArea", "Aktuellen Klickbereich hervorheben" },
                         { "HardwareMode", "Hardwaresimulation (SendInput)" },
                         { "StartClicking", "Klicken starten" },
                         { "StopClicking", "Klicken stoppen (ESC)" },
@@ -756,6 +799,12 @@ Willkommen beim automatischen Mausklicker!
    - Unter „Info“ finden Sie die Projektseite und Informationen zu neuen Versionen.
    - „Update ansehen“ öffnet die Veröffentlichungsseite. Mit „Diese Version überspringen“ blenden Sie die Benachrichtigung für diese Version aus.
 
+9. Bereiche finden und hervorheben:
+   - Bewegen Sie den Mauszeiger über einen Listeneintrag oder wählen Sie ihn aus, um den zugehörigen Bereich mit einem blauen Rahmen zu markieren.
+   - Während des automatischen Klickens wird der aktuelle Klickbereich mit einem grünen Rahmen hervorgehoben.
+   - „Aktuellen Klickbereich hervorheben“ ist standardmäßig aktiviert und wird in der Konfiguration gespeichert. Deaktivieren Sie die Option, um die grüne Hervorhebung auszuschalten.
+   - Die Hervorhebungen sind nur sichtbar, wenn „Bereiche anzeigen“ aktiviert ist.
+
 Vielen Dank für die Nutzung!
 """ },
                         { "CloseButton", "Schließen" },
@@ -795,6 +844,7 @@ Vielen Dank für die Nutzung!
                         { "SequenceRandom", "Repetir al azar" },
                         { "SequenceOnce", "Una vez en orden" },
                         { "ShowOverlay", "Mostrar áreas" },
+                        { "HighlightCurrentArea", "Resaltar el área del clic actual" },
                         { "HardwareMode", "Simulación de hardware (SendInput)" },
                         { "StartClicking", "Iniciar clics" },
                         { "StopClicking", "Detener clics (ESC)" },
@@ -854,6 +904,12 @@ Vielen Dank für die Nutzung!
    - «Acerca de» muestra la página del proyecto e información sobre nuevas versiones.
    - «Ver actualización» abre la página de la versión. «Omitir esta versión» oculta sus notificaciones.
 
+9. Localizar y resaltar áreas:
+   - Pase el puntero por un elemento de la lista o selecciónelo para localizar su área con un borde azul.
+   - Durante los clics automáticos, el área del clic actual se resalta con un borde verde.
+   - « Resaltar el área del clic actual » está activado de forma predeterminada y se guarda con la configuración. Desactívelo para quitar el resaltado verde.
+   - Estos resaltados solo se ven cuando « Mostrar áreas » está activado.
+
 ¡Gracias por utilizar la aplicación!
 """ },
                         { "CloseButton", "Cerrar" },
@@ -893,6 +949,7 @@ Vielen Dank für die Nutzung!
                         { "SequenceRandom", "Повторять случайно" },
                         { "SequenceOnce", "Один раз по порядку" },
                         { "ShowOverlay", "Показать области" },
+                        { "HighlightCurrentArea", "Выделять текущую область нажатия" },
                         { "HardwareMode", "Эмуляция оборудования (SendInput)" },
                         { "StartClicking", "Начать нажатия" },
                         { "StopClicking", "Остановить нажатия (ESC)" },
@@ -952,6 +1009,12 @@ Vielen Dank für die Nutzung!
    - Раздел «О программе» содержит ссылку на проект и информацию о новых версиях.
    - «Посмотреть обновление» открывает страницу выпуска. «Пропустить эту версию» скрывает уведомления об этой версии.
 
+9. Поиск и выделение областей:
+   - Наведите указатель на элемент списка или выберите его, чтобы обозначить соответствующую область синей рамкой.
+   - Во время автоматических нажатий текущая область выделяется зелёной рамкой.
+   - Параметр «Выделять текущую область нажатия» включён по умолчанию и сохраняется в файле настроек. Отключите его, чтобы убрать зелёное выделение.
+   - Выделение видно только при включённом параметре «Показать области».
+
 Спасибо за использование программы!
 """ },
                         { "CloseButton", "Закрыть" },
@@ -991,6 +1054,7 @@ Vielen Dank für die Nutzung!
                         { "SequenceRandom", "Repetir aleatoriamente" },
                         { "SequenceOnce", "Uma vez em ordem" },
                         { "ShowOverlay", "Mostrar áreas" },
+                        { "HighlightCurrentArea", "Destacar a área do clique atual" },
                         { "HardwareMode", "Simulação de hardware (SendInput)" },
                         { "StartClicking", "Iniciar cliques" },
                         { "StopClicking", "Parar cliques (ESC)" },
@@ -1049,6 +1113,12 @@ Bem-vindo ao Clicador automático!
 8. Sobre e atualizações:
    - “Sobre” mostra a página do projeto e informações sobre novas versões.
    - “Ver atualização” abre a página da versão. “Ignorar esta versão” oculta as notificações dessa versão.
+
+9. Localizar e destacar áreas:
+   - Passe o ponteiro sobre um item da lista ou selecione-o para localizar sua área com uma borda azul.
+   - Durante os cliques automáticos, a área do clique atual é destacada com uma borda verde.
+   - “Destacar a área do clique atual” fica ativado por padrão e é salvo com a configuração. Desative a opção para remover o destaque verde.
+   - Esses destaques só aparecem quando “Mostrar áreas” está ativado.
 
 Obrigado por usar o aplicativo!
 """ },
