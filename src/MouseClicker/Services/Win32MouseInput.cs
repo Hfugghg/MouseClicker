@@ -22,6 +22,8 @@ namespace MouseClicker
         private const int INPUT_MOUSE = 0;
         private const uint MOUSEEVENTF_LEFTDOWN = 0x0002;
         private const uint MOUSEEVENTF_LEFTUP = 0x0004;
+        private const uint MOUSEEVENTF_RIGHTDOWN = 0x0008;
+        private const uint MOUSEEVENTF_RIGHTUP = 0x0010;
         private static readonly IntPtr HardwareExtraInfo = (IntPtr)0x4B49434D;
 
         [StructLayout(LayoutKind.Sequential)]
@@ -51,20 +53,24 @@ namespace MouseClicker
             }
         }
 
-        public void SoftwareClick()
+        public void SoftwareClick(bool rightButton = false)
         {
             // 旧版 mouse_event API 没有可供检查的返回值。
-            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+            uint down = rightButton ? MOUSEEVENTF_RIGHTDOWN : MOUSEEVENTF_LEFTDOWN;
+            uint up = rightButton ? MOUSEEVENTF_RIGHTUP : MOUSEEVENTF_LEFTUP;
+            mouse_event(down | up, 0, 0, 0, 0);
         }
 
-        public void HardwareClick()
+        public void HardwareClick(bool rightButton = false)
         {
             // dwExtraInfo 只是附加元数据；它不会把合成输入变成真实的硬件输入。
-            SendMouseClick(HardwareExtraInfo);
+            SendMouseClick(HardwareExtraInfo, rightButton);
         }
 
-        private static void SendMouseClick(IntPtr extraInfo)
+        private static void SendMouseClick(IntPtr extraInfo, bool rightButton)
         {
+            uint down = rightButton ? MOUSEEVENTF_RIGHTDOWN : MOUSEEVENTF_LEFTDOWN;
+            uint up = rightButton ? MOUSEEVENTF_RIGHTUP : MOUSEEVENTF_LEFTUP;
             var inputs = new[]
             {
                 new INPUT
@@ -72,7 +78,7 @@ namespace MouseClicker
                     type = INPUT_MOUSE,
                     mi = new MOUSEINPUT
                     {
-                        dwFlags = MOUSEEVENTF_LEFTDOWN,
+                        dwFlags = down,
                         dwExtraInfo = extraInfo
                     }
                 },
@@ -81,8 +87,8 @@ namespace MouseClicker
                     type = INPUT_MOUSE,
                     mi = new MOUSEINPUT
                     {
-                        dwFlags = MOUSEEVENTF_LEFTUP,
-                        dwExtraInfo = extraInfo
+                        dwFlags = up,
+                        dwExtraInfo = extra
                     }
                 }
             };
@@ -106,7 +112,7 @@ namespace MouseClicker
                         type = INPUT_MOUSE,
                         mi = new MOUSEINPUT
                         {
-                            dwFlags = MOUSEEVENTF_LEFTUP,
+                            dwFlags = up,
                             dwExtraInfo = extraInfo
                         }
                     }
