@@ -16,7 +16,9 @@ namespace MouseClicker
         public OverlayForm()
         {
             this.FormBorderStyle = FormBorderStyle.None;
-            this.WindowState = FormWindowState.Maximized;
+            // Span the complete virtual desktop, including monitors left/above the primary display.
+            this.StartPosition = FormStartPosition.Manual;
+            this.Bounds = SystemInformation.VirtualScreen;
             this.BackColor = Color.Magenta;
             this.TransparencyKey = this.BackColor;
             this.TopMost = true;
@@ -40,18 +42,26 @@ namespace MouseClicker
             if (AreasToDraw == null) return;
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
+            var virtualScreen = SystemInformation.VirtualScreen;
             foreach (var area in AreasToDraw)
             {
+                // Painting coordinates are local to the overlay window; click areas use screen coordinates.
+                var localArea = new Rectangle(
+                    area.Area.X - virtualScreen.Left,
+                    area.Area.Y - virtualScreen.Top,
+                    area.Area.Width,
+                    area.Area.Height);
+
                 using (var pen = new Pen(Color.Red, 2))
                 {
-                    e.Graphics.DrawRectangle(pen, area.Area);
+                    e.Graphics.DrawRectangle(pen, localArea);
                 }
                 using (var font = new Font("Arial", 16, FontStyle.Bold))
                 using (var brush = new SolidBrush(Color.FromArgb(150, 255, 255, 0)))
                 {
                     var textSize = e.Graphics.MeasureString(area.Label, font);
-                    var textX = area.Area.X + (area.Area.Width - textSize.Width) / 2;
-                    var textY = area.Area.Y + (area.Area.Height - textSize.Height) / 2;
+                    var textX = localArea.X + (localArea.Width - textSize.Width) / 2;
+                    var textY = localArea.Y + (localArea.Height - textSize.Height) / 2;
                     e.Graphics.DrawString(area.Label, font, brush, textX, textY);
                 }
             }

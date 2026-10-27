@@ -391,7 +391,16 @@ namespace MouseClicker
 
                         if (configData != null)
                         {
-                            _clickAreas = configData.ClickAreas ?? new List<ClickArea>();
+                            // Validate the entire file before changing the current UI or configuration.
+                            configData.Validate(
+                                intervalNumericUpDown.Minimum,
+                                intervalNumericUpDown.Maximum,
+                                jitterNumericUpDown.Minimum,
+                                jitterNumericUpDown.Maximum,
+                                sequenceComboBox.Items.Count);
+
+                            // Apply only after every field has passed validation.
+                            _clickAreas = configData.ClickAreas;
                             intervalNumericUpDown.Value = configData.Interval;
                             jitterNumericUpDown.Value = configData.Jitter;
                             sequenceComboBox.SelectedIndex = configData.SequenceIndex;
@@ -543,8 +552,15 @@ namespace MouseClicker
             _isClicking = false;
             startButton.Text = Localization.Get("StartClicking");
             SetUIEnabled(true);
-            _overlayForm.Show();
-            _overlayForm.Invalidate();
+            if (showOverlayCheckBox.Checked)
+            {
+                _overlayForm.Show();
+                _overlayForm.Invalidate();
+            }
+            else
+            {
+                _overlayForm.Hide();
+            }
         }
 
         // 在点击过程中禁用或启用UI控件。
@@ -573,7 +589,21 @@ namespace MouseClicker
             ClickArea? areaToClick = GetNextArea();
             if (areaToClick == null) { StopClicking(); return; }
 
-            _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
+            try
+            {
+                _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
+            }
+            catch (Exception ex)
+            {
+                // Surface native input failures without leaving the timer or global hook active.
+                StopClicking();
+                MessageBox.Show(
+                    $"鼠标输入失败，自动点击已停止。\n{ex.Message}",
+                    this.Text,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
 
             if (_isClicking)
             {
