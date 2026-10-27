@@ -245,10 +245,10 @@ namespace MouseClicker.Tests
         // 8. ClickArea ToString() 格式
         // ──────────────────────────────────────
         [Theory]
-        [InlineData("MyLabel", 5, 10, 100, 50, "'MyLabel' @ (X:5, Y:10, W:100, H:50)")]
-        [InlineData("Btn", 0, 0, 1, 1, "'Btn' @ (X:0, Y:0, W:1, H:1)")]
-        [InlineData("", 0, 0, 0, 0, "'' @ (X:0, Y:0, W:0, H:0)")]
-        [InlineData("OK", -5, -10, 30, 20, "'OK' @ (X:-5, Y:-10, W:30, H:20)")]
+        [InlineData("MyLabel", 5, 10, 100, 50, "[L] 'MyLabel' @ (X:5, Y:10, W:100, H:50)")]
+        [InlineData("Btn", 0, 0, 1, 1, "[L] 'Btn' @ (X:0, Y:0, W:1, H:1)")]
+        [InlineData("", 0, 0, 0, 0, "[L] '' @ (X:0, Y:0, W:0, H:0)")]
+        [InlineData("OK", -5, -10, 30, 20, "[L] 'OK' @ (X:-5, Y:-10, W:30, H:20)")]
         public void ClickArea_ToString_ReturnsCorrectFormat(
             string label, int x, int y, int w, int h, string expected)
         {
@@ -274,7 +274,7 @@ namespace MouseClicker.Tests
             string result = area.ToString();
 
             // 默认 Label 为 string.Empty，默认 Area 为 Rectangle.Empty
-            Assert.Equal("'' @ (X:0, Y:0, W:0, H:0)", result);
+            Assert.Equal("[L] '' @ (X:0, Y:0, W:0, H:0)", result);
         }
 
         // ──────────────────────────────────────
