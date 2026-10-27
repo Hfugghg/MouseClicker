@@ -589,7 +589,21 @@ namespace MouseClicker
             ClickArea? areaToClick = GetNextArea();
             if (areaToClick == null) { StopClicking(); return; }
 
-            _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
+            try
+            {
+                _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked);
+            }
+            catch (Exception ex)
+            {
+                // Surface native input failures without leaving the timer or global hook active.
+                StopClicking();
+                MessageBox.Show(
+                    $"鼠标输入失败，自动点击已停止。\\n{ex.Message}",
+                    this.Text,
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                return;
+            }
 
             if (_isClicking)
             {
