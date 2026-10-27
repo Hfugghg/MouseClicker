@@ -99,6 +99,7 @@ namespace MouseClicker
 
             _hotkeyManager = new GlobalHotkeyManager();
             _hotkeyManager.KeyPressed += HotkeyManager_KeyPressed;
+            _hotkeyManager.ShouldSuppressEscape = () => _isClicking;
 
             _overlayForm = new OverlayForm();
             UpdateOverlayState();
