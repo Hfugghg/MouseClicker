@@ -59,6 +59,8 @@ namespace MouseClicker
                 area == null ||
                 area.Area.Width <= 0 ||
                 area.Area.Height <= 0 ||
+                (long)area.Area.X + area.Area.Width > int.MaxValue ||
+                (long)area.Area.Y + area.Area.Height > int.MaxValue ||
                 area.Label == null))
             {
                 throw new InvalidDataException("Configuration contains an invalid click area.");
