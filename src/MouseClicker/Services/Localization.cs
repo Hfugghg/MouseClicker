@@ -189,7 +189,13 @@ Thank you for using the application!
                         { "UpdateSkipped", "Version {0} was skipped." },
                         { "UpdatePreferencesError", "Unable to save the skipped-version preference: {0}" },
                         { "OpenLinkError", "Unable to open the link: {0}" },
-                        { "MouseInputError", "Mouse input failed. Automatic clicking has stopped.\n{0}" }
+                                                { "HotkeySettings", "Hotkey Settings" },
+                        { "HotkeyLabel", "Start/stop hotkey:" },
+                        { "HotkeyHint", "ESC remains available as an emergency stop while clicking." },
+                        { "HotkeyApply", "Apply" },
+                        { "LeftMouseButton", "Left mouse button" },
+                        { "RightMouseButton", "Right mouse button" },
+{ "MouseInputError", "Mouse input failed. Automatic clicking has stopped.\n{0}" }
                     }
                 },
                 {
@@ -294,7 +300,13 @@ Thank you for using the application!
                         { "UpdateSkipped", "已跳过版本 {0}" },
                         { "UpdatePreferencesError", "无法保存跳过设置：{0}" },
                         { "OpenLinkError", "无法打开链接：{0}" },
-                        { "MouseInputError", "鼠标输入失败，自动点击已停止。\n{0}" }
+                                                { "HotkeySettings", "热键设置" },
+                        { "HotkeyLabel", "启停热键：" },
+                        { "HotkeyHint", "点击过程中仍可使用 ESC 紧急停止。" },
+                        { "HotkeyApply", "应用" },
+                        { "LeftMouseButton", "鼠标左键" },
+                        { "RightMouseButton", "鼠标右键" },
+{ "MouseInputError", "鼠标输入失败，自动点击已停止。\n{0}" }
                     }
                 },
                 {
@@ -399,7 +411,13 @@ Thank you for using the application!
                         { "UpdateSkipped", "バージョン {0} をスキップしました。" },
                         { "UpdatePreferencesError", "スキップ設定を保存できません：{0}" },
                         { "OpenLinkError", "リンクを開けません：{0}" },
-                        { "MouseInputError", "マウス入力に失敗したため、自動クリックを停止しました。\n{0}" }
+                                                { "HotkeySettings", "ホットキー設定" },
+                        { "HotkeyLabel", "開始/停止ホットキー：" },
+                        { "HotkeyHint", "クリック中は ESC で緊急停止できます。" },
+                        { "HotkeyApply", "適用" },
+                        { "LeftMouseButton", "マウスの左ボタン" },
+                        { "RightMouseButton", "マウスの右ボタン" },
+{ "MouseInputError", "マウス入力に失敗したため、自動クリックを停止しました。\n{0}" }
                     }
                 },
                 {
@@ -504,7 +522,13 @@ Thank you for using the application!
                         { "UpdateSkipped", "버전 {0}을(를) 건너뛰었습니다." },
                         { "UpdatePreferencesError", "건너뛰기 설정을 저장할 수 없습니다: {0}" },
                         { "OpenLinkError", "링크를 열 수 없습니다: {0}" },
-                        { "MouseInputError", "마우스 입력에 실패하여 자동 클릭을 중지했습니다.\n{0}" }
+                                                { "HotkeySettings", "단축키 설정" },
+                        { "HotkeyLabel", "시작/중지 단축키:" },
+                        { "HotkeyHint", "클릭 중에는 ESC로 긴급 정지할 수 있습니다." },
+                        { "HotkeyApply", "적용" },
+                        { "LeftMouseButton", "마우스 왼쪽 버튼" },
+                        { "RightMouseButton", "마우스 오른쪽 버튼" },
+{ "MouseInputError", "마우스 입력에 실패하여 자동 클릭을 중지했습니다.\n{0}" }
                     }
                 },
                 {
@@ -609,7 +633,13 @@ Thank you for using the application!
                         { "UpdateSkipped", "已略過版本 {0}" },
                         { "UpdatePreferencesError", "無法儲存略過設定：{0}" },
                         { "OpenLinkError", "無法開啟連結：{0}" },
-                        { "MouseInputError", "滑鼠輸入失敗，自動點擊已停止。\n{0}" }
+                                                { "HotkeySettings", "熱鍵設定" },
+                        { "HotkeyLabel", "啟停熱鍵：" },
+                        { "HotkeyHint", "點擊過程中仍可使用 ESC 緊急停止。" },
+                        { "HotkeyApply", "套用" },
+                        { "LeftMouseButton", "滑鼠左鍵" },
+                        { "RightMouseButton", "滑鼠右鍵" },
+{ "MouseInputError", "滑鼠輸入失敗，自動點擊已停止。\n{0}" }
                     }
                 },
                 {
@@ -714,7 +744,13 @@ Merci d’utiliser cette application !
                         { "UpdateSkipped", "La version {0} a été ignorée." },
                         { "UpdatePreferencesError", "Impossible d’enregistrer la version à ignorer : {0}" },
                         { "OpenLinkError", "Impossible d’ouvrir le lien : {0}" },
-                        { "MouseInputError", "Échec de la saisie de la souris. Les clics automatiques ont été arrêtés.\n{0}" }
+                                                { "HotkeySettings", "Paramètres des raccourcis" },
+                        { "HotkeyLabel", "Raccourci démarrer/arrêter :" },
+                        { "HotkeyHint", "ESC reste disponible pour arrêter d'urgence pendant les clics." },
+                        { "HotkeyApply", "Appliquer" },
+                        { "LeftMouseButton", "Bouton gauche" },
+                        { "RightMouseButton", "Bouton droit" },
+{ "MouseInputError", "Échec de la saisie de la souris. Les clics automatiques ont été arrêtés.\n{0}" }
                     }
                 },
                 {
@@ -819,7 +855,13 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Version {0} wurde übersprungen." },
                         { "UpdatePreferencesError", "Die Einstellung zum Überspringen konnte nicht gespeichert werden: {0}" },
                         { "OpenLinkError", "Der Link konnte nicht geöffnet werden: {0}" },
-                        { "MouseInputError", "Die Mauseingabe ist fehlgeschlagen. Das automatische Klicken wurde gestoppt.\n{0}" }
+                                                { "HotkeySettings", "Tastenkürzel" },
+                        { "HotkeyLabel", "Start/Stopp-Taste:" },
+                        { "HotkeyHint", "ESC bleibt während des Klickens als Notstopp verfügbar." },
+                        { "HotkeyApply", "Übernehmen" },
+                        { "LeftMouseButton", "Linke Maustaste" },
+                        { "RightMouseButton", "Rechte Maustaste" },
+{ "MouseInputError", "Die Mauseingabe ist fehlgeschlagen. Das automatische Klicken wurde gestoppt.\n{0}" }
                     }
                 },
                 {
@@ -924,7 +966,13 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Se ha omitido la versión {0}." },
                         { "UpdatePreferencesError", "No se pudo guardar la versión que se desea omitir: {0}" },
                         { "OpenLinkError", "No se pudo abrir el enlace: {0}" },
-                        { "MouseInputError", "La entrada del ratón ha fallado. Los clics automáticos se han detenido.\n{0}" }
+                                                { "HotkeySettings", "Ajustes de teclas" },
+                        { "HotkeyLabel", "Tecla de inicio/parada:" },
+                        { "HotkeyHint", "ESC sigue disponible como parada de emergencia durante los clics." },
+                        { "HotkeyApply", "Aplicar" },
+                        { "LeftMouseButton", "Botón izquierdo" },
+                        { "RightMouseButton", "Botón derecho" },
+{ "MouseInputError", "La entrada del ratón ha fallado. Los clics automáticos se han detenido.\n{0}" }
                     }
                 },
                 {
@@ -1029,7 +1077,13 @@ Vielen Dank für die Nutzung!
                         { "UpdateSkipped", "Версия {0} пропущена." },
                         { "UpdatePreferencesError", "Не удалось сохранить настройку пропуска версии: {0}" },
                         { "OpenLinkError", "Не удалось открыть ссылку: {0}" },
-                        { "MouseInputError", "Ошибка ввода мыши. Автоматические нажатия остановлены.\n{0}" }
+                                                { "HotkeySettings", "Настройки горячих клавиш" },
+                        { "HotkeyLabel", "Клавиша запуска/остановки:" },
+                        { "HotkeyHint", "Во время нажатий ESC остаётся аварийной остановкой." },
+                        { "HotkeyApply", "Применить" },
+                        { "LeftMouseButton", "Левая кнопка мыши" },
+                        { "RightMouseButton", "Правая кнопка мыши" },
+{ "MouseInputError", "Ошибка ввода мыши. Автоматические нажатия остановлены.\n{0}" }
                     }
                 },
                 {
@@ -1134,7 +1188,13 @@ Obrigado por usar o aplicativo!
                         { "UpdateSkipped", "A versão {0} foi ignorada." },
                         { "UpdatePreferencesError", "Não foi possível salvar a preferência de ignorar a versão: {0}" },
                         { "OpenLinkError", "Não foi possível abrir o link: {0}" },
-                        { "MouseInputError", "Falha na entrada do mouse. Os cliques automáticos foram interrompidos.\n{0}" }
+                                                { "HotkeySettings", "Configurações de atalhos" },
+                        { "HotkeyLabel", "Atalho iniciar/parar:" },
+                        { "HotkeyHint", "ESC continua disponível como parada de emergência durante os cliques." },
+                        { "HotkeyApply", "Aplicar" },
+                        { "LeftMouseButton", "Botão esquerdo do mouse" },
+                        { "RightMouseButton", "Botão direito do mouse" },
+{ "MouseInputError", "Falha na entrada do mouse. Os cliques automáticos foram interrompidos.\n{0}" }
                     }
                 }
             };
