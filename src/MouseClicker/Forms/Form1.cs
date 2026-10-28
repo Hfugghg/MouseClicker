@@ -31,10 +31,12 @@ namespace MouseClicker
         private volatile int _modalDepth;
 
         // --- 定时器和状态字段 ---
-        private System.Windows.Forms.Timer _clickTimer;
-        private Random _random = new Random();
+        private CancellationTokenSource? _clickCancellation;
+        private Task? _clickSession;
+        private long _clickSessionId;
+        private bool _conditionSession;
+        private ToolStripMenuItem conditionMenuItem = null!;
         private volatile bool _isClicking = false;
-        private int _currentClickIndex = 0;
 
         private readonly HttpClient _updateHttpClient;
         private readonly bool _ownsUpdateHttpClient;
@@ -54,6 +56,8 @@ namespace MouseClicker
         // --- UI 控件字段 ---
         private MenuStrip menuStrip = null!;
         private ToolStripMenuItem fileMenuItem = null!, languageMenuItem = null!, helpMenuItem = null!, aboutMenuItem = null!;
+        private HelpForm? _helpForm;
+        private ToolStripMenuItem conditionGuideMenuItem = null!;
         private ToolStripMenuItem saveConfigMenuItem = null!, loadConfigMenuItem = null!, viewHelpMenuItem = null!, hotkeySettingsMenuItem = null!;
         private ContextMenuStrip areaClickButtonMenu = null!;
         private ToolStripMenuItem leftClickMenuItem = null!, rightClickMenuItem = null!;
@@ -82,8 +86,6 @@ namespace MouseClicker
             InitializeComponent();
             _mouseController = new MouseController(new Win32MouseInput());
 
-            _clickTimer = new System.Windows.Forms.Timer();
-            _clickTimer.Tick += new EventHandler(clickTimer_Tick);
 
             this.FormBorderStyle = FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
@@ -234,7 +236,7 @@ namespace MouseClicker
             _isClosing = true;
             _updateCancellation.Cancel();
             StopClicking();
-            _clickTimer.Stop();
+            _clickCancellation?.Cancel();
             _overlayForm.Close();
         }
 
@@ -246,7 +248,8 @@ namespace MouseClicker
             _updateCancellation.Cancel();
             _updateCancellation.Dispose();
             if (_ownsUpdateHttpClient) _updateHttpClient.Dispose();
-            _clickTimer.Dispose();
+            _clickCancellation?.Cancel();
+            _helpForm?.Dispose();
             areaClickButtonMenu?.Dispose();
             if (!_overlayForm.IsDisposed) _overlayForm.Dispose();
             _hotkeyManager?.Dispose();
@@ -356,7 +359,9 @@ namespace MouseClicker
             areaClickButtonMenu = new ContextMenuStrip();
             leftClickMenuItem = new ToolStripMenuItem();
             rightClickMenuItem = new ToolStripMenuItem();
-            areaClickButtonMenu.Items.AddRange(new ToolStripItem[] { leftClickMenuItem, rightClickMenuItem });
+            conditionMenuItem = new ToolStripMenuItem();
+            conditionMenuItem.Click += (_, _) => EditSelectedCondition();
+            areaClickButtonMenu.Items.AddRange(new ToolStripItem[] { leftClickMenuItem, rightClickMenuItem, new ToolStripSeparator(), conditionMenuItem });
             areaClickButtonMenu.Opening += (_, e) =>
             {
                 if (areasListBox.SelectedItem is not ClickArea selectedArea)
@@ -366,7 +371,7 @@ namespace MouseClicker
                 }
                 leftClickMenuItem.Checked = !selectedArea.RightButton;
                 rightClickMenuItem.Checked = selectedArea.RightButton;
-                leftClickMenuItem.Enabled = rightClickMenuItem.Enabled = !_isClicking;
+                leftClickMenuItem.Enabled = rightClickMenuItem.Enabled = conditionMenuItem.Enabled = _clickSession == null;
             };
             leftClickMenuItem.Click += (_, _) => SetSelectedAreaRightButton(false);
             rightClickMenuItem.Click += (_, _) => SetSelectedAreaRightButton(true);
@@ -380,6 +385,8 @@ namespace MouseClicker
             }
             helpMenuItem = new ToolStripMenuItem();
             viewHelpMenuItem = new ToolStripMenuItem();
+            conditionGuideMenuItem = new ToolStripMenuItem();
+            conditionGuideMenuItem.Click += (_, _) => ShowHelp(HelpTopic.ImageConditionSetup);
             aboutMenuItem = new ToolStripMenuItem();
             var toggleSelectionListBox = new ToggleSelectionListBox();
             this.areasListBox = toggleSelectionListBox;
@@ -413,7 +420,9 @@ namespace MouseClicker
             fileMenuItem.DropDownItems.Add(new ToolStripSeparator());
             fileMenuItem.DropDownItems.Add(hotkeySettingsMenuItem);
             areasListBox.ContextMenuStrip = areaClickButtonMenu;
+            areasListBox.DoubleClick += (_, _) => EditSelectedCondition();
             helpMenuItem.DropDownItems.Add(viewHelpMenuItem);
+            helpMenuItem.DropDownItems.Add(conditionGuideMenuItem);
             this.menuStrip.Items.Add(fileMenuItem);
             this.menuStrip.Items.Add(languageMenuItem);
             this.menuStrip.Items.Add(helpMenuItem);
@@ -578,11 +587,14 @@ namespace MouseClicker
             saveConfigMenuItem.Text = Localization.Get("SaveConfig");
             loadConfigMenuItem.Text = Localization.Get("LoadConfig");
             hotkeySettingsMenuItem.Text = Localization.Get("HotkeySettings");
+            conditionMenuItem.Text = Localization.Get("ConditionEdit");
             leftClickMenuItem.Text = Localization.Get("LeftMouseButton");
             rightClickMenuItem.Text = Localization.Get("RightMouseButton");
             languageMenuItem.Text = Localization.Get("Language");
             helpMenuItem.Text = Localization.Get("Help");
             viewHelpMenuItem.Text = Localization.Get("ViewHelp");
+            conditionGuideMenuItem.Text = HelpContent.GetCatalog(Localization.Language).ConditionGuideText;
+            _helpForm?.ReloadCatalog(HelpContent.GetCatalog(Localization.Language));
             aboutMenuItem.Text = Localization.Get("About");
             updateAvailableLinkLabel.Text = Localization.Get("UpdateAvailable");
             foreach (ToolStripMenuItem item in languageMenuItem.DropDownItems)
@@ -638,44 +650,27 @@ namespace MouseClicker
         }
 
         // “查看帮助”菜单项的点击事件。
-        private void viewHelpMenuItem_Click(object? sender, EventArgs e)
+        private void viewHelpMenuItem_Click(object? sender, EventArgs e) => ShowHelp(HelpTopic.QuickStart);
+
+        internal HelpForm? OpenHelpForm => _helpForm;
+
+        internal void ShowHelp(HelpTopic topic)
         {
-            using (Form tutorialForm = new Form())
+            if (_isClosing || IsDisposed || Disposing) return;
+            if (_helpForm == null || _helpForm.IsDisposed)
             {
-                tutorialForm.Text = Localization.Get("HelpTutorialTitle");
-                tutorialForm.Size = new Size(600, 500);
-                tutorialForm.StartPosition = FormStartPosition.CenterParent;
-                tutorialForm.FormBorderStyle = FormBorderStyle.Sizable;
-                tutorialForm.MaximizeBox = true;
-                tutorialForm.MinimizeBox = true;
-
-                Panel buttonPanel = new Panel();
-                buttonPanel.Height = 40;
-                buttonPanel.Dock = DockStyle.Bottom;
-
-                Button closeButton = new Button();
-                closeButton.Text = Localization.Get("CloseButton");
-                closeButton.DialogResult = DialogResult.OK;
-                closeButton.Size = new Size(100, 25);
-                closeButton.Location = new Point((buttonPanel.ClientSize.Width - closeButton.Width) / 2, (buttonPanel.ClientSize.Height - closeButton.Height) / 2);
-                closeButton.Anchor = AnchorStyles.None;
-                buttonPanel.Controls.Add(closeButton);
-
-                RichTextBox helpTextBox = new RichTextBox();
-                helpTextBox.Dock = DockStyle.Fill;
-                helpTextBox.ReadOnly = true;
-                helpTextBox.Text = Localization.Get("HelpTutorialContent");
-                helpTextBox.ScrollBars = RichTextBoxScrollBars.Vertical;
-                helpTextBox.Font = new Font("Microsoft YaHei UI", 9.75F, FontStyle.Regular, GraphicsUnit.Point, ((byte)(0)));
-                helpTextBox.BorderStyle = BorderStyle.None;
-
-                tutorialForm.Controls.Add(helpTextBox);
-                tutorialForm.Controls.Add(buttonPanel);
-                tutorialForm.AcceptButton = closeButton;
-
-                using (BeginModalScope()) tutorialForm.ShowDialog(this);
+                _helpForm = new HelpForm(HelpContent.GetCatalog(Localization.Language), topic, () => _isClicking);
+                _helpForm.Show(this);
+            }
+            else
+            {
+                _helpForm.ShowTopic(topic);
+                if (_helpForm.WindowState == FormWindowState.Minimized) _helpForm.WindowState = FormWindowState.Normal;
+                _helpForm.Show();
+                _helpForm.Activate();
             }
         }
+
 
         // “保存配置”菜单项的点击事件。
         private void saveConfigMenuItem_Click(object? sender, EventArgs e)
@@ -856,7 +851,7 @@ namespace MouseClicker
         {
             highlightCurrentAreaCheckBox.Enabled = showOverlayCheckBox.Checked;
             if (_overlayForm == null || _overlayForm.IsDisposed) return;
-            bool showOverlay = showOverlayCheckBox.Checked && !_isSelectingArea && !_isClosing;
+            bool showOverlay = showOverlayCheckBox.Checked && !_isSelectingArea && !_isClosing && !_conditionSession;
             ClickArea? preview = _hoveredArea ?? areasListBox.SelectedItem as ClickArea;
             if (!_clickAreas.Any(area => ReferenceEquals(area, preview))) preview = null;
             _overlayForm.PreviewArea = showOverlay && !_isClicking ? preview : null;
@@ -952,39 +947,135 @@ namespace MouseClicker
             if (_isClicking) { StopClicking(); } else { StartClicking(); }
         }
 
-        // 开始自动点击。
+        private void EditSelectedCondition()
+        {
+            if (_clickSession != null || areasListBox.SelectedItem is not ClickArea area) return;
+            _isSelectingArea = true;
+            UpdateOverlayState();
+            try
+            {
+                using (BeginModalScope())
+                using (var dialog = new ConditionSettingsForm(area.Condition, ShowHelp))
+                {
+                    if (dialog.ShowDialog(this) == DialogResult.OK)
+                    {
+                        area.Condition = dialog.ResultCondition;
+                        RefreshAreaList();
+                    }
+                }
+            }
+            catch (Exception ex) { ShowMessageBox(ex.Message, Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            finally { _isSelectingArea = false; UpdateOverlayState(); }
+        }
+
         private void StartClicking()
         {
+            if (_clickSession != null || _isClosing) return;
             if (_clickAreas.Count == 0)
             {
                 using (BeginModalScope()) MessageBox.Show(Localization.Get("AddAreaFirst"));
                 return;
             }
-
+            ClickArea[] snapshot;
+            try
+            {
+                snapshot = JsonSerializer.Deserialize<ClickArea[]>(JsonSerializer.Serialize(_clickAreas))!;
+                foreach (var area in snapshot) area.Condition?.Validate();
+            }
+            catch (Exception ex) { ShowMessageBox(ex.Message, Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error); return; }
+            var options = new ClickSessionOptions { SequenceIndex = sequenceComboBox.SelectedIndex,
+                IntervalMs = (int)intervalNumericUpDown.Value, JitterMs = (int)jitterNumericUpDown.Value };
+            bool hardwareMode = hardwareModeCheckBox.Checked;
+            var cancellation = new CancellationTokenSource();
+            _clickCancellation = cancellation;
+            var id = ++_clickSessionId;
+            _conditionSession = snapshot.Any(area => area.Condition != null);
             _isClicking = true;
             ClearHoveredArea();
             _activeClickArea = null;
-            _currentClickIndex = 0;
             startButton.Text = Localization.Get("StopClicking");
             SetUIEnabled(false);
-            
             UpdateOverlayState();
-
-            clickTimer_Tick(this, EventArgs.Empty);
+            _clickSession = Task.CompletedTask;
+            _clickSession = RunSessionAsync(snapshot, options, hardwareMode, cancellation, id);
         }
 
-        // 停止自动点击。
+        private async Task RunSessionAsync(ClickArea[] snapshot, ClickSessionOptions options, bool hardwareMode,
+            CancellationTokenSource cancellation, long id)
+        {
+            await Task.Yield();
+            Exception? failure = null;
+            try
+            {
+                await Task.Run(async () =>
+                {
+                    using var detector = new OpenCvConditionDetector();
+                    var runner = new ClickSessionRunner(detector);
+                    await runner.RunAsync(snapshot, options, async (area, token) =>
+                    {
+                        token.ThrowIfCancellationRequested();
+                        await this.InvokeAsync(() =>
+                        {
+                            token.ThrowIfCancellationRequested();
+                            if (_isClosing || !_isClicking || id != _clickSessionId) throw new OperationCanceledException(token);
+                            _mouseController.PerformRandomClickInArea(area.Area, hardwareMode, area.RightButton);
+                            var index = Array.IndexOf(snapshot, area);
+                            _activeClickArea = index >= 0 && index < _clickAreas.Count ? _clickAreas[index] : null;
+                            UpdateOverlayState();
+                        }, token);
+                    }, (area, detected) =>
+                    {
+                        if (cancellation.IsCancellationRequested || _isClosing) return;
+                        try
+                        {
+                            BeginInvoke(() =>
+                            {
+                                if (_isClosing || !_isClicking || id != _clickSessionId) return;
+                                Text = Localization.Get("WindowTitle") + " — " + area.Label + " — " +
+                                    Localization.Get(detected.HasValue && detected.Value.Score >= (area.Condition?.Threshold ?? 1)
+                                    ? "ConditionMatched" : "ConditionWaiting") + (detected.HasValue ? " " + detected.Value.Score.ToString("F3") : string.Empty);
+                            });
+                        }
+                        catch (InvalidOperationException) when (_isClosing || IsDisposed || Disposing) { }
+                    }, cancellation.Token);
+                }, cancellation.Token);
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested || _isClosing) { }
+            catch (Exception ex) { failure = ex; }
+            finally
+            {
+                cancellation.Dispose();
+                if (id == _clickSessionId)
+                {
+                    _clickCancellation = null;
+                    _clickSession = null;
+                    _isClicking = false;
+                    _conditionSession = false;
+                    _activeClickArea = null;
+                    if (!_isClosing && !IsDisposed && !Disposing)
+                    {
+                        Text = Localization.Get("WindowTitle");
+                        startButton.Enabled = true;
+                        startButton.Text = Localization.Get("StartClicking");
+                        SetUIEnabled(true);
+                    }
+                }
+            }
+            if (failure != null && !_isClosing && !IsDisposed && !Disposing)
+                ShowMessageBox(failure.Message, Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
         private void StopClicking()
         {
-            _activeClickArea = null;
-            ClearHoveredArea();
-            if (!_isClicking) { UpdateOverlayState(); return; }
-
-
-            _clickTimer.Stop();
             _isClicking = false;
-            startButton.Text = Localization.Get("StartClicking");
-            SetUIEnabled(true);
+            _activeClickArea = null;
+            _clickCancellation?.Cancel();
+            if (_clickSession != null && !_isClosing)
+            {
+                startButton.Enabled = false;
+                startButton.Text = Localization.Get("ConditionStopped");
+            }
+            UpdateOverlayState();
         }
 
         // 在点击过程中禁用或启用UI控件。
@@ -1011,63 +1102,5 @@ namespace MouseClicker
             return Math.Max(10, Math.Abs(baseInterval + randomJitter));
         }
 
-        // 定时器事件，用于执行点击。
-        private void clickTimer_Tick(object? sender, EventArgs e)
-        {
-            if (!_isClicking) return;
-
-            _clickTimer.Stop();
-
-            ClickArea? areaToClick = GetNextArea();
-            if (areaToClick == null) { StopClicking(); return; }
-
-            try
-            {
-                _mouseController.PerformRandomClickInArea(areaToClick.Area, hardwareModeCheckBox.Checked, areaToClick.RightButton);
-                _activeClickArea = _isClicking ? areaToClick : null;
-                UpdateOverlayState();
-            }
-            catch (Exception ex)
-            {
-                // 上报原生输入失败，并确保计时器和全局钩子不会继续处于活动状态。
-                StopClicking();
-                ShowMessageBox(
-                    string.Format(Localization.Get("MouseInputError"), ex.Message),
-                    this.Text,
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
-                return;
-            }
-
-            if (_isClicking)
-            {
-                int baseInterval = (int)intervalNumericUpDown.Value;
-                int jitter = (int)jitterNumericUpDown.Value;
-                int randomJitter = _random.Next(-jitter, jitter + 1);
-                _clickTimer.Interval = CalculateClickInterval(baseInterval, randomJitter);
-                _clickTimer.Start();
-            }
-        }
-        
-        // 根据序列模式获取下一个点击区域。
-        private ClickArea? GetNextArea()
-        {
-            if (_clickAreas.Count == 0) return null;
-            string mode = sequenceComboBox.Text;
-            
-            if (mode == Localization.Get("SequenceRandom"))
-            {
-                return _clickAreas[_random.Next(0, _clickAreas.Count)];
-            }
-            
-            if (_currentClickIndex >= _clickAreas.Count)
-            {
-                if (mode == Localization.Get("SequenceLoop")) { _currentClickIndex = 0; } else { return null; }
-            }
-            
-            var area = _clickAreas[_currentClickIndex];
-            _currentClickIndex++;
-            return area;
-        }
     }
 }

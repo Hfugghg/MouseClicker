@@ -12,6 +12,59 @@ namespace MouseClicker.Tests
 
         public void Dispose() => Localization.Language = _originalLanguage;
 
+        [Theory]
+        [InlineData("zh-CN", "请先截取或导入模板图片。", "模板图片超过 8 MB 大小限制。")]
+        [InlineData("en-US", "Capture or import a template image first.", "The template image exceeds the 8 MB limit.")]
+        public void ConditionTemplateErrors_DistinguishMissingFromOversized(string language, string emptyMessage, string sizeMessage)
+        {
+            Localization.Language = language;
+            var condition = new ClickCondition { DetectionArea = new System.Drawing.Rectangle(0, 0, 40, 40) };
+            Assert.Equal(emptyMessage, Assert.Throws<InvalidDataException>(() => condition.Validate()).Message);
+            condition.TemplateImageBase64 = new string('A', ((ClickCondition.MaximumTemplateBytes + 2) / 3 * 4) + 4);
+            Assert.Equal(sizeMessage, Assert.Throws<InvalidDataException>(() => condition.Validate()).Message);
+            Assert.NotEqual(emptyMessage, sizeMessage);
+        }
+
+        [Fact]
+        public void ConditionErrorKeys_AreTranslatedInAllLanguages()
+        {
+            string[] suffixes = ["DetectionArea", "Settings", "Decode", "Encoding", "Png", "Dimensions", "CaptureArea",
+                "OutsideDisplays", "LowDetail", "TemplateFit", "Score", "TemplateEmpty", "TemplateSize", "Timeout", "Recognition"];
+            var translations = GetTranslations();
+            foreach (var language in Localization.SupportedLanguages.Keys)
+                foreach (var suffix in suffixes)
+                {
+                    var key = "ConditionError" + suffix;
+                    Assert.True(translations[language].TryGetValue(key, out var value));
+                    Assert.False(string.IsNullOrWhiteSpace(value));
+                    Assert.DoesNotContain("{", value);
+                    if (language != "en-US") Assert.NotEqual(translations["en-US"][key], value);
+                }
+        }
+
+        [Fact]
+        public async Task ConditionTimeout_UsesChineseAndKeepsTaskLabel()
+        {
+            Localization.Language = "zh-CN";
+            using var bitmap = new System.Drawing.Bitmap(4, 4);
+            using var stream = new MemoryStream();
+            bitmap.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            var area = new ClickArea { Label = "任务甲", Area = new System.Drawing.Rectangle(90, 90, 5, 5),
+                Condition = new ClickCondition { DetectionArea = new System.Drawing.Rectangle(0, 0, 40, 40),
+                    TemplateImageBase64 = Convert.ToBase64String(stream.ToArray()), TimeoutMs = 1 } };
+            using var detector = new UnmatchedConditionDetector();
+            var error = await Assert.ThrowsAsync<TimeoutException>(() => new ClickSessionRunner(detector).RunAsync([area],
+                new ClickSessionOptions(), (_, _) => throw new Xunit.Sdk.XunitException("Unexpected click"), null, CancellationToken.None));
+            Assert.Contains("[任务甲]", error.Message);
+            Assert.Contains("等待画面条件超时。", error.Message);
+        }
+
+        private sealed class UnmatchedConditionDetector : IConditionDetector
+        {
+            public DetectionResult Detect(ClickCondition condition) => new(0, System.Drawing.Rectangle.Empty);
+            public void Dispose() { }
+        }
+
         private static Dictionary<string, Dictionary<string, string>> GetTranslations()
         {
             var field = typeof(Localization).GetField("Translations", BindingFlags.NonPublic | BindingFlags.Static);

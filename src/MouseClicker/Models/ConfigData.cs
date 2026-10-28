@@ -68,6 +68,7 @@ namespace MouseClicker
             {
                 throw new InvalidDataException("Configuration contains an invalid click area.");
             }
+            foreach (var area in ClickAreas) area.Condition?.Validate();
         }
     }
 }
