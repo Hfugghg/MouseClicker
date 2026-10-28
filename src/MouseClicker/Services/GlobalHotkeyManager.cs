@@ -6,6 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading;
+using System.Runtime.ExceptionServices;
 using System.Windows.Forms;
 
 namespace MouseClicker
@@ -17,13 +19,37 @@ namespace MouseClicker
     {
         private const int WhKeyboardLl = 13, WmKeyDown = 0x0100, WmKeyUp = 0x0101, WmSysKeyDown = 0x0104, WmSysKeyUp = 0x0105;
         private const int VkShift = 0x10, VkControl = 0x11, VkMenu = 0x12, VkLWin = 0x5B, VkRWin = 0x5C;
-        private static readonly LowLevelKeyboardProc HookProc = HookCallback;
-        private static GlobalHotkeyManager? _instance;
+        private readonly LowLevelKeyboardProc _hookProc;
+        private readonly Thread _hookThread;
+        private uint _threadId;
+        private volatile Keys _hotkey = Keys.F6;
         private readonly HashSet<int> _pressedKeys = new();
         private readonly string _settingsPath;
         private IntPtr _hookId;
         private bool _disposed;
         private delegate IntPtr LowLevelKeyboardProc(int nCode, IntPtr wParam, IntPtr lParam);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct NativeMessage
+        {
+            public IntPtr Window;
+            public uint Message;
+            public UIntPtr WParam;
+            public IntPtr LParam;
+            public uint Time;
+            public System.Drawing.Point Point;
+            public uint Private;
+        }
+
+        [DllImport("kernel32.dll")]
+        private static extern uint GetCurrentThreadId();
+        [DllImport("user32.dll")]
+        private static extern bool PeekMessage(out NativeMessage message, IntPtr window, uint minimum, uint maximum, uint remove);
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int GetMessage(out NativeMessage message, IntPtr window, uint minimum, uint maximum);
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern bool PostThreadMessage(uint threadId, uint message, UIntPtr wParam, IntPtr lParam);
+
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         private static extern IntPtr GetModuleHandle(string moduleName);
@@ -41,8 +67,44 @@ namespace MouseClicker
         {
             _settingsPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MouseClicker", "hotkey.json");
             Hotkey = LoadHotkey();
-            if (_instance != null) throw new InvalidOperationException("Only one global hotkey manager can be active.");
-            _instance = this;
+            _hookProc = HookCallback;
+            using var ready = new ManualResetEventSlim();
+            Exception? startupError = null;
+            _hookThread = new Thread(() =>
+            {
+                try
+                {
+                    _threadId = GetCurrentThreadId();
+                    PeekMessage(out _, IntPtr.Zero, 0, 0, 0);
+                    InstallHook();
+                }
+                catch (Exception ex) { startupError = ex; }
+                finally { ready.Set(); }
+
+                if (startupError != null) return;
+                try
+                {
+                    while (GetMessage(out _, IntPtr.Zero, 0, 0) > 0) { }
+                    // GetMessage 的 -1 返回值也必须退出并释放钩子。
+                }
+                finally
+                {
+                    if (_hookId != IntPtr.Zero) UnhookWindowsHookEx(_hookId);
+                    _hookId = IntPtr.Zero;
+                    _pressedKeys.Clear();
+                }
+            }) { IsBackground = true, Name = "MouseClicker global keyboard hook" };
+            _hookThread.Start();
+            ready.Wait();
+            if (startupError != null)
+            {
+                _hookThread.Join();
+                ExceptionDispatchInfo.Capture(startupError).Throw();
+            }
+        }
+
+        private void InstallHook()
+        {
             IntPtr moduleHandle = IntPtr.Zero;
             using (Process currentProcess = Process.GetCurrentProcess())
             using (ProcessModule? currentModule = currentProcess.MainModule)
@@ -50,17 +112,22 @@ namespace MouseClicker
                 if (currentModule?.ModuleName is string moduleName)
                     moduleHandle = GetModuleHandle(moduleName);
             }
-            _hookId = SetWindowsHookEx(WhKeyboardLl, HookProc, moduleHandle, 0);
+            _hookId = SetWindowsHookEx(WhKeyboardLl, _hookProc, moduleHandle, 0);
             if (_hookId == IntPtr.Zero)
             {
-                _instance = null;
                 throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to install the global keyboard hook.");
             }
         }
 
-        public Keys Hotkey { get; private set; } = Keys.F6;
-        public event Action<Keys>? KeyPressed;
-        public Func<bool>? ShouldSuppressEscape { get; set; }
+        public Keys Hotkey { get => _hotkey; private set => _hotkey = value; }
+        private volatile Action<Keys>? _keyPressed;
+        private volatile Func<bool>? _shouldSuppressEscape;
+        public event Action<Keys>? KeyPressed
+        {
+            add => _keyPressed += value;
+            remove => _keyPressed -= value;
+        }
+        public Func<bool>? ShouldSuppressEscape { get => _shouldSuppressEscape; set => _shouldSuppressEscape = value; }
         public static IReadOnlyList<Keys> SupportedKeys { get; } = new[]
         {
             Keys.F6, Keys.F7, Keys.F8, Keys.F9, Keys.F10, Keys.F11, Keys.F12,
@@ -116,10 +183,10 @@ namespace MouseClicker
             return HookKeyDecision.PassThrough;
         }
 
-        private static IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
+        private IntPtr HookCallback(int nCode, IntPtr wParam, IntPtr lParam)
         {
-            var instance = _instance;
-            if (instance != null && nCode >= 0)
+            var instance = this;
+            if (nCode >= 0)
             {
                 int message = wParam.ToInt32();
                 int keyCode = Marshal.ReadInt32(lParam);
@@ -138,7 +205,7 @@ namespace MouseClicker
                         bool isClicking = key == Keys.Escape && instance.ShouldSuppressEscape?.Invoke() == true;
                         var decision = DecideKeyDown(key, instance.Hotkey, controlDown, altDown, shiftDown, windowsDown, isClicking);
                         if (firstPress && (decision & HookKeyDecision.Invoke) == HookKeyDecision.Invoke)
-                            instance.KeyPressed?.Invoke(key);
+                            instance._keyPressed?.Invoke(key);
                         if ((decision & HookKeyDecision.Suppress) == HookKeyDecision.Suppress)
                             return (IntPtr)1;
                     }
@@ -149,7 +216,7 @@ namespace MouseClicker
                 }
             }
 
-            return CallNextHookEx(instance?._hookId ?? IntPtr.Zero, nCode, wParam, lParam);
+            return CallNextHookEx(_hookId, nCode, wParam, lParam);
         }
 
         private static bool IsKeyDown(int virtualKey) => (GetAsyncKeyState(virtualKey) & 0x8000) != 0;
@@ -158,9 +225,10 @@ namespace MouseClicker
         {
             if (_disposed) return;
             _disposed = true;
-            if (_hookId != IntPtr.Zero) { UnhookWindowsHookEx(_hookId); _hookId = IntPtr.Zero; }
-            if (ReferenceEquals(_instance, this)) _instance = null;
-            _pressedKeys.Clear();
+            if (_hookThread.IsAlive && !PostThreadMessage(_threadId, 0x0012, UIntPtr.Zero, IntPtr.Zero))
+                throw new Win32Exception(Marshal.GetLastWin32Error(), "Unable to stop the global keyboard hook thread.");
+            if (Thread.CurrentThread != _hookThread) _hookThread.Join();
+            GC.KeepAlive(_hookProc);
         }
 
         private sealed class HotkeyPreferences { public string Hotkey { get; set; } = nameof(Keys.F6); }

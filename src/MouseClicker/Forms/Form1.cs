@@ -27,13 +27,13 @@ namespace MouseClicker
         private Point? _hoverPoint;
         private int _hoverRevision;
         private ClickArea? _activeClickArea;
-        private bool _isSelectingArea;
-        private int _modalDepth;
+        private volatile bool _isSelectingArea;
+        private volatile int _modalDepth;
 
         // --- 定时器和状态字段 ---
         private System.Windows.Forms.Timer _clickTimer;
         private Random _random = new Random();
-        private bool _isClicking = false;
+        private volatile bool _isClicking = false;
         private int _currentClickIndex = 0;
 
         private readonly HttpClient _updateHttpClient;
@@ -46,7 +46,7 @@ namespace MouseClicker
         private bool _updateCheckStarted;
         private bool _checkingForUpdates = true;
         private bool _updateCheckSucceeded;
-        private bool _isClosing;
+        private volatile bool _isClosing;
         private bool _updateResourcesDisposed;
         private UpdateInfo? _availableUpdate;
         private Version? _skippedUpdateVersion;
@@ -701,6 +701,8 @@ namespace MouseClicker
 
                     try
                     {
+                        configData.Validate(intervalNumericUpDown.Minimum, intervalNumericUpDown.Maximum,
+                            jitterNumericUpDown.Minimum, jitterNumericUpDown.Maximum, sequenceComboBox.Items.Count);
                         string jsonString = JsonSerializer.Serialize(configData, new JsonSerializerOptions { WriteIndented = true });
                         File.WriteAllText(saveFileDialog.FileName, jsonString);
                         ShowMessageBox(Localization.Get("ConfigSavedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -883,7 +885,7 @@ namespace MouseClicker
                     DialogResult result;
                     using (BeginModalScope()) result = selectionForm.ShowDialog();
                     this.Show();
-                    if (result == DialogResult.OK)
+                    if (result == DialogResult.OK && selectionForm.SelectedArea.Width > 0 && selectionForm.SelectedArea.Height > 0)
                     {
                         string label;
                         using (BeginModalScope())

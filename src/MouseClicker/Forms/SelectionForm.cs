@@ -18,8 +18,10 @@ namespace MouseClicker
         public SelectionForm()
         {
             // --- 初始化窗口属性，使其成为一个半透明的覆盖层 ---
-            this.WindowState = FormWindowState.Maximized; // 最大化以覆盖整个屏幕
             this.FormBorderStyle = FormBorderStyle.None;  // 无边框
+            this.StartPosition = FormStartPosition.Manual;
+            this.WindowState = FormWindowState.Normal;
+            this.Bounds = SystemInformation.VirtualScreen;
             this.BackColor = Color.Black;                 // 背景色设为黑色
             this.Opacity = 0.3;                           // 30% 的不透明度，产生“变暗”效果
             this.Cursor = Cursors.Cross;                  // 设置光标为十字形
@@ -36,7 +38,9 @@ namespace MouseClicker
             if (e.Button == MouseButtons.Left)
             {
                 _startPoint = e.Location; // 记录起始点
+                _selectionRectangle = Rectangle.Empty;
                 _isDrawing = true;
+                Invalidate();
             }
         }
 
@@ -46,11 +50,7 @@ namespace MouseClicker
             if (_isDrawing)
             {
                 // 根据起始点和当前鼠标位置计算矩形的左上角坐标、宽度和高度
-                int x = Math.Min(_startPoint.X, e.X);
-                int y = Math.Min(_startPoint.Y, e.Y);
-                int width = Math.Abs(_startPoint.X - e.X);
-                int height = Math.Abs(_startPoint.Y - e.Y);
-                _selectionRectangle = new Rectangle(x, y, width, height);
+                UpdateSelectionRectangle(e.Location);
 
                 // 使窗口的当前区域无效，并触发重绘消息（调用OnPaint）
                 this.Invalidate();
@@ -60,15 +60,26 @@ namespace MouseClicker
         // 当鼠标松开时触发，完成选择。
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            if (e.Button == MouseButtons.Left && _isDrawing)
             {
                 _isDrawing = false;
+                UpdateSelectionRectangle(e.Location);
+                Invalidate();
+                // 单击或只沿一个方向拖动时继续等待有效选区。
+                if (_selectionRectangle.Width <= 0 || _selectionRectangle.Height <= 0) return;
                 // 保存最终选择的矩形区域
-                SelectedArea = _selectionRectangle;
+                SelectedArea = RectangleToScreen(_selectionRectangle);
                 // 将对话框结果设置为OK，通知调用方选择已完成
                 this.DialogResult = DialogResult.OK;
                 this.Close(); // 关闭选择窗口
             }
+        }
+
+        private void UpdateSelectionRectangle(Point point)
+        {
+            _selectionRectangle = Rectangle.FromLTRB(
+                Math.Min(_startPoint.X, point.X), Math.Min(_startPoint.Y, point.Y),
+                Math.Max(_startPoint.X, point.X), Math.Max(_startPoint.Y, point.Y));
         }
 
         // 绘制选择框。
