@@ -13,8 +13,8 @@ namespace MouseClicker.Tests
         public void Dispose() => Localization.Language = _originalLanguage;
 
         [Theory]
-        [InlineData("zh-CN", "请先截取或导入模板图片。", "模板图片超过 8 MB 大小限制。")]
-        [InlineData("en-US", "Capture or import a template image first.", "The template image exceeds the 8 MB limit.")]
+        [InlineData("zh-CN", "请先截取或导入模板图片。", "原始模板上限为 32 MiB、32M 像素。")]
+        [InlineData("en-US", "Capture or import a template image first.", "Original templates are limited to 32 MiB and 32M pixels.")]
         public void ConditionTemplateErrors_DistinguishMissingFromOversized(string language, string emptyMessage, string sizeMessage)
         {
             Localization.Language = language;
@@ -193,6 +193,27 @@ namespace MouseClicker.Tests
         [InlineData("LeftMouseButton")]
         [InlineData("RightMouseButton")]
         [InlineData("MouseInputError")]
+        [InlineData("ShowDetectionOverlay")]
+        [InlineData("DetectionOverlayLabel")]
+        [InlineData("ConditionTemplateDimensions")]
+        [InlineData("ConditionDetectionDimensions")]
+        [InlineData("ConditionTemplateFit")]
+        [InlineData("ConditionSetupRegionFirst")]
+        [InlineData("ConditionSetupTemplate")]
+        [InlineData("ConditionResizeDetection")]
+        [InlineData("TemplateCaptureInstructions")]
+        [InlineData("TemplateCaptureSize")]
+        [InlineData("TemplateCaptureInvalidArea")]
+        [InlineData("TemplateCropTitle")]
+        [InlineData("TemplateCropHint")]
+        [InlineData("TemplateCropConfirm")]
+        [InlineData("TemplateCropDimensions")]
+        [InlineData("TemplateCropKeyboardHint")]
+        [InlineData("ConditionImportTooLarge")]
+        [InlineData("ConditionUseMultiScale")]
+        [InlineData("ConditionScaleHint")]
+        [InlineData("ConditionCropTemplate")]
+        [InlineData("ConditionMatchScale")]
         public void RequiredKeys_ExistInAllTenLanguages(string key)
         {
             var translations = GetTranslations();
@@ -212,18 +233,32 @@ namespace MouseClicker.Tests
             {
                 "SaveConfigError", "LoadConfigError", "AboutMessage", "UpdateAvailableVersion",
                 "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "HotkeyUnavailable",
-                "MouseInputError"
+                "MouseInputError", "DetectionOverlayLabel"
             };
             foreach (var language in GetTranslations())
             {
                 foreach (var entry in language.Value)
                 {
                     var format = CompositeFormat.Parse(entry.Value);
-                    bool requiresArgument = formattedKeys.Contains(entry.Key);
-                    Assert.Equal(requiresArgument ? 1 : 0, format.MinimumArgumentCount);
-                    if (requiresArgument)
+                    int argumentCount = entry.Key switch
                     {
-                        Assert.Contains("test-value", string.Format(CultureInfo.InvariantCulture, entry.Value, "test-value"));
+                        "ConditionTemplateDimensions" => 2,
+                        "ConditionMatchScale" => 3,
+                        "ConditionDetectionDimensions" or "ConditionTemplateFit" or "TemplateCaptureSize" or "TemplateCropDimensions" => 4,
+                        _ => formattedKeys.Contains(entry.Key) ? 1 : 0
+                    };
+                    Assert.Equal(argumentCount, format.MinimumArgumentCount);
+                    if (argumentCount > 0)
+                    {
+                        var arguments = Enumerable.Range(0, argumentCount).Select(index => entry.Key == "ConditionMatchScale" ? (object)(index + .5) : $"test-value-{index}").ToArray();
+                        var rendered = string.Format(CultureInfo.InvariantCulture, entry.Value, arguments);
+                        if (entry.Key == "ConditionMatchScale")
+                        {
+                            Assert.Contains("50", rendered);
+                            Assert.Contains("1.5", rendered);
+                            Assert.Contains("2.5", rendered);
+                        }
+                        else foreach (var argument in arguments) Assert.Contains((string)argument, rendered);
                     }
                 }
             }

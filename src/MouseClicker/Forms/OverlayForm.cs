@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace MouseClicker
@@ -9,10 +10,53 @@ namespace MouseClicker
     public class OverlayForm : Form
     {
         private const int WS_EX_TRANSPARENT = 0x20;
+        private const uint WDA_EXCLUDEFROMCAPTURE = 0x11;
+        internal bool IsExcludedFromCapture { get; private set; }
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        internal bool RequireCaptureExclusion { get; set; }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetWindowDisplayAffinity(IntPtr window, uint affinity);
+
+        internal bool CanShowDuringCondition()
+        {
+            if (IsDisposed || Disposing) return false;
+            // Create the handle before deciding: affinity belongs to each HWND.
+            _ = Handle;
+            return IsExcludedFromCapture;
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            IsExcludedFromCapture = OperatingSystem.IsWindowsVersionAtLeast(10, 0, 19041) &&
+                SetWindowDisplayAffinity(Handle, WDA_EXCLUDEFROMCAPTURE);
+            if (RequireCaptureExclusion && !IsExcludedFromCapture) Hide();
+        }
+
+        protected override void SetVisibleCore(bool value)
+        {
+            if (value && RequireCaptureExclusion && !CanShowDuringCondition()) value = false;
+            base.SetVisibleCore(value);
+        }
+
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            IsExcludedFromCapture = false;
+            base.OnHandleDestroyed(e);
+        }
         private ClickArea? _previewArea;
         private ClickArea? _activeArea;
         internal static readonly Color PreviewColor = Color.DodgerBlue;
         internal static readonly Color ActiveColor = Color.LimeGreen;
+        internal static readonly Color DetectionColor = Color.DarkOrange;
+
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        internal bool ShowClickAreas { get; set; } = true;
+
+        [System.ComponentModel.DesignerSerializationVisibility(System.ComponentModel.DesignerSerializationVisibility.Hidden)]
+        internal bool ShowDetectionAreas { get; set; }
 
         [System.ComponentModel.DesignerSerializationVisibility(
             System.ComponentModel.DesignerSerializationVisibility.Hidden)]
@@ -73,6 +117,12 @@ namespace MouseClicker
         internal static Color GetBorderColor(ClickArea area, ClickArea? preview, ClickArea? active) =>
             ReferenceEquals(area, active) ? ActiveColor : ReferenceEquals(area, preview) ? PreviewColor : Color.Red;
 
+        internal static IEnumerable<ClickArea> GetDetectionAreas(IEnumerable<ClickArea> areas) =>
+            areas.Where(area => area.Condition is { DetectionArea.Width: > 0, DetectionArea.Height: > 0 });
+
+        internal static Rectangle ToLocalArea(Rectangle area, Point origin) =>
+            new(area.X - origin.X, area.Y - origin.Y, area.Width, area.Height);
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -81,7 +131,7 @@ namespace MouseClicker
             var virtualScreen = SystemInformation.VirtualScreen;
             ClickArea? preview = PreviewArea;
             ClickArea? active = ActiveArea;
-            foreach (var area in GetDrawOrder(AreasToDraw, preview, active))
+            foreach (var area in GetDrawOrder(ShowClickAreas ? AreasToDraw : Enumerable.Empty<ClickArea>(), preview, active))
             {
                 // 绘制坐标相对于覆盖层窗口，而点击区域使用屏幕坐标。
                 var localArea = new Rectangle(
@@ -103,6 +153,23 @@ namespace MouseClicker
                     var textX = localArea.X + (localArea.Width - textSize.Width) / 2;
                     var textY = localArea.Y + (localArea.Height - textSize.Height) / 2;
                     e.Graphics.DrawString(area.Label, font, brush, textX, textY);
+                }
+            }
+            // Draw dashed detection borders last so coincident click borders remain distinguishable.
+            if (ShowDetectionAreas)
+            {
+                using var pen = new Pen(DetectionColor, 2) { DashStyle = DashStyle.Dash };
+                using var font = new Font("Arial", 11, FontStyle.Bold);
+                using var brush = new SolidBrush(DetectionColor);
+                foreach (var area in GetDetectionAreas(AreasToDraw))
+                {
+                    var bounds = ToLocalArea(area.Condition!.DetectionArea, virtualScreen.Location);
+                    e.Graphics.DrawRectangle(pen, bounds);
+                    var label = string.Format(Localization.Get("DetectionOverlayLabel"), area.Label);
+                    var state = e.Graphics.Save();
+                    e.Graphics.SetClip(bounds);
+                    e.Graphics.DrawString(label, font, brush, bounds.Left + 4, bounds.Top + 4);
+                    e.Graphics.Restore(state);
                 }
             }
         }

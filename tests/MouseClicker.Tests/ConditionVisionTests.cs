@@ -8,6 +8,108 @@ namespace MouseClicker.Tests;
 
 public class ConditionVisionTests
 {
+    [Theory]
+    [InlineData(4, 64, 64)]
+    [InlineData(16, 1920, 160)]
+    public void MultiScaleKeepsExactMatchingForTargetsBelowCoarseDetailFloor(int size, int width, int height)
+    {
+        using var pattern = Pattern();
+        using var template = pattern.Clone(new Rectangle(0, 0, size, size), PixelFormat.Format24bppRgb);
+        using var source = new Bitmap(width, height);
+        using (var g = Graphics.FromImage(source)) { g.Clear(Color.DimGray); g.DrawImageUnscaled(template, width - size - 11, 31); }
+        var result = OpenCvConditionDetector.Match(source, template, true);
+        Assert.True(result.Score > .99);
+        Assert.Equal(new Rectangle(width - size - 11, 31, size, size), result.MatchBounds);
+        Assert.Equal(1, result.Scale);
+    }
+
+    private static Bitmap StructuredPattern(int width, int height)
+    {
+        var image = new Bitmap(width, height);
+        using var g = Graphics.FromImage(image);
+        g.Clear(Color.Navy);
+        g.FillRectangle(Brushes.Coral, width * .1f, height * .15f, width * .3f, height * .4f);
+        g.FillEllipse(Brushes.LimeGreen, width * .45f, height * .1f, width * .4f, height * .6f);
+        g.FillRectangle(Brushes.White, width * .15f, height * .7f, width * .7f, height * .12f);
+        g.DrawLine(Pens.Yellow, 0, height - 1, width - 1, 0);
+        return image;
+    }
+
+    private static Bitmap Scaled(Bitmap image, int width, int height)
+    {
+        using var stream = new MemoryStream();
+        image.Save(stream, ImageFormat.Bmp);
+        using var mat = OpenCvSharp.Cv2.ImDecode(stream.ToArray(), OpenCvSharp.ImreadModes.Color);
+        using var resized = new OpenCvSharp.Mat();
+        OpenCvSharp.Cv2.Resize(mat, resized, new OpenCvSharp.Size(width, height), interpolation:
+            width < image.Width ? OpenCvSharp.InterpolationFlags.Area : OpenCvSharp.InterpolationFlags.Linear);
+        OpenCvSharp.Cv2.ImEncode(".bmp", resized, out byte[] bytes);
+        using var encoded = new MemoryStream(bytes);
+        using var decoded = new Bitmap(encoded);
+        return new Bitmap(decoded);
+    }
+
+    [Theory]
+    [InlineData(1000, 500, 200, 100)]
+    [InlineData(1000, 500, 173, 86)]
+    [InlineData(80, 40, 137, 68)]
+    [InlineData(3840, 1920, 192, 96)]
+    [InlineData(80, 40, 32, 16)]
+    public void MultiScaleFindsSmallerAndLargerTargetsWithTrueBounds(int tw, int th, int width, int height)
+    {
+        using var template = StructuredPattern(tw, th);
+        using var target = Scaled(template, width, height);
+        using var source = new Bitmap(400, 300);
+        using (var g = Graphics.FromImage(source)) { g.Clear(Color.DimGray); g.DrawImageUnscaled(target, 43, 67); }
+        var found = OpenCvConditionDetector.Match(source, template, true);
+        Assert.True(found.Score > .9, $"Score={found.Score}, bounds={found.MatchBounds}, scale={found.Scale}");
+        Assert.InRange(Math.Abs(found.MatchBounds.X - 43), 0, 1);
+        Assert.InRange(Math.Abs(found.MatchBounds.Y - 67), 0, 1);
+        Assert.InRange(Math.Abs(found.MatchBounds.Width - width), 0, 1);
+        Assert.InRange(Math.Abs(found.MatchBounds.Height - height), 0, 1);
+        Assert.Equal((double)found.MatchBounds.Width / tw, found.Scale, 10);
+    }
+
+    [Fact]
+    public void MultiScaleRejectsWrongPictureAndChoosesTrueColourTarget()
+    {
+        using var template = StructuredPattern(120, 60);
+        using var target = Scaled(template, 90, 45);
+        using var absent = new Bitmap(300, 120);
+        using (var g = Graphics.FromImage(absent)) g.Clear(Color.Gray);
+        Assert.True(OpenCvConditionDetector.Match(absent, template, true).Score < .9);
+        using var source = new Bitmap(300, 120);
+        for (int y = 0; y < target.Height; y++) for (int x = 0; x < target.Width; x++)
+        {
+            var p = target.GetPixel(x, y);
+            source.SetPixel(x + 5, y + 10, Color.FromArgb(p.B, p.R, p.G));
+        }
+        using (var g = Graphics.FromImage(source)) g.DrawImageUnscaled(target, 180, 50);
+        var found = OpenCvConditionDetector.Match(source, template, true);
+        Assert.True(found.Score > .9);
+        Assert.InRange(found.MatchBounds.X, 179, 181);
+        Assert.InRange(found.MatchBounds.Y, 49, 51);
+    }
+
+    [Fact]
+    public void HighResolutionModelPreservesOriginalAndDefaultsToOriginalSizeMatching()
+    {
+        using var image = StructuredPattern(3000, 1800);
+        var condition = Condition(image);
+        Assert.False(condition.UseMultiScale);
+        Assert.Throws<InvalidDataException>(condition.Validate);
+        condition.UseMultiScale = true;
+        condition.Validate();
+        var restored = JsonSerializer.Deserialize<ClickCondition>(JsonSerializer.Serialize(condition))!;
+        restored.Validate();
+        Assert.True(restored.UseMultiScale);
+        Assert.Equal(condition.TemplateImageBase64, restored.TemplateImageBase64);
+        using var tiny = Pattern();
+        using var source = new Bitmap(64, 64);
+        using (var g = Graphics.FromImage(source)) g.DrawImageUnscaled(tiny, 10, 20);
+        Assert.Equal(OpenCvConditionDetector.Match(source, tiny), OpenCvConditionDetector.Match(source, tiny, false));
+    }
+
     private static Bitmap Pattern(int seed = 1)
     {
         var bitmap = new Bitmap(16, 16);

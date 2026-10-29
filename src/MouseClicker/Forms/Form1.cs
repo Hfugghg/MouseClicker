@@ -57,7 +57,6 @@ namespace MouseClicker
         private MenuStrip menuStrip = null!;
         private ToolStripMenuItem fileMenuItem = null!, languageMenuItem = null!, helpMenuItem = null!, aboutMenuItem = null!;
         private HelpForm? _helpForm;
-        private ToolStripMenuItem conditionGuideMenuItem = null!;
         private ToolStripMenuItem saveConfigMenuItem = null!, loadConfigMenuItem = null!, viewHelpMenuItem = null!, hotkeySettingsMenuItem = null!;
         private ContextMenuStrip areaClickButtonMenu = null!;
         private ToolStripMenuItem leftClickMenuItem = null!, rightClickMenuItem = null!;
@@ -68,6 +67,7 @@ namespace MouseClicker
         private NumericUpDown intervalNumericUpDown = null!, jitterNumericUpDown = null!;
         private ComboBox sequenceComboBox = null!;
         private CheckBox showOverlayCheckBox = null!;
+        private CheckBox showDetectionOverlayCheckBox = null!;
         private CheckBox highlightCurrentAreaCheckBox = null!;
         private CheckBox hardwareModeCheckBox = null!;
         private Button startButton = null!;
@@ -385,8 +385,6 @@ namespace MouseClicker
             }
             helpMenuItem = new ToolStripMenuItem();
             viewHelpMenuItem = new ToolStripMenuItem();
-            conditionGuideMenuItem = new ToolStripMenuItem();
-            conditionGuideMenuItem.Click += (_, _) => ShowHelp(HelpTopic.ImageConditionSetup);
             aboutMenuItem = new ToolStripMenuItem();
             var toggleSelectionListBox = new ToggleSelectionListBox();
             this.areasListBox = toggleSelectionListBox;
@@ -402,6 +400,7 @@ namespace MouseClicker
             this.sequenceLabel = new Label { AutoSize = true };
             this.sequenceComboBox = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList };
             this.showOverlayCheckBox = new CheckBox { AutoSize = true, Checked = true };
+            this.showDetectionOverlayCheckBox = new CheckBox { AutoSize = true };
             this.highlightCurrentAreaCheckBox = new CheckBox { AutoSize = true, Checked = true };
             this.hardwareModeCheckBox = new CheckBox { AutoSize = true, Checked = false };
             this.startButton = new Button { Font = new Font(this.Font.FontFamily, 10, FontStyle.Bold) };
@@ -422,7 +421,6 @@ namespace MouseClicker
             areasListBox.ContextMenuStrip = areaClickButtonMenu;
             areasListBox.DoubleClick += (_, _) => EditSelectedCondition();
             helpMenuItem.DropDownItems.Add(viewHelpMenuItem);
-            helpMenuItem.DropDownItems.Add(conditionGuideMenuItem);
             this.menuStrip.Items.Add(fileMenuItem);
             this.menuStrip.Items.Add(languageMenuItem);
             this.menuStrip.Items.Add(helpMenuItem);
@@ -441,6 +439,7 @@ namespace MouseClicker
             this.Controls.Add(this.sequenceLabel);
             this.Controls.Add(this.sequenceComboBox);
             this.Controls.Add(this.showOverlayCheckBox);
+            this.Controls.Add(this.showDetectionOverlayCheckBox);
             this.Controls.Add(this.highlightCurrentAreaCheckBox);
             this.Controls.Add(this.hardwareModeCheckBox);
             this.Controls.Add(this.startButton);
@@ -469,6 +468,7 @@ namespace MouseClicker
                 QueueHoverRefresh();
             };
             showOverlayCheckBox.CheckedChanged += (s, e) => UpdateOverlayState();
+            showDetectionOverlayCheckBox.CheckedChanged += (s, e) => UpdateOverlayState();
             highlightCurrentAreaCheckBox.CheckedChanged += (s, e) => UpdateOverlayState();
         }
 
@@ -523,6 +523,9 @@ namespace MouseClicker
             showOverlayCheckBox.Location = new Point(sequenceComboBox.Right + controlPadding, currentY + 4);
             currentY += rowHeight + controlPadding;
 
+            showDetectionOverlayCheckBox.Location = new Point(formPadding, currentY);
+            currentY += rowHeight + controlPadding;
+
             highlightCurrentAreaCheckBox.Location = new Point(formPadding, currentY);
             currentY += rowHeight + controlPadding;
 
@@ -531,6 +534,7 @@ namespace MouseClicker
 
             int requiredWidth = Math.Max(moveDownButton.Right, jitterNumericUpDown.Right);
             requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right);
+            requiredWidth = Math.Max(requiredWidth, showDetectionOverlayCheckBox.Right);
             requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
             requiredWidth = Math.Max(requiredWidth, highlightCurrentAreaCheckBox.Right);
             requiredWidth += formPadding;
@@ -550,6 +554,7 @@ namespace MouseClicker
                 sequenceLabel.Top += hintOffset;
                 sequenceComboBox.Top += hintOffset;
                 showOverlayCheckBox.Top += hintOffset;
+                showDetectionOverlayCheckBox.Top += hintOffset;
                 hardwareModeCheckBox.Top += hintOffset;
                 highlightCurrentAreaCheckBox.Top += hintOffset;
                 currentY += hintOffset;
@@ -593,7 +598,6 @@ namespace MouseClicker
             languageMenuItem.Text = Localization.Get("Language");
             helpMenuItem.Text = Localization.Get("Help");
             viewHelpMenuItem.Text = Localization.Get("ViewHelp");
-            conditionGuideMenuItem.Text = HelpContent.GetCatalog(Localization.Language).ConditionGuideText;
             _helpForm?.ReloadCatalog(HelpContent.GetCatalog(Localization.Language));
             aboutMenuItem.Text = Localization.Get("About");
             updateAvailableLinkLabel.Text = Localization.Get("UpdateAvailable");
@@ -608,6 +612,7 @@ namespace MouseClicker
             jitterExceedsIntervalHintLabel.Text = Localization.Get("JitterExceedsIntervalHint");
             sequenceLabel.Text = Localization.Get("SequenceLabel");
             showOverlayCheckBox.Text = Localization.Get("ShowOverlay");
+            showDetectionOverlayCheckBox.Text = Localization.Get("ShowDetectionOverlay");
             highlightCurrentAreaCheckBox.Text = Localization.Get("HighlightCurrentArea");
             hardwareModeCheckBox.Text = Localization.Get("HardwareMode");
             startButton.Text = _isClicking ? Localization.Get("StopClicking") : Localization.Get("StartClicking");
@@ -690,6 +695,7 @@ namespace MouseClicker
                         Jitter = jitterNumericUpDown.Value,
                         SequenceIndex = sequenceComboBox.SelectedIndex,
                         ShowOverlay = showOverlayCheckBox.Checked,
+                        ShowDetectionOverlay = showDetectionOverlayCheckBox.Checked,
                         HighlightCurrentArea = highlightCurrentAreaCheckBox.Checked,
                         HardwareMode = hardwareModeCheckBox.Checked
                     };
@@ -744,6 +750,7 @@ namespace MouseClicker
                             jitterNumericUpDown.Value = configData.Jitter;
                             sequenceComboBox.SelectedIndex = configData.SequenceIndex;
                             showOverlayCheckBox.Checked = configData.ShowOverlay;
+                            showDetectionOverlayCheckBox.Checked = configData.ShowDetectionOverlay;
                             highlightCurrentAreaCheckBox.Checked = configData.HighlightCurrentArea;
                             hardwareModeCheckBox.Checked = configData.HardwareMode;
 
@@ -851,14 +858,19 @@ namespace MouseClicker
         {
             highlightCurrentAreaCheckBox.Enabled = showOverlayCheckBox.Checked;
             if (_overlayForm == null || _overlayForm.IsDisposed) return;
-            bool showOverlay = showOverlayCheckBox.Checked && !_isSelectingArea && !_isClosing && !_conditionSession;
+            _overlayForm.RequireCaptureExclusion = _conditionSession;
+            _overlayForm.ShowClickAreas = showOverlayCheckBox.Checked;
+            _overlayForm.ShowDetectionAreas = showDetectionOverlayCheckBox.Checked;
+            bool showOverlay = (showOverlayCheckBox.Checked || showDetectionOverlayCheckBox.Checked) && !_isSelectingArea && !_isClosing &&
+                (!_conditionSession || _overlayForm.CanShowDuringCondition());
             ClickArea? preview = _hoveredArea ?? areasListBox.SelectedItem as ClickArea;
             if (!_clickAreas.Any(area => ReferenceEquals(area, preview))) preview = null;
-            _overlayForm.PreviewArea = showOverlay && !_isClicking ? preview : null;
-            _overlayForm.ActiveArea = showOverlay && _isClicking && highlightCurrentAreaCheckBox.Checked ? _activeClickArea : null;
+            _overlayForm.PreviewArea = showOverlay && showOverlayCheckBox.Checked && !_isClicking ? preview : null;
+            _overlayForm.ActiveArea = showOverlay && showOverlayCheckBox.Checked && _isClicking && highlightCurrentAreaCheckBox.Checked ? _activeClickArea : null;
             if (showOverlay)
             {
                 if (!_overlayForm.Visible) _overlayForm.Show();
+                _overlayForm.Invalidate();
             }
             else
             {

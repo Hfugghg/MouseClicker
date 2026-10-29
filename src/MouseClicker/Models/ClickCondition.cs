@@ -14,8 +14,9 @@ public sealed class ClickCondition
     public int PollIntervalMs { get; set; } = 200;
     public int TimeoutMs { get; set; } = 60000;
     public ConditionTriggerMode TriggerMode { get; set; }
-    public const int MaximumTemplateBytes = 8 * 1024 * 1024;
-    public const int MaximumTemplatePixels = 4 * 1024 * 1024;
+    public bool UseMultiScale { get; set; }
+    public const int MaximumTemplateBytes = 32 * 1024 * 1024;
+    public const int MaximumTemplatePixels = 32 * 1024 * 1024;
 
     public void Validate()
     {
@@ -56,9 +57,11 @@ public sealed class ClickCondition
             throw new InvalidDataException(Localization.Get("ConditionErrorPng"));
         uint width = BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(16, 4));
         uint height = BinaryPrimitives.ReadUInt32BigEndian(bytes.AsSpan(20, 4));
-        if (width < 2 || height < 2 || width > DetectionArea.Width || height > DetectionArea.Height ||
+        if (width < 2 || height < 2 ||
             (ulong)width * height > MaximumTemplatePixels)
             throw new InvalidDataException(Localization.Get("ConditionErrorDimensions"));
+        if (!UseMultiScale && (width > DetectionArea.Width || height > DetectionArea.Height))
+            throw new InvalidDataException(string.Format(Localization.Get("ConditionTemplateFit"), width, height, DetectionArea.Width, DetectionArea.Height));
         return bytes;
     }
 }

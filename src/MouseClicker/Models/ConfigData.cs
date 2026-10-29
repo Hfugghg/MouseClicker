@@ -22,6 +22,9 @@ namespace MouseClicker
         // 是否显示点击区域的覆盖层。
         public bool ShowOverlay { get; set; }
 
+        // 检测范围独立显示；旧配置未指定时默认关闭。
+        public bool ShowDetectionOverlay { get; set; }
+
         // 缺少该字段的旧配置默认保留当前点击区域高亮。
         public bool HighlightCurrentArea { get; set; } = true;
 

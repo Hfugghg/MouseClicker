@@ -7,6 +7,17 @@ namespace MouseClicker.Tests
 {
     public class ConfigDataTests
     {
+        [Fact]
+        public void DetectionOverlayDefaultsOffForOldConfigurationsAndRoundTripsIndependently()
+        {
+            var old = JsonSerializer.Deserialize<ConfigData>("{\"ShowOverlay\":true}")!;
+            Assert.False(old.ShowDetectionOverlay);
+            var restored = JsonSerializer.Deserialize<ConfigData>(JsonSerializer.Serialize(
+                new ConfigData { ShowOverlay = false, ShowDetectionOverlay = true }))!;
+            Assert.False(restored.ShowOverlay);
+            Assert.True(restored.ShowDetectionOverlay);
+        }
+
         // ──────────────────────────────────────
         // 1. 新建 ConfigData 的默认值
         // ──────────────────────────────────────

@@ -8,6 +8,153 @@ namespace MouseClicker.Tests;
 public class ConditionSettingsFormTests
 {
     [Fact]
+    public void ImportSourceAndTemplateBudgetsAllowFullResolutionImages()
+    {
+        ConditionSettingsForm.ValidateImportSource(20L * 1024 * 1024, new Size(3840, 2160));
+        Assert.Throws<InvalidDataException>(() => ConditionSettingsForm.ValidateImportSource(ConditionSettingsForm.MaximumImportBytes + 1));
+        Assert.Throws<InvalidDataException>(() => ConditionSettingsForm.ValidateImportSource(0, new Size(8192, 8192)));
+    }
+
+    [Fact]
+    public void FullFourKTemplateCanBeKeptWithoutCroppingOrResizing() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition());
+        using var source = new Bitmap(3840, 2160);
+        source.SetPixel(3800, 2100, Color.Blue);
+        form.SetCroppedTemplate(source, new Rectangle(3800, 2100, 20, 20));
+        Field<CheckBox>(form, "useMultiScale").Checked = true;
+        typeof(ConditionSettingsForm).GetMethod("SetTemplate", Private)!.Invoke(form, [source]);
+        Assert.Equal(source.Size, Field<Bitmap>(form, "templateBitmap").Size);
+        Assert.Equal(Color.Blue.ToArgb(), Field<Bitmap>(form, "templateBitmap").GetPixel(3800, 2100).ToArgb());
+        Assert.True(form.BuildCondition().UseMultiScale);
+        Assert.True(Field<Button>(form, "test").Enabled);
+    });
+
+    private const BindingFlags Private = BindingFlags.NonPublic | BindingFlags.Instance;
+    private static T Field<T>(ConditionSettingsForm form, string name) => (T)typeof(ConditionSettingsForm).GetField(name, Private)!.GetValue(form)!;
+    private static void SetRegion(ConditionSettingsForm form, Rectangle area)
+    {
+        typeof(ConditionSettingsForm).GetField("detectionArea", Private)!.SetValue(form, area);
+        typeof(ConditionSettingsForm).GetMethod("UpdateRegion", Private)!.Invoke(form, null);
+    }
+
+    [Fact]
+    public void CaptureAndImportRequireDetectionAreaButTemplatePositionRemainsIndependent() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(null);
+        Assert.False(Field<Button>(form, "capture").Enabled);
+        Assert.False(Field<Button>(form, "import").Enabled);
+        Assert.True(Field<Button>(form, "save").Enabled);
+        SetRegion(form, new Rectangle(300, 50, 1, 20));
+        Assert.False(Field<Button>(form, "capture").Enabled);
+        SetRegion(form, new Rectangle(-900, -300, 30, 20));
+        Assert.True(Field<Button>(form, "capture").Enabled);
+        Assert.True(Field<Button>(form, "import").Enabled);
+        using var image = new Bitmap(30, 20);
+        typeof(ConditionSettingsForm).GetMethod("SetTemplate", Private)!.Invoke(form, [image]);
+        Assert.True(Field<Button>(form, "test").Enabled);
+        Assert.True(Field<Button>(form, "save").Enabled);
+        Assert.Equal(new Rectangle(-900, -300, 30, 20), form.BuildCondition().DetectionArea);
+    });
+
+    [Fact]
+    public void ImportCropUsesOriginalPixelsAndRejectsInvalidCropWithoutChangingTemplate() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition());
+        SetRegion(form, new Rectangle(-500, 20, 3, 3));
+        using var source = new Bitmap(8, 8);
+        source.SetPixel(5, 4, Color.CornflowerBlue);
+        source.SetPixel(6, 5, Color.Red);
+        form.SetCroppedTemplate(source, new Rectangle(5, 4, 2, 2));
+        var condition = form.BuildCondition();
+        using var stream = new MemoryStream(Convert.FromBase64String(condition.TemplateImageBase64));
+        using var image = new Bitmap(stream);
+        Assert.Equal(new Size(2, 2), image.Size);
+        Assert.Equal(Color.CornflowerBlue.ToArgb(), image.GetPixel(0, 0).ToArgb());
+        Assert.Equal(Color.Red.ToArgb(), image.GetPixel(1, 1).ToArgb());
+        Assert.Throws<InvalidDataException>(() => form.SetCroppedTemplate(source, new Rectangle(7, 7, 2, 2)));
+        Assert.Equal(condition.TemplateImageBase64, form.BuildCondition().TemplateImageBase64);
+    });
+
+    [Fact]
+    public void NewEditorEnablesScaleWhileExistingConditionsKeepOriginalMode() => OnSta(() =>
+    {
+        using var fresh = new ConditionSettingsForm(null);
+        Assert.True(Field<CheckBox>(fresh, "useMultiScale").Checked);
+        using var old = new ConditionSettingsForm(MakeCondition());
+        Assert.False(Field<CheckBox>(old, "useMultiScale").Checked);
+        SetRegion(old, new Rectangle(-400, 50, 2, 2));
+        Assert.False(Field<Button>(old, "save").Enabled);
+        Field<CheckBox>(old, "useMultiScale").Checked = true;
+        Assert.True(Field<Button>(old, "save").Enabled);
+        Assert.True(old.BuildCondition().UseMultiScale);
+        Field<CheckBox>(old, "useMultiScale").Checked = false;
+        Assert.False(Field<Button>(old, "test").Enabled);
+        Assert.Throws<InvalidDataException>(() => old.BuildCondition());
+    });
+
+    [Fact]
+    public void OptionalCropUsesRealTemplateAndCancelLeavesOriginalUnchanged() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition());
+        var original = form.BuildCondition().TemplateImageBase64;
+        typeof(ConditionSettingsForm).GetMethod("ReplacePreview", Private)!.Invoke(form, [new Bitmap(100, 80)]);
+        bool inspected = false;
+        using var cancel = new System.Windows.Forms.Timer { Interval = 50 };
+        cancel.Tick += (_, _) =>
+        {
+            var crop = Application.OpenForms.Cast<Form>().OfType<TemplateCropForm>().FirstOrDefault();
+            if (crop == null) return;
+            inspected = crop.CropArea.Size == new Size(4, 4);
+            crop.DialogResult = DialogResult.Cancel;
+            crop.Close();
+        };
+        cancel.Start();
+        typeof(ConditionSettingsForm).GetMethod("CropTemplate", Private)!.Invoke(form, null);
+        Assert.True(inspected);
+        Assert.Equal(original, form.BuildCondition().TemplateImageBase64);
+        Assert.Equal(new Size(4, 4), Field<Bitmap>(form, "templateBitmap").Size);
+    });
+
+    [Fact]
+    public void BusyEditorDisablesTemplateAndScaleOperations() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition());
+        typeof(ConditionSettingsForm).GetField("busy", Private)!.SetValue(form, true);
+        typeof(ConditionSettingsForm).GetMethod("UpdateSetupState", Private)!.Invoke(form, null);
+        foreach (var name in new[] { "capture", "import", "cropTemplate", "test", "save", "useMultiScale" })
+            Assert.False(Field<Control>(form, name).Enabled);
+    });
+
+    [Fact]
+    public void OversizeTemplateAndSmallerRegionAreImmediatelyRecoverable() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition());
+        SetRegion(form, new Rectangle(1200, 400, 3, 4));
+        Assert.False(Field<Button>(form, "test").Enabled);
+        Assert.False(Field<Button>(form, "save").Enabled);
+        Assert.Contains("4", Field<Label>(form, "setupHint").Text);
+        Assert.Throws<InvalidDataException>(() => form.BuildCondition());
+        Field<CheckBox>(form, "enabled").Checked = false;
+        Assert.True(Field<Button>(form, "save").Enabled);
+        using var smaller = new Bitmap(2, 2);
+        typeof(ConditionSettingsForm).GetMethod("SetTemplate", Private)!.Invoke(form, [smaller]);
+        Assert.True(Field<Button>(form, "test").Enabled);
+        Assert.True(Field<Button>(form, "save").Enabled);
+        using var larger = new Bitmap(8, 6);
+        typeof(ConditionSettingsForm).GetMethod("SetTemplate", Private)!.Invoke(form, [larger]);
+        Assert.False(Field<Button>(form, "test").Enabled);
+        SetRegion(form, new Rectangle(-800, 70, 10, 10));
+        Assert.True(Field<Button>(form, "save").Enabled);
+        Assert.Equal(new Size(8, 6), Field<Size>(form, "templateSize"));
+        // Recognition previews can have detection-region dimensions; they must not redefine the template size.
+        typeof(ConditionSettingsForm).GetMethod("ReplacePreview", Private)!.Invoke(form, [new Bitmap(100, 80)]);
+        SetRegion(form, new Rectangle(-800, 70, 10, 10));
+        Assert.True(Field<Button>(form, "test").Enabled);
+        Assert.Equal(new Size(8, 6), Field<Size>(form, "templateSize"));
+    });
+
+    [Fact]
     public void CaptureTemporarilyClearsOwnedGuideAndRestoresItsOpacity() => OnSta(() =>
     {
         using var owner = new Form { Opacity = .7 };
