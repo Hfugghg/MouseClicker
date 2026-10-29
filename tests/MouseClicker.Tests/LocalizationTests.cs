@@ -233,7 +233,7 @@ namespace MouseClicker.Tests
             {
                 "SaveConfigError", "LoadConfigError", "AboutMessage", "UpdateAvailableVersion",
                 "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "HotkeyUnavailable",
-                "MouseInputError", "DetectionOverlayLabel"
+                "MouseInputError", "DetectionOverlayLabel", "MainRunHint"
             };
             foreach (var language in GetTranslations())
             {

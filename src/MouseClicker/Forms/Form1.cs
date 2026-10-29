@@ -117,6 +117,8 @@ namespace MouseClicker
                 hotkeySettingsMenuItem.Enabled = false;
             }
 
+            UpdateAppearanceStrings();
+            PerformLayoutLayout();
             _overlayForm = new OverlayForm();
             UpdateOverlayState();
             this.Disposed += (_, _) => DisposeUpdateResources();
@@ -356,6 +358,7 @@ namespace MouseClicker
             saveConfigMenuItem = new ToolStripMenuItem();
             loadConfigMenuItem = new ToolStripMenuItem();
             hotkeySettingsMenuItem = new ToolStripMenuItem();
+            settingsMenuItem = new ToolStripMenuItem();
             areaClickButtonMenu = new ContextMenuStrip();
             leftClickMenuItem = new ToolStripMenuItem();
             rightClickMenuItem = new ToolStripMenuItem();
@@ -416,12 +419,12 @@ namespace MouseClicker
             this.MainMenuStrip = this.menuStrip;
             fileMenuItem.DropDownItems.Add(saveConfigMenuItem);
             fileMenuItem.DropDownItems.Add(loadConfigMenuItem);
-            fileMenuItem.DropDownItems.Add(new ToolStripSeparator());
-            fileMenuItem.DropDownItems.Add(hotkeySettingsMenuItem);
+            settingsMenuItem.DropDownItems.Add(hotkeySettingsMenuItem);
             areasListBox.ContextMenuStrip = areaClickButtonMenu;
             areasListBox.DoubleClick += (_, _) => EditSelectedCondition();
             helpMenuItem.DropDownItems.Add(viewHelpMenuItem);
             this.menuStrip.Items.Add(fileMenuItem);
+            this.menuStrip.Items.Add(settingsMenuItem);
             this.menuStrip.Items.Add(languageMenuItem);
             this.menuStrip.Items.Add(helpMenuItem);
             this.menuStrip.Items.Add(aboutMenuItem);
@@ -445,6 +448,7 @@ namespace MouseClicker
             this.Controls.Add(this.startButton);
 
             // 附加事件处理器
+            InitializeAppearance();
             saveConfigMenuItem.Click += new EventHandler(saveConfigMenuItem_Click);
             loadConfigMenuItem.Click += new EventHandler(loadConfigMenuItem_Click);
             hotkeySettingsMenuItem.Click += new EventHandler(hotkeySettingsMenuItem_Click);
@@ -456,8 +460,8 @@ namespace MouseClicker
             moveUpButton.Click += new EventHandler(moveUpButton_Click);
             moveDownButton.Click += new EventHandler(moveDownButton_Click);
             startButton.Click += new EventHandler(startButton_Click);
-            intervalNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
-            jitterNumericUpDown.ValueChanged += (s, e) => PerformLayoutLayout();
+            intervalNumericUpDown.ValueChanged += TimingValueChanged;
+            jitterNumericUpDown.ValueChanged += TimingValueChanged;
             toggleSelectionListBox.SelectionClearedByClick += (s, e) => ClearHoveredArea();
             areasListBox.MouseMove += areasListBox_MouseMove;
             areasListBox.MouseWheel += areasListBox_MouseWheel;
@@ -475,107 +479,7 @@ namespace MouseClicker
         // 动态调整UI控件的布局。
         private void PerformLayoutLayout()
         {
-            int controlPadding = 5;
-            int rowHeight = 30;
-            int formPadding = 10;
-            bool showUpdateBadge = _availableUpdate != null;
-            updateAvailableLinkLabel.Visible = showUpdateBadge;
-            int badgeHeight = showUpdateBadge ? updateAvailableLinkLabel.PreferredSize.Height + controlPadding : 0;
-            int currentY = menuStrip.Height + formPadding + badgeHeight;
-
-            int minimumButtonWidth = new[] { addAreaButton, removeAreaButton, moveUpButton, moveDownButton }
-                .Max(button => TextRenderer.MeasureText(button.Text, button.Font).Width + 20);
-            int formWidth = Math.Max(430, minimumButtonWidth * 4 + formPadding * 2 + controlPadding * 3);
-
-            areasListBox.Location = new Point(formPadding, currentY);
-            areasListBox.Size = new Size(formWidth - (formPadding * 2), 120);
-            currentY += areasListBox.Height + controlPadding;
-
-            int buttonWidth = (formWidth - (formPadding * 2) - (controlPadding * 3)) / 4;
-            addAreaButton.Location = new Point(formPadding, currentY);
-            addAreaButton.Size = new Size(buttonWidth, rowHeight);
-            removeAreaButton.Location = new Point(addAreaButton.Right + controlPadding, currentY);
-            removeAreaButton.Size = new Size(buttonWidth, rowHeight);
-            moveUpButton.Location = new Point(removeAreaButton.Right + controlPadding, currentY);
-            moveUpButton.Size = new Size(buttonWidth, rowHeight);
-            moveDownButton.Location = new Point(moveUpButton.Right + controlPadding, currentY);
-            moveDownButton.Size = new Size(buttonWidth, rowHeight);
-            currentY += rowHeight + (controlPadding * 2);
-
-            intervalLabel.Location = new Point(formPadding, currentY + 4);
-            intervalNumericUpDown.Location = new Point(intervalLabel.Right + controlPadding, currentY);
-            intervalNumericUpDown.Size = new Size(100, rowHeight);
-
-            jitterLabel.Location = new Point(intervalNumericUpDown.Right + controlPadding, currentY + 4);
-            jitterNumericUpDown.Location = new Point(jitterLabel.Right + controlPadding, currentY);
-            jitterNumericUpDown.Size = new Size(100, rowHeight);
-            currentY += rowHeight + controlPadding;
-            int jitterHintY = currentY;
-
-            sequenceLabel.Location = new Point(formPadding, currentY + 4);
-            sequenceComboBox.Location = new Point(sequenceLabel.Right + controlPadding, currentY);
-            int sequenceWidth = Math.Max(180, sequenceComboBox.Items.Cast<string>()
-                .Select(text => TextRenderer.MeasureText(text, sequenceComboBox.Font).Width)
-                .DefaultIfEmpty(0).Max() + SystemInformation.VerticalScrollBarWidth + 12);
-            sequenceComboBox.Size = new Size(sequenceWidth, rowHeight);
-            sequenceComboBox.DropDownWidth = sequenceWidth;
-
-            showOverlayCheckBox.Location = new Point(sequenceComboBox.Right + controlPadding, currentY + 4);
-            currentY += rowHeight + controlPadding;
-
-            showDetectionOverlayCheckBox.Location = new Point(formPadding, currentY);
-            currentY += rowHeight + controlPadding;
-
-            highlightCurrentAreaCheckBox.Location = new Point(formPadding, currentY);
-            currentY += rowHeight + controlPadding;
-
-            hardwareModeCheckBox.Location = new Point(formPadding, currentY);
-            currentY += rowHeight + controlPadding;
-
-            int requiredWidth = Math.Max(moveDownButton.Right, jitterNumericUpDown.Right);
-            requiredWidth = Math.Max(requiredWidth, showOverlayCheckBox.Right);
-            requiredWidth = Math.Max(requiredWidth, showDetectionOverlayCheckBox.Right);
-            requiredWidth = Math.Max(requiredWidth, hardwareModeCheckBox.Right);
-            requiredWidth = Math.Max(requiredWidth, highlightCurrentAreaCheckBox.Right);
-            requiredWidth += formPadding;
-            int menuWidth = menuStrip.Items.Cast<ToolStripItem>().Sum(item => item.GetPreferredSize(Size.Empty).Width) + menuStrip.Padding.Horizontal + formPadding * 2;
-            requiredWidth = Math.Max(requiredWidth, menuWidth);
-            requiredWidth = Math.Max(requiredWidth, aboutMenuItem.Bounds.Left + updateAvailableLinkLabel.PreferredSize.Width + formPadding);
-            formWidth = Math.Max(formWidth, requiredWidth);
-
-            // 按最终宽度进行测量，确保翻译后的提示换行时不会覆盖下一行控件。
-            jitterExceedsIntervalHintLabel.Location = new Point(formPadding, jitterHintY);
-            jitterExceedsIntervalHintLabel.MaximumSize = new Size(formWidth - (formPadding * 2), 0);
-            bool showJitterHint = jitterNumericUpDown.Value > intervalNumericUpDown.Value;
-            jitterExceedsIntervalHintLabel.Visible = showJitterHint;
-            if (showJitterHint)
-            {
-                int hintOffset = jitterExceedsIntervalHintLabel.PreferredSize.Height + controlPadding;
-                sequenceLabel.Top += hintOffset;
-                sequenceComboBox.Top += hintOffset;
-                showOverlayCheckBox.Top += hintOffset;
-                showDetectionOverlayCheckBox.Top += hintOffset;
-                hardwareModeCheckBox.Top += hintOffset;
-                highlightCurrentAreaCheckBox.Top += hintOffset;
-                currentY += hintOffset;
-            }
-
-            areasListBox.Width = formWidth - (formPadding * 2);
-            startButton.Width = formWidth - (formPadding * 2);
-            int buttonWidthNew = (formWidth - (formPadding * 2) - (controlPadding * 3)) / 4;
-            addAreaButton.Width = removeAreaButton.Width = moveUpButton.Width = moveDownButton.Width = buttonWidthNew;
-            removeAreaButton.Left = addAreaButton.Right + controlPadding;
-            moveUpButton.Left = removeAreaButton.Right + controlPadding;
-            moveDownButton.Left = moveUpButton.Right + controlPadding;
-
-            startButton.Location = new Point(formPadding, currentY);
-            startButton.Size = new Size(formWidth - (formPadding * 2), 40);
-
-            this.ClientSize = new Size(formWidth, startButton.Bottom + formPadding);
-            menuStrip.PerformLayout();
-            updateAvailableLinkLabel.Location = new Point(
-                Math.Max(formPadding, Math.Min(aboutMenuItem.Bounds.Left, formWidth - updateAvailableLinkLabel.PreferredSize.Width - formPadding)),
-                menuStrip.Height + 2);
+            LayoutAppearance();
         }
 
         // 更改应用程序语言。
@@ -589,6 +493,7 @@ namespace MouseClicker
         private void UpdateUIStrings()
         {
             fileMenuItem.Text = Localization.Get("File");
+            UpdateAppearanceStrings();
             saveConfigMenuItem.Text = Localization.Get("SaveConfig");
             loadConfigMenuItem.Text = Localization.Get("LoadConfig");
             hotkeySettingsMenuItem.Text = Localization.Get("HotkeySettings");
@@ -636,7 +541,10 @@ namespace MouseClicker
             var manager = _hotkeyManager;
             if (manager == null) return;
             using var settings = new HotkeySettingsForm(manager);
+            string previousHint = runHint.Text;
             using (BeginModalScope()) settings.ShowDialog(this);
+            UpdateAppearanceStrings();
+            if (runHint.Text != previousHint) PerformLayoutLayout();
         }
 
         private void areasListBox_MouseDown(object? sender, MouseEventArgs e)
@@ -789,11 +697,16 @@ namespace MouseClicker
             var selected = areasListBox.SelectedItem as ClickArea;
             ClearHoveredArea();
             if (!_clickAreas.Any(area => ReferenceEquals(area, _activeClickArea))) _activeClickArea = null;
-            areasListBox.Items.Clear();
-            foreach (var area in _clickAreas) areasListBox.Items.Add(area);
-            int selectedIndex = _clickAreas.FindIndex(area => ReferenceEquals(area, selected));
-            if (selectedIndex < 0 && previousIndex >= 0 && previousIndex < _clickAreas.Count) selectedIndex = previousIndex;
-            areasListBox.SelectedIndex = selectedIndex;
+            areasListBox.BeginUpdate();
+            try
+            {
+                areasListBox.Items.Clear();
+                foreach (var area in _clickAreas) areasListBox.Items.Add(area);
+                int selectedIndex = _clickAreas.FindIndex(area => ReferenceEquals(area, selected));
+                if (selectedIndex < 0 && previousIndex >= 0 && previousIndex < _clickAreas.Count) selectedIndex = previousIndex;
+                areasListBox.SelectedIndex = selectedIndex;
+            }
+            finally { areasListBox.EndUpdate(); }
             _overlayForm.AreasToDraw = new List<ClickArea>(_clickAreas);
             _overlayForm.Invalidate();
             UpdateOverlayState();
@@ -856,9 +769,12 @@ namespace MouseClicker
 
         private void UpdateOverlayState()
         {
+            RefreshAreaActions();
             highlightCurrentAreaCheckBox.Enabled = showOverlayCheckBox.Checked;
             if (_overlayForm == null || _overlayForm.IsDisposed) return;
             _overlayForm.RequireCaptureExclusion = _conditionSession;
+            bool flagsChanged = _overlayForm.ShowClickAreas != showOverlayCheckBox.Checked ||
+                _overlayForm.ShowDetectionAreas != showDetectionOverlayCheckBox.Checked;
             _overlayForm.ShowClickAreas = showOverlayCheckBox.Checked;
             _overlayForm.ShowDetectionAreas = showDetectionOverlayCheckBox.Checked;
             bool showOverlay = (showOverlayCheckBox.Checked || showDetectionOverlayCheckBox.Checked) && !_isSelectingArea && !_isClosing &&
@@ -870,7 +786,7 @@ namespace MouseClicker
             if (showOverlay)
             {
                 if (!_overlayForm.Visible) _overlayForm.Show();
-                _overlayForm.Invalidate();
+                else if (flagsChanged) _overlayForm.Invalidate();
             }
             else
             {
@@ -1105,6 +1021,7 @@ namespace MouseClicker
             hardwareModeCheckBox.Enabled = isEnabled;
             menuStrip.Enabled = isEnabled;
             updateAvailableLinkLabel.Enabled = isEnabled;
+            RefreshAreaActions();
             UpdateOverlayState();
         }
 

@@ -176,7 +176,7 @@ Welcome to Mouse Clicker!
    - These highlights are visible only while "Show Overlay" is enabled.
 
 10. Hotkey and Mouse Button Settings:
-   - "File" → "Hotkey Settings": click the input box, then press the desired key. Supported keys are F6–F12, Insert, Home, End, PageUp, PageDown and Pause. Do not hold Ctrl/Alt/Shift/Win. ESC remains the emergency stop while clicking.
+   - "Settings" → "Hotkey Settings": click the input box, then press the desired key. Supported keys are F6–F12, Insert, Home, End, PageUp, PageDown and Pause. Do not hold Ctrl/Alt/Shift/Win. ESC remains the emergency stop while clicking.
    - Right-click an area in the list to choose the left or right mouse button. The list shows [L] or [R] for each area.
 
 Thank you for using the application!
@@ -293,7 +293,7 @@ Thank you for using the application!
    - 这些高亮仅在开启“显示区域框”时可见。
 
 10. 热键与鼠标按键设置：
-   - “文件”→“热键设置”：点击输入框后按下所需按键。支持的按键为 F6–F12、Insert、Home、End、PageUp、PageDown 和 Pause；请勿同时按住 Ctrl/Alt/Shift/Win。点击过程中 ESC 仍可紧急停止。
+   - “设置”→“热键设置”：点击输入框后按下所需按键。支持的按键为 F6–F12、Insert、Home、End、PageUp、PageDown 和 Pause；请勿同时按住 Ctrl/Alt/Shift/Win。点击过程中 ESC 仍可紧急停止。
    - 右键点击列表中的区域，可为该区域选择鼠标左键或右键；列表中以 [L] 或 [R] 显示当前按键。
 
 感谢您的使用！
@@ -410,7 +410,7 @@ Thank you for using the application!
    - これらの強調表示は「オーバーレイを表示」がオンのときだけ見えます。
 
 10. ホットキーとマウスボタンの設定：
-   - 「ファイル」→「ホットキー設定」：入力欄をクリックしてから、目的のキーを押します。使用できるキーは F6～F12、Insert、Home、End、PageUp、PageDown、Pause です。Ctrl/Alt/Shift/Win は押さないでください。クリック中は ESC で緊急停止できます。
+   - 「設定」→「ホットキー設定」：入力欄をクリックしてから、目的のキーを押します。使用できるキーは F6～F12、Insert、Home、End、PageUp、PageDown、Pause です。Ctrl/Alt/Shift/Win は押さないでください。クリック中は ESC で緊急停止できます。
    - リスト内のエリアを右クリックすると、マウスの左ボタンまたは右ボタンを選択できます。リストには各エリアのボタンが [L] または [R] で表示されます。
 
 ご利用いただきありがとうございます！
@@ -527,7 +527,7 @@ Thank you for using the application!
    - 이러한 강조 표시는 "영역 표시"를 켰을 때만 보입니다.
 
 10. 단축키 및 마우스 버튼 설정:
-   - "파일" → "단축키 설정": 입력란을 클릭한 뒤 원하는 키를 누릅니다. 지원되는 키는 F6–F12, Insert, Home, End, PageUp, PageDown, Pause입니다. Ctrl/Alt/Shift/Win을 함께 누르지 마세요. 클릭 중에는 ESC로 긴급 정지할 수 있습니다.
+   - "설정" → "단축키 설정": 입력란을 클릭한 뒤 원하는 키를 누릅니다. 지원되는 키는 F6–F12, Insert, Home, End, PageUp, PageDown, Pause입니다. Ctrl/Alt/Shift/Win을 함께 누르지 마세요. 클릭 중에는 ESC로 긴급 정지할 수 있습니다.
    - 목록에서 영역을 마우스 오른쪽 버튼으로 클릭하여 마우스 왼쪽 또는 오른쪽 버튼을 선택합니다. 목록에는 각 영역의 버튼이 [L] 또는 [R]로 표시됩니다.
 
 이용해 주셔서 감사합니다!
@@ -644,7 +644,7 @@ Thank you for using the application!
    - 這些標示僅在開啟「顯示區域框」時可見。
 
 10. 熱鍵與滑鼠按鍵設定：
-   - 「檔案」→「熱鍵設定」：點擊輸入框後按下所需按鍵。支援的按鍵為 F6–F12、Insert、Home、End、PageUp、PageDown 及 Pause；請勿同時按住 Ctrl/Alt/Shift/Win。點擊過程中 ESC 仍可緊急停止。
+   - 「設定」→「熱鍵設定」：點擊輸入框後按下所需按鍵。支援的按鍵為 F6–F12、Insert、Home、End、PageUp、PageDown 及 Pause；請勿同時按住 Ctrl/Alt/Shift/Win。點擊過程中 ESC 仍可緊急停止。
    - 在清單中的區域上按滑鼠右鍵，可為該區域選擇滑鼠左鍵或右鍵；清單會以 [L] 或 [R] 顯示目前按鍵。
 
 感謝您的使用！
@@ -761,7 +761,7 @@ Bienvenue dans le cliqueur automatique !
    - Ces surlignages sont visibles uniquement lorsque « Afficher les zones » est activé.
 
 10. Raccourci clavier et bouton de la souris :
-   - « Fichier » → « Paramètres des raccourcis » : cliquez dans la zone de saisie, puis appuyez sur la touche souhaitée. Les touches prises en charge sont F6–F12, Insert, Home, End, PageUp, PageDown et Pause. Ne maintenez pas Ctrl/Alt/Shift/Win. ESC reste disponible pour arrêter d'urgence pendant les clics.
+   - « Paramètres » → « Paramètres des raccourcis » : cliquez dans la zone de saisie, puis appuyez sur la touche souhaitée. Les touches prises en charge sont F6–F12, Insert, Home, End, PageUp, PageDown et Pause. Ne maintenez pas Ctrl/Alt/Shift/Win. ESC reste disponible pour arrêter d'urgence pendant les clics.
    - Cliquez avec le bouton droit sur une zone de la liste pour choisir le bouton gauche ou droit de la souris. La liste affiche [L] ou [R] pour chaque zone.
 
 Merci d’utiliser cette application !
@@ -878,7 +878,7 @@ Willkommen beim automatischen Mausklicker!
    - Die Hervorhebungen sind nur sichtbar, wenn „Bereiche anzeigen“ aktiviert ist.
 
 10. Tastenkürzel und Maustaste:
-   - „Datei“ → „Tastenkürzel“: Klicken Sie in das Eingabefeld und drücken Sie die gewünschte Taste. Unterstützt werden F6–F12, Insert, Home, End, PageUp, PageDown und Pause. Halten Sie Ctrl/Alt/Shift/Win nicht gedrückt. ESC bleibt während des Klickens der Notstopp.
+   - „Einstellungen“ → „Tastenkürzel“: Klicken Sie in das Eingabefeld und drücken Sie die gewünschte Taste. Unterstützt werden F6–F12, Insert, Home, End, PageUp, PageDown und Pause. Halten Sie Ctrl/Alt/Shift/Win nicht gedrückt. ESC bleibt während des Klickens der Notstopp.
    - Klicken Sie mit der rechten Maustaste auf einen Bereich in der Liste, um die linke oder rechte Maustaste zu wählen. Die Liste zeigt [L] oder [R] für jeden Bereich.
 
 Vielen Dank für die Nutzung!
@@ -995,7 +995,7 @@ Vielen Dank für die Nutzung!
    - Estos resaltados solo se ven cuando «Mostrar áreas» está activado.
 
 10. Tecla de atajo y botón del ratón:
-   - «Archivo» → «Ajustes de teclas»: haz clic en el cuadro de entrada y pulsa la tecla deseada. Las teclas compatibles son F6–F12, Insert, Home, End, PageUp, PageDown y Pause. No mantengas pulsado Ctrl/Alt/Shift/Win. ESC sigue disponible como parada de emergencia durante los clics.
+   - «Ajustes» → «Ajustes de teclas»: haz clic en el cuadro de entrada y pulsa la tecla deseada. Las teclas compatibles son F6–F12, Insert, Home, End, PageUp, PageDown y Pause. No mantengas pulsado Ctrl/Alt/Shift/Win. ESC sigue disponible como parada de emergencia durante los clics.
    - Haz clic con el botón derecho en un área de la lista para elegir el botón izquierdo o derecho del ratón. La lista muestra [L] o [R] para cada área.
 
 ¡Gracias por utilizar la aplicación!
@@ -1112,7 +1112,7 @@ Vielen Dank für die Nutzung!
    - Выделение видно только при включённом параметре «Показать области».
 
 10. Горячая клавиша и кнопка мыши:
-   - «Файл» → «Настройки горячих клавиш»: щёлкните поле ввода и нажмите нужную клавишу. Поддерживаются клавиши F6–F12, Insert, Home, End, PageUp, PageDown и Pause. Не удерживайте Ctrl/Alt/Shift/Win. Во время нажатий ESC остаётся аварийной остановкой.
+   - «Настройки» → «Настройки горячих клавиш»: щёлкните поле ввода и нажмите нужную клавишу. Поддерживаются клавиши F6–F12, Insert, Home, End, PageUp, PageDown и Pause. Не удерживайте Ctrl/Alt/Shift/Win. Во время нажатий ESC остаётся аварийной остановкой.
    - Щёлкните правой кнопкой мыши по области в списке, чтобы выбрать левую или правую кнопку мыши. В списке отображается [L] или [R] для каждой области.
 
 Спасибо за использование программы!
@@ -1229,7 +1229,7 @@ Bem-vindo ao Clicador automático!
    - Esses destaques só aparecem quando “Mostrar áreas” está ativado.
 
 10. Atalho e botão do mouse:
-   - “Arquivo” → “Configurações de atalhos”: clique na caixa de entrada e pressione a tecla desejada. As teclas compatíveis são F6–F12, Insert, Home, End, PageUp, PageDown e Pause. Não mantenha Ctrl/Alt/Shift/Win pressionado. ESC continua disponível como parada de emergência durante os cliques.
+   - “Configurações” → “Configurações de atalhos”: clique na caixa de entrada e pressione a tecla desejada. As teclas compatíveis são F6–F12, Insert, Home, End, PageUp, PageDown e Pause. Não mantenha Ctrl/Alt/Shift/Win pressionado. ESC continua disponível como parada de emergência durante os cliques.
    - Clique com o botão direito em uma área da lista para escolher o botão esquerdo ou direito do mouse. A lista mostra [L] ou [R] para cada área.
 
 Obrigado por usar o aplicativo!
@@ -1811,6 +1811,76 @@ Obrigado por usar o aplicativo!
             Translations["pt-BR"]["ConditionCropTemplate"] = "Recortar modelo (opcional)";
             Translations["pt-BR"]["ConditionScaleHint"] = "Mantenha o modelo inteiro e busque tamanhos proporcionais. A busca é mais lenta; teste primeiro o reconhecimento.";
             Translations["pt-BR"]["ConditionMatchScale"] = "Escala: {0:P0}, tamanho: {1}×{2}";
+            Translations["en-US"]["Settings"] = "Settings";
+            Translations["en-US"]["MainAreasTitle"] = "1 · Click areas";
+            Translations["en-US"]["MainTimingTitle"] = "2 · Click behavior";
+            Translations["en-US"]["MainDisplayTitle"] = "Screen guides";
+            Translations["en-US"]["MainAreasHint"] = "Add an area first; image conditions are optional.";
+            Translations["en-US"]["MainEmptyAreas"] = "Click Add to select your first click area";
+            Translations["en-US"]["MainRunHint"] = "{0} to start or stop · Esc to stop immediately";
+            Translations["zh-CN"]["Settings"] = "设置";
+            Translations["zh-CN"]["MainAreasTitle"] = "1 · 点击区域";
+            Translations["zh-CN"]["MainTimingTitle"] = "2 · 点击方式";
+            Translations["zh-CN"]["MainDisplayTitle"] = "屏幕辅助";
+            Translations["zh-CN"]["MainAreasHint"] = "先添加区域；画面条件可按需设置。";
+            Translations["zh-CN"]["MainEmptyAreas"] = "点击“添加”框选第一个点击区域";
+            Translations["zh-CN"]["MainRunHint"] = "使用 {0} 开始或停止 · Esc 紧急停止";
+            Translations["zh-TW"]["Settings"] = "設定";
+            Translations["zh-TW"]["MainAreasTitle"] = "1 · 點擊區域";
+            Translations["zh-TW"]["MainTimingTitle"] = "2 · 點擊方式";
+            Translations["zh-TW"]["MainDisplayTitle"] = "螢幕輔助";
+            Translations["zh-TW"]["MainAreasHint"] = "先新增區域；影像條件可依需要設定。";
+            Translations["zh-TW"]["MainEmptyAreas"] = "按「新增」框選第一個點擊區域";
+            Translations["zh-TW"]["MainRunHint"] = "使用 {0} 開始或停止 · Esc 緊急停止";
+            Translations["ja-JP"]["Settings"] = "設定";
+            Translations["ja-JP"]["MainAreasTitle"] = "1 · クリック領域";
+            Translations["ja-JP"]["MainTimingTitle"] = "2 · クリック方法";
+            Translations["ja-JP"]["MainDisplayTitle"] = "画面ガイド";
+            Translations["ja-JP"]["MainAreasHint"] = "まず領域を追加。画像条件は必要に応じて設定できます。";
+            Translations["ja-JP"]["MainEmptyAreas"] = "「追加」で最初のクリック領域を選択";
+            Translations["ja-JP"]["MainRunHint"] = "{0} で開始・停止 · Esc で緊急停止";
+            Translations["ko-KR"]["Settings"] = "설정";
+            Translations["ko-KR"]["MainAreasTitle"] = "1 · 클릭 영역";
+            Translations["ko-KR"]["MainTimingTitle"] = "2 · 클릭 방식";
+            Translations["ko-KR"]["MainDisplayTitle"] = "화면 안내";
+            Translations["ko-KR"]["MainAreasHint"] = "먼저 영역을 추가하세요. 이미지 조건은 선택 사항입니다.";
+            Translations["ko-KR"]["MainEmptyAreas"] = "추가를 눌러 첫 클릭 영역을 선택하세요";
+            Translations["ko-KR"]["MainRunHint"] = "{0}: 시작 또는 중지 · Esc: 긴급 중지";
+            Translations["fr-FR"]["Settings"] = "Paramètres";
+            Translations["fr-FR"]["MainAreasTitle"] = "1 · Zones de clic";
+            Translations["fr-FR"]["MainTimingTitle"] = "2 · Comportement";
+            Translations["fr-FR"]["MainDisplayTitle"] = "Repères à l’écran";
+            Translations["fr-FR"]["MainAreasHint"] = "Ajoutez une zone ; les conditions visuelles sont facultatives.";
+            Translations["fr-FR"]["MainEmptyAreas"] = "Cliquez sur Ajouter pour sélectionner votre première zone";
+            Translations["fr-FR"]["MainRunHint"] = "{0} pour démarrer ou arrêter · Esc pour arrêter immédiatement";
+            Translations["de-DE"]["Settings"] = "Einstellungen";
+            Translations["de-DE"]["MainAreasTitle"] = "1 · Klickbereiche";
+            Translations["de-DE"]["MainTimingTitle"] = "2 · Klickverhalten";
+            Translations["de-DE"]["MainDisplayTitle"] = "Bildschirmhilfen";
+            Translations["de-DE"]["MainAreasHint"] = "Zuerst einen Bereich hinzufügen; Bildbedingungen sind optional.";
+            Translations["de-DE"]["MainEmptyAreas"] = "Mit Hinzufügen den ersten Klickbereich auswählen";
+            Translations["de-DE"]["MainRunHint"] = "{0} zum Starten oder Stoppen · Esc zum sofortigen Stoppen";
+            Translations["es-ES"]["Settings"] = "Ajustes";
+            Translations["es-ES"]["MainAreasTitle"] = "1 · Zonas de clic";
+            Translations["es-ES"]["MainTimingTitle"] = "2 · Comportamiento";
+            Translations["es-ES"]["MainDisplayTitle"] = "Guías en pantalla";
+            Translations["es-ES"]["MainAreasHint"] = "Añada una zona; las condiciones visuales son opcionales.";
+            Translations["es-ES"]["MainEmptyAreas"] = "Pulse Añadir para seleccionar su primera zona";
+            Translations["es-ES"]["MainRunHint"] = "{0} para iniciar o detener · Esc para detener de inmediato";
+            Translations["ru-RU"]["Settings"] = "Настройки";
+            Translations["ru-RU"]["MainAreasTitle"] = "1 · Области кликов";
+            Translations["ru-RU"]["MainTimingTitle"] = "2 · Параметры кликов";
+            Translations["ru-RU"]["MainDisplayTitle"] = "Экранные подсказки";
+            Translations["ru-RU"]["MainAreasHint"] = "Сначала добавьте область; условия изображения необязательны.";
+            Translations["ru-RU"]["MainEmptyAreas"] = "Нажмите «Добавить», чтобы выбрать первую область";
+            Translations["ru-RU"]["MainRunHint"] = "{0} — запуск или остановка · Esc — немедленная остановка";
+            Translations["pt-BR"]["Settings"] = "Configurações";
+            Translations["pt-BR"]["MainAreasTitle"] = "1 · Áreas de clique";
+            Translations["pt-BR"]["MainTimingTitle"] = "2 · Comportamento";
+            Translations["pt-BR"]["MainDisplayTitle"] = "Guias na tela";
+            Translations["pt-BR"]["MainAreasHint"] = "Adicione uma área; as condições visuais são opcionais.";
+            Translations["pt-BR"]["MainEmptyAreas"] = "Clique em Adicionar para selecionar a primeira área";
+            Translations["pt-BR"]["MainRunHint"] = "{0} para iniciar ou parar · Esc para parar imediatamente";
             foreach (var language in Translations.Values)
             {
                 language["HelpTutorialContent"] += "\n\n" + language["ConditionEdit"] + ":\n" +
