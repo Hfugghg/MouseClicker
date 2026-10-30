@@ -15,10 +15,10 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 安装 .NET SDK
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v6
         with:
           dotnet-version: '10.0.x'
 
@@ -59,13 +59,13 @@ jobs:
         shell: powershell
 
       - name: 编译 Inno Setup 安装包
-        uses: Minionguyjpro/Inno-Setup-Action@v1.2.7
+        uses: Minionguyjpro/Inno-Setup-Action@v1.2.9
         with:
           path: setup.iss
 
       # --- 创建 Release 并上传构建产物 ---
       - name: 创建 GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             MouseClicker-Portable-${{ github.ref_name }}.zip
