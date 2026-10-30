@@ -96,7 +96,6 @@ internal sealed class ConditionSettingsForm : Form
         test.Text = Localization.Get("ConditionTest");
         test.AutoSize = true;
         test.Click += async (_, _) => await TestAsync();
-        table.Controls.Add(test);
         result.Dock = DockStyle.Fill;
         result.Margin = new Padding(16, 8, 16, 8);
         layout.Controls.Add(result, 0, 1);
@@ -105,7 +104,15 @@ internal sealed class ConditionSettingsForm : Form
         var cancel = new Button { Text = Localization.Get("ConditionCancel"), DialogResult = DialogResult.Cancel, AutoSize = true };
         save.Click += (_, _) => Save();
         actions.Controls.AddRange([save, cancel]);
-        layout.Controls.Add(actions, 0, 2);
+        // 测试按钮放在滚动区域之外：窗口较矮或系统缩放较大时，它不会被内容区裁掉。
+        var footer = new TableLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, ColumnCount = 2, Margin = Padding.Empty };
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+        footer.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+        var testHost = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, Padding = new Padding(16, 8, 0, 12), WrapContents = false };
+        testHost.Controls.Add(test);
+        footer.Controls.Add(testHost, 0, 0);
+        footer.Controls.Add(actions, 1, 0);
+        layout.Controls.Add(footer, 0, 2);
         CancelButton = cancel;
         enabled.Checked = original != null;
         if (original != null)

@@ -360,6 +360,32 @@ public class ConditionSettingsFormTests
         Assert.Equal(DialogResult.OK, form.DialogResult);
     });
 
+    [Fact]
+    public void TestAndSaveButtonsStayVisibleAtMinimumSize() => OnSta(() =>
+    {
+        using var form = new ConditionSettingsForm(MakeCondition()) { ShowInTaskbar = false };
+        form.Size = form.MinimumSize;
+        form.Show();
+        Application.DoEvents();
+        form.DisplayTestResult(new DetectionResult(.95, new Rectangle(120, 80, 160, 120), 1.0), .9);
+        Application.DoEvents();
+        form.PerformLayout();
+        // 测试按钮过去位于滚动区域末尾，窗口较矮时会被内容区边缘裁掉。
+        foreach (var name in new[] { "test", "save", "result" })
+            Assert.True(IsFullyVisible(Field<Control>(form, name)), name);
+
+        static bool IsFullyVisible(Control control)
+        {
+            var bounds = control.RectangleToScreen(control.ClientRectangle);
+            for (var parent = control.Parent; parent != null; parent = parent.Parent)
+            {
+                if (!parent.RectangleToScreen(parent.ClientRectangle).Contains(bounds)) return false;
+                if (parent is Form) break;
+            }
+            return control.Visible;
+        }
+    });
+
     private static ClickCondition MakeCondition()
     {
         using var bitmap = new Bitmap(4, 4);
