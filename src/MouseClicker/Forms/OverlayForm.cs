@@ -23,7 +23,7 @@ namespace MouseClicker
         internal bool CanShowDuringCondition()
         {
             if (IsDisposed || Disposing) return false;
-            // Create the handle before deciding: affinity belongs to each HWND.
+            // 先创建窗口句柄再判断：窗口显示亲和性属于每个 HWND。
             _ = Handle;
             return IsExcludedFromCapture;
         }
@@ -154,7 +154,7 @@ namespace MouseClicker
                     e.Graphics.DrawRectangle(pen, localArea);
                 }
             }
-            // Draw dashed detection borders last so coincident click borders remain distinguishable.
+            // 最后绘制检测虚线框，避免与重合的点击框混在一起。
             if (ShowDetectionAreas)
             {
                 using var pen = new Pen(DetectionColor, 2) { DashStyle = DashStyle.Dash };
@@ -192,8 +192,8 @@ namespace MouseClicker
                 layer.FillPath(foreground, path);
             }
 
-            // A color-key window cannot blend partial alpha with the desktop. Keep the
-            // antialiasing inside the outline, but make its outside edge fully opaque or clear.
+            // 颜色键窗口无法与桌面混合半透明像素。保留轮廓内部的抗锯齿，
+            // 但把轮廓外缘处理成完全不透明或完全透明。
             var data = label.LockBits(new Rectangle(Point.Empty, label.Size), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
             try
             {

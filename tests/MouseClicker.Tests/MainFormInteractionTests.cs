@@ -15,8 +15,8 @@ public class MainFormInteractionTests
     {
         foreach (string action in new[] { "timing", "overlay", "hardware", "sequence", "selection", "reorder", "remove", "list-refresh", "explicit-layout", "hotkey-return", "update-status" })
             foreach (bool scroll in new[] { false, true })
-                // Refreshing all translated copy legitimately replaces the synthetic
-                // overflow text, so that setup cannot represent unchanged content.
+                // 刷新全部翻译文案本来就会替换人为构造的溢出文本，
+                // 因此该场景不能用来表示“内容未变化”。
                 if (action != "hotkey-return" || !scroll) yield return new object[] { action, scroll };
     }
 
@@ -229,7 +229,7 @@ public class MainFormInteractionTests
         var start = Field<Button>(form, "startButton");
         Assert.True(start.Bottom <= form.ClientSize.Height);
         Assert.True(start.Top >= viewport.Bottom);
-        // A second layout must retain the same logical coordinates and scroll offset.
+        // 第二次布局必须保持相同的逻辑坐标和滚动偏移。
         var bounds = Descendants(form).ToDictionary(c => c, c => c.Bounds);
         Point scroll = viewport.AutoScrollPosition;
         Call(form, "PerformLayoutLayout");

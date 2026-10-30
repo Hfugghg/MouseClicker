@@ -73,7 +73,7 @@ public class HelpFormTests
         using var form = new ConditionSettingsForm(null, topic => requested = topic);
         _ = form.Handle;
         var guide = Assert.IsType<Button>(form.Controls.Find("conditionGuideButton", true).Single());
-        // Invoke the click handler without requiring a visible modal editor.
+        // 直接调用点击处理器，不需要显示模态编辑窗口。
         typeof(Button).GetMethod("OnClick", BindingFlags.Instance | BindingFlags.NonPublic)!.Invoke(guide, [EventArgs.Empty]);
         Assert.Equal(HelpTopic.ImageConditionSetup, requested);
         Assert.Null(form.ResultCondition);

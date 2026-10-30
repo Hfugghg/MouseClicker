@@ -712,7 +712,7 @@ namespace MouseClicker
                 try { _sessionConfigStore.BackupUnreadableConfig(); }
                 catch (Exception backupError) when (backupError is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
                 {
-                    // Keep the original intact when it cannot be backed up.
+                    // 无法备份时保留原文件，不要覆盖。
                     _sessionSaveBlocked = true;
                     _sessionRestoreError = new IOException(ex.Message + Environment.NewLine + backupError.Message, ex);
                 }

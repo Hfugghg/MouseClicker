@@ -2,7 +2,7 @@ namespace MouseClicker;
 
 internal static class SelectionActionLayout
 {
-    // Both rectangles use the caller's coordinate system (screen or canvas).
+    // 两个矩形都使用调用方的坐标系（屏幕或画布）。
     internal static Rectangle Place(Rectangle selection, Rectangle viewport, Size toolbarSize, int gap)
     {
         int width = Math.Min(Math.Max(1, toolbarSize.Width), Math.Max(1, viewport.Width));

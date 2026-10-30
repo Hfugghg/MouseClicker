@@ -2,7 +2,7 @@ using System.Drawing.Drawing2D;
 
 namespace MouseClicker;
 
-// All crop geometry uses original image pixels, independent of display scale and DPI.
+// 裁剪几何全部使用原图像素，不受显示缩放和 DPI 影响。
 internal static class TemplateCropGeometry
 {
     internal static Size Maximum(Size source, Size requested)
@@ -85,7 +85,7 @@ internal sealed class TemplateCropForm : Form
 
     private sealed class CropCanvas : Control
     {
-        private readonly Bitmap source; // Borrowed: the caller owns this image.
+        private readonly Bitmap source; // 借用：图像由调用方负责释放。
         private readonly Size maximum;
         private Point anchor;
         private Rectangle initial;

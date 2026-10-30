@@ -134,7 +134,7 @@ public partial class Form1
         Enable(moveUpButton, editable && index > 0);
         Enable(moveDownButton, editable && index >= 0 && index < areasListBox.Items.Count - 1);
         bool empty = areasListBox.Items.Count == 0;
-        // Visible also reflects parent visibility; set the intended state even before the form is shown.
+        // Visible 还受父控件可见性影响；即使窗体尚未显示，也要设置期望的可见状态。
         emptyAreasLabel.Visible = empty;
         Enable(emptyAreasLabel, editable);
         Color background = _isClicking ? Color.FromArgb(180, 48, 48) : Accent;

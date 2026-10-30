@@ -87,7 +87,7 @@ public class Form1SessionTests
         var original = StartWorkerWithoutPumping(form);
         Call(form, "StartClicking");
         Assert.Same(original, Field<Task>(form, "_clickSession"));
-        // The worker is running while this STA stays busy: its input stays queued.
+        // STA 线程忙碌期间工作线程仍在运行：输入会保持排队。
         Assert.True(SpinWait.SpinUntil(() => (GetQueueStatus(0x0008) >> 16) != 0, TimeSpan.FromSeconds(5)),
             "Worker did not post its UI callback.");
         Thread.Sleep(100);

@@ -163,7 +163,7 @@ internal sealed class ConditionSettingsForm : Form
     }
     private void ReplacePreview(Bitmap image) { var old = preview.Image; preview.Image = image; old?.Dispose(); }
 
-    // A modal form must stay Visible: Hide() terminates the ShowDialog message loop.
+    // 模态窗体必须保持 Visible：调用 Hide() 会结束 ShowDialog 的消息循环。
     internal async Task WithTransparentWindowsAsync(Func<Task> operation)
     {
         Form root = this;

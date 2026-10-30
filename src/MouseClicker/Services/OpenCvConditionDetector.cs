@@ -71,8 +71,8 @@ internal sealed class OpenCvConditionDetector : IConditionDetector
             throw new InvalidDataException(Localization.Get("ConditionErrorTemplateFit"));
         using var correlations = new Mat();
         Cv2.MatchTemplate(source, template, correlations, TemplateMatchModes.CCoeffNormed);
-        // Score every candidate using shape and colour together, before choosing a location.
-        // A colour-shifted distractor may have higher correlation than the genuine target.
+        // 先综合形状和颜色给每个候选打分，再选择位置。
+        // 颜色偏移的干扰项，其相关系数可能高于真实目标。
         using var difference = new Mat();
         using var colourAgreement = new Mat();
         using var combined = new Mat();
@@ -85,8 +85,8 @@ internal sealed class OpenCvConditionDetector : IConditionDetector
         return new DetectionResult(Math.Clamp(score, 0, 1), new Rectangle(location.X, location.Y, template.Width, template.Height));
     }
 
-    // Coarse search is bounded in image size and candidate count. Only a few promising
-    // locations are checked against original pixels; scaled Mats never survive this call.
+    // 粗搜索受图像尺寸和候选数量限制。只对少量有希望的位置
+    // 用原图像素复核；缩放后的 Mat 不会逃出本次调用。
     private static DetectionResult MatchMultiScale(Mat source, Mat template)
     {
         if (source.Empty()) throw new InvalidDataException(Localization.Get("ConditionErrorTemplateFit"));
@@ -95,8 +95,8 @@ internal sealed class OpenCvConditionDetector : IConditionDetector
         var none = new DetectionResult(0, Rectangle.Empty, 1);
         if (upper < lower) return none;
         double q = Math.Min(1, 640d / Math.Max(source.Width, source.Height));
-        // Small originals can disappear below the coarse-image detail floor. Preserve
-        // their exact-scale search over the whole source, then merge with scaled hits.
+        // 较小的原图可能在粗搜索的细节下限以下消失。保留
+        // 它们在全图上的原尺寸搜索，再与缩放结果合并。
         var exactSmall = template.Width <= source.Width && template.Height <= source.Height &&
             Math.Min(template.Width, template.Height) * q < 6 ? Match(source, template) : none;
         using var smallSource = new Mat();
@@ -117,7 +117,7 @@ internal sealed class OpenCvConditionDetector : IConditionDetector
             if (Math.Max(deviation.Val0, Math.Max(deviation.Val1, deviation.Val2)) < 5) return;
             samples.Add(Match(smallSource, candidate) with { Scale = scale });
         }
-        // Logarithmic candidates cover one hundredth through triple size, not just fit-to-area.
+        // 对数候选覆盖百分之一到三倍尺寸，而不只是刚好放进检测区的大小。
         double logStep = Math.Log(upper / lower) / 47;
         for (int i = 0; i < 48; i++) Evaluate(lower * Math.Exp(logStep * i));
         Evaluate(upper);
@@ -138,7 +138,7 @@ internal sealed class OpenCvConditionDetector : IConditionDetector
         }
         if (best.Score > 0)
         {
-            // Resolve integer-pixel scale uncertainty left by the coarse image.
+            // 消除粗搜索图像留下的整数像素比例误差。
             var seed = new DetectionResult(best.Score, new Rectangle((int)Math.Round(best.MatchBounds.X * q), (int)Math.Round(best.MatchBounds.Y * q), 0, 0), best.Scale);
             int width = best.MatchBounds.Width;
             for (int i = -2; i <= 2; i++) Verify(width + i, seed);

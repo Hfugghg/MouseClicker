@@ -31,11 +31,19 @@ public class ConditionSettingsFormTests
             {
                 await (Task)typeof(ConditionSettingsForm).GetMethod("TestAsync", Private)!.Invoke(form, null)!;
                 var result = Field<Label>(form, "result");
-                var expected = scenario == "error" ? "ConditionTestError" : scenario == "match" ? "ConditionTestMatched" : "ConditionTestNotMatched";
-                Assert.StartsWith(Localization.Get(expected).Split('{')[0], result.Text);
-                if (scenario == "error") Assert.Contains("capture failed", result.Text);
-                else Assert.Contains(condition.Threshold.ToString("F3"), result.Text);
-                Assert.DoesNotContain(Localization.Get("ConditionWaiting"), result.Text);
+                // 这里的断言不依赖界面语言：其他测试可能在窗体运行期间
+                // 修改全局界面语言。
+                if (scenario == "error")
+                {
+                    Assert.EndsWith("capture failed", result.Text);
+                    Assert.Equal(Color.Firebrick, result.ForeColor);
+                }
+                else
+                {
+                    Assert.Contains(condition.Threshold.ToString("F3"), result.Text);
+                    Assert.Equal(scenario == "match" ? Color.DarkGreen : Color.Firebrick, result.ForeColor);
+                    Assert.DoesNotContain(Localization.Get("ConditionWaiting"), result.Text);
+                }
                 Assert.True(result.Visible);
                 Assert.True(form.RectangleToScreen(form.ClientRectangle).Contains(result.PointToScreen(Point.Empty)));
                 Assert.NotSame(Field<Button>(form, "test").Parent, result.Parent);
@@ -191,7 +199,7 @@ public class ConditionSettingsFormTests
         SetRegion(form, new Rectangle(-800, 70, 10, 10));
         Assert.True(Field<Button>(form, "save").Enabled);
         Assert.Equal(new Size(8, 6), Field<Size>(form, "templateSize"));
-        // Recognition previews can have detection-region dimensions; they must not redefine the template size.
+        // 识别预览可能使用检测区域的尺寸，但不能因此改写模板尺寸。
         typeof(ConditionSettingsForm).GetMethod("ReplacePreview", Private)!.Invoke(form, [new Bitmap(100, 80)]);
         SetRegion(form, new Rectangle(-800, 70, 10, 10));
         Assert.True(Field<Button>(form, "test").Enabled);

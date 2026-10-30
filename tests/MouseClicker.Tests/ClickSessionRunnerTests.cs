@@ -92,7 +92,7 @@ public class ClickSessionRunnerTests
     {
         var area = Area();
         var clock = new Clock();
-        // First appearance, isolated miss, appearance, full disappearance, new appearance.
+        // 首次出现、单次未匹配、再次出现、完全消失、重新出现。
         bool[] samples = [true, true, false, true, true, false, false, true, true];
         using var detector = new Detector((_, n) => Result(samples[Math.Min(n - 1, samples.Length - 1)]));
         using var cancel = new CancellationTokenSource();

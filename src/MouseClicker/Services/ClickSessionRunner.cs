@@ -7,7 +7,7 @@ internal sealed record ClickSessionOptions
     public int JitterMs { get; init; }
 }
 
-/// <summary>A serial session. The caller runs it off the UI thread and owns the detector.</summary>
+/// <summary>串行执行一次点击会话。调用方在 UI 线程之外运行它，并负责释放检测器。</summary>
 internal sealed class ClickSessionRunner
 {
     private readonly IConditionDetector _detector;
@@ -58,8 +58,8 @@ internal sealed class ClickSessionRunner
                 announce = false;
             }
 
-            // Observe inactive steps too: an appearance latch survives sequence cycles,
-            // but can be rearmed by a disappearance while another step is executing.
+            // 也要观察非当前项：出现锁存会跨序列周期保留，
+            // 但在执行其他项期间，画面消失可以让它重新就绪。
             foreach (var pair in states.OrderBy(pair => ReferenceEquals(pair.Key, current) ? 1 : 0))
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -92,13 +92,13 @@ internal sealed class ClickSessionRunner
             bool ready = now >= nextClickAt;
             if (current.Condition is { } currentCondition)
             {
-                // The mandatory click cooldown is not time spent waiting for a condition.
+                // 点击后的强制冷却不应算作条件等待时间。
                 TimeSpan conditionWaitStarted = selectedAt > nextClickAt ? selectedAt : nextClickAt;
                 if (currentCondition.TimeoutMs > 0 && now - conditionWaitStarted >= TimeSpan.FromMilliseconds(currentCondition.TimeoutMs))
                     throw new TimeoutException($"[{current.Label}] " + Localization.Get("ConditionErrorTimeout"));
                 var state = states[current];
-                // Require a sample taken after the click cooldown and step selection;
-                // never click using an image left over from the preceding step.
+                // 必须使用点击冷却和步骤切换之后采集的样本；
+                // 绝不能拿上一项遗留的画面结果来点击。
                 ready &= state.Hits >= 2 && now < state.NextPoll &&
                     state.LastObserved >= nextClickAt && state.LastObserved >= selectedAt &&
                     (currentCondition.TriggerMode == ConditionTriggerMode.WhileVisible || !state.Consumed);
@@ -119,7 +119,7 @@ internal sealed class ClickSessionRunner
                 continue;
             }
 
-            // Bound cancellation latency while retaining independent polling periods.
+            // 在保留各项独立轮询周期的同时，限制取消响应的延迟。
             TimeSpan wake = now + TimeSpan.FromMilliseconds(25);
             foreach (var state in states.Values) if (state.NextPoll < wake) wake = state.NextPoll;
             if (nextClickAt > now && nextClickAt < wake) wake = nextClickAt;

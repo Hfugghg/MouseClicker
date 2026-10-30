@@ -99,7 +99,7 @@ internal sealed class TemplateCaptureForm : Form
     {
         int width = Math.Clamp(desired.Width, 2, Math.Max(2, maximum.Width));
         int height = Math.Clamp(desired.Height, 2, Math.Max(2, maximum.Height));
-        // Keep both independent dimensions and the decoded-template pixel budget valid.
+        // 同时保证两个独立尺寸和模板解码后的像素预算都有效。
         width = Math.Min(width, ClickCondition.MaximumTemplatePixels / 2);
         height = Math.Min(height, ClickCondition.MaximumTemplatePixels / width);
         return new Size(width, height);

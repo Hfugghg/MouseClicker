@@ -90,8 +90,8 @@ public class MainFormLayoutTests(ITestOutputHelper output)
     public void MovingWithinTheSameDisplaySkipsLayoutAndPreservesScroll(bool overflow) => OnSta(() =>
     {
         using var form = new Form1(null, null);
-        // AutoScroll needs a visible native window. Keep it transparent, and suppress
-        // startup network work/dialogs so the test only exercises layout and scrolling.
+        // AutoScroll 需要可见的原生窗口。让窗口保持透明，并抑制
+        // 启动时的网络检查和弹窗，使测试只关注布局与滚动。
         typeof(Form1).GetField("_updateCheckStarted", Private)!.SetValue(form, true);
         typeof(Form1).GetField("_hotkeyFailureShown", Private)!.SetValue(form, true);
         form.Opacity = 0;
@@ -138,8 +138,8 @@ public class MainFormLayoutTests(ITestOutputHelper output)
         int layouts = 0;
         Field<Panel>(form, "areasCard").Layout += (_, _) => layouts++;
         typeof(Form).GetMethod("OnResizeEnd", Private)!.Invoke(form, [EventArgs.Empty]);
-        // An environment key change must be consumed even when recalculating yields
-        // the same final geometry. It need not force a native layout/repaint.
+        // 即使重新计算得到相同的最终几何，也必须消费环境键变化。
+        // 它不必强制触发原生布局或重绘。
         Assert.Equal(expected, cache.GetValue(form));
         layouts = 0;
         typeof(Form).GetMethod("OnResizeEnd", Private)!.Invoke(form, [EventArgs.Empty]);
