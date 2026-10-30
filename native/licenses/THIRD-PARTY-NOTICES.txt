@@ -1,0 +1,34 @@
+MouseClicker 第三方组件许可说明
+
+MouseClicker 应用本体以 MIT 许可证发布（见仓库根目录 LICENSE）。
+发布包中还包含下列第三方组件，它们分别适用各自的许可证：
+
+1. OpenCV 4.13.0（精简构建，仅 core/imgproc/imgcodecs）
+   Apache License 2.0
+   许可证全文：LICENSE-OpenCV.txt
+   构建说明：仓库 native/README.md
+
+2. OpenCvSharp 4.13.0（托管封装与 C 封装）
+   Apache License 2.0
+   许可证全文：LICENSE-OpenCvSharp.txt
+
+3. zlib（随 OpenCV 静态链接）
+   zlib License
+   许可证全文：LICENSE-zlib.txt
+
+4. libpng（随 OpenCV 静态链接）
+   PNG Reference Library License version 2
+   许可证全文：LICENSE-libpng.txt
+
+5. LLVM libc++ / libunwind（随精简原生库静态链接）
+   Apache License 2.0 with LLVM Exceptions
+   许可证全文：LICENSE-LLVM.txt
+
+6. .NET 运行时（自包含安装包中包含）
+   MIT License，Copyright (c) .NET Foundation and Contributors
+   许可证全文：LICENSE-dotnet-runtime.txt
+
+各组件版权归其各自作者所有。本项目与 OpenCV、OpenCvSharp、LLVM、.NET Foundation
+无隶属关系，也不代表其官方认可。
+
+以上文本随安装包和便携版一起分发（licenses 目录）。

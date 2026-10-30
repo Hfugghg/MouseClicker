@@ -28,3 +28,14 @@ jobs:
 
       - name: 运行测试
         run: dotnet test MouseClicker.sln --configuration Release --no-build
+
+      - name: 校验发布用精简 OpenCV 原生库
+        shell: pwsh
+        run: |
+          dotnet publish ./src/MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained false --output ./ci-publish-check
+          $expected = 'DBB174C553BEAB60A2FD94BAF620C79AF0ABD57A95826F3EF512C6DA57C71991'
+          $path = './ci-publish-check/OpenCvSharpExtern.dll'
+          if (-not (Test-Path -LiteralPath $path)) { throw "缺少 $path" }
+          $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+          if ($hash -ne $expected) { throw "$path 哈希不匹配：$hash" }
+          Write-Host "$path OK ($hash)"

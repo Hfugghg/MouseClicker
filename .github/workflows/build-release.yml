@@ -34,6 +34,17 @@ jobs:
       - name: 构建用于安装包的文件
         run: dotnet publish ./src/MouseClicker/MouseClicker.csproj --configuration Release --runtime win-x64 --self-contained true -p:PublishSingleFile=false --output ./release-for-inno
 
+      - name: 校验精简 OpenCV 原生库
+        shell: pwsh
+        run: |
+          $expected = 'DBB174C553BEAB60A2FD94BAF620C79AF0ABD57A95826F3EF512C6DA57C71991'
+          foreach ($path in @('./release-portable/OpenCvSharpExtern.dll', './release-for-inno/OpenCvSharpExtern.dll')) {
+            if (-not (Test-Path -LiteralPath $path)) { throw "缺少 $path" }
+            $hash = (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash
+            if ($hash -ne $expected) { throw "$path 哈希不匹配：$hash" }
+            Write-Host "$path OK ($hash)"
+          }
+
       # --- 使用 Inno Setup 创建高压安装包 ---
       - name: 在 Inno Setup 脚本中设置版本号
         # 直接替换脚本文件中的占位符

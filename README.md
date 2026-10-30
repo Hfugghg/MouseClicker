@@ -107,7 +107,7 @@ MouseClicker 按你框选的屏幕区域和设定的节奏自动点击鼠标。�
 
 *   **语言**：C#
 *   **框架**：.NET 10 / Windows Forms（正式版本）；.NET Framework 4.8 / Windows Forms（实验分支）
-*   **图像识别**：OpenCvSharp / OpenCV，Windows x64 原生运行库
+*   **图像识别**：OpenCvSharp / OpenCV，Windows x64 原生运行库；发布时自动替换为仓库内置的精简原生库（见 [native/README.md](native/README.md)）
 *   **测试**：xUnit 自动化测试（包括配置数据与边界条件验证）
 
 ## 📁 项目结构
@@ -122,6 +122,7 @@ MouseClicker/
 │   └── Languages/      # 语言文件
 ├── tests/MouseClicker.Tests/
 │   └── TestDoubles/    # 测试替身
+├── native/             # 精简 OpenCV 原生库与构建说明
 ├── setup.iss           # Inno Setup 安装脚本
 └── .github/workflows/  # CI/CD
 ```
@@ -146,6 +147,8 @@ dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --
 & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" setup.iss
 ```
 
+> 发布 `win-x64` 时，构建会自动用 `src/MouseClicker/Resources/native/win-x64/OpenCvSharpExtern.dll` 替换官方 OpenCV 原生库，并校验 SHA256。来源、体积与重建方法见 [native/README.md](native/README.md)。
+
 ### 运行测试
 
 ```powershell
@@ -162,4 +165,6 @@ dotnet test .\MouseClicker.sln --configuration Release
 
 ## 📄 许可证
 
-[LICENSE](LICENSE)
+应用本体使用 MIT 许可证：[LICENSE](LICENSE)。
+
+发布包内含第三方组件的许可文本（`licenses` 目录）：OpenCV、OpenCvSharp（Apache-2.0）、zlib、libpng、LLVM 与 .NET 运行时。精简 OpenCV 原生库的来源与构建方法见 [native/README.md](native/README.md)。

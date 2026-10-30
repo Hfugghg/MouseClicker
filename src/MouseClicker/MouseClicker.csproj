@@ -9,6 +9,8 @@
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources/logo.ico</ApplicationIcon>
+    <MinimalOpenCvLibrary>$(MSBuildProjectDirectory)\Resources\native\win-x64\OpenCvSharpExtern.dll</MinimalOpenCvLibrary>
+    <MinimalOpenCvLibrarySha256>DBB174C553BEAB60A2FD94BAF620C79AF0ABD57A95826F3EF512C6DA57C71991</MinimalOpenCvLibrarySha256>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +18,37 @@
     <PackageReference Include="OpenCvSharp4.runtime.win.slim" Version="4.13.0.20260627" />
     <InternalsVisibleTo Include="MouseClicker.Tests" />
   </ItemGroup>
+
+  <!-- 第三方许可证随发布包分发；单文件模式下放在 exe 旁的 licenses 目录，不并入捆绑包。 -->
+  <ItemGroup>
+    <Content Include="..\..\native\licenses\*" Link="licenses\%(Filename)%(Extension)"
+             CopyToPublishDirectory="PreserveNewest" ExcludeFromSingleFile="true" />
+  </ItemGroup>
+
+  <!-- 发布时用仓库内置的精简 OpenCV 原生库替换官方运行时包中的版本。
+       该库只编译 core/imgproc/imgcodecs，单文件压缩后可比官方库小约 16 MB；
+       来源、构建方法与许可证见 native/README.md。 -->
+  <Target Name="_UseMinimalOpenCvNativeLibrary" AfterTargets="ComputeResolvedFilesToPublishList"
+          Condition="'$(RuntimeIdentifier)' == 'win-x64'">
+    <Error Condition="!Exists('$(MinimalOpenCvLibrary)')"
+           Text="缺少精简 OpenCV 原生库：$(MinimalOpenCvLibrary)" />
+    <GetFileHash Files="$(MinimalOpenCvLibrary)" Algorithm="SHA256">
+      <Output TaskParameter="Items" ItemName="_MinimalOpenCvLibraryHash" />
+    </GetFileHash>
+    <Error Condition="'@(_MinimalOpenCvLibraryHash->'%(FileHash)')' != '$(MinimalOpenCvLibrarySha256)'"
+           Text="精简 OpenCV 原生库哈希不匹配：@(_MinimalOpenCvLibraryHash->'%(FileHash)')" />
+    <ItemGroup>
+      <_OfficialOpenCvNative Include="@(ResolvedFileToPublish)"
+                             Condition="'%(ResolvedFileToPublish.Filename)%(ResolvedFileToPublish.Extension)' == 'OpenCvSharpExtern.dll'" />
+    </ItemGroup>
+    <Error Condition="'@(_OfficialOpenCvNative->Count())' != '1'"
+           Text="发布清单中应恰好有一个 OpenCvSharpExtern.dll，实际为 @(_OfficialOpenCvNative->Count())。" />
+    <ItemGroup>
+      <ResolvedFileToPublish Remove="@(_OfficialOpenCvNative)" />
+      <ResolvedFileToPublish Include="$(MinimalOpenCvLibrary)"
+                             RelativePath="OpenCvSharpExtern.dll"
+                             CopyToPublishDirectory="PreserveNewest" />
+    </ItemGroup>
+  </Target>
 
 </Project>
