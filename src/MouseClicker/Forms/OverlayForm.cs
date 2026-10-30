@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -141,26 +142,23 @@ namespace MouseClicker
                     area.Area.Height);
                 Color borderColor = GetBorderColor(area, preview, active);
                 bool highlighted = ReferenceEquals(area, active) || ReferenceEquals(area, preview);
-                Color textColor = highlighted ? borderColor : Color.FromArgb(150, 255, 255, 0);
+                using (var font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 13, FontStyle.Bold))
+                {
+                    var textSize = e.Graphics.MeasureString(area.Label, font);
+                    DrawLabel(e.Graphics, area.Label, font,
+                        localArea.X + (localArea.Width - textSize.Width) / 2,
+                        localArea.Y + (localArea.Height - textSize.Height) / 2);
+                }
                 using (var pen = new Pen(borderColor, highlighted ? 3 : 2))
                 {
                     e.Graphics.DrawRectangle(pen, localArea);
-                }
-                using (var font = new Font("Arial", 16, FontStyle.Bold))
-                using (var brush = new SolidBrush(textColor))
-                {
-                    var textSize = e.Graphics.MeasureString(area.Label, font);
-                    var textX = localArea.X + (localArea.Width - textSize.Width) / 2;
-                    var textY = localArea.Y + (localArea.Height - textSize.Height) / 2;
-                    e.Graphics.DrawString(area.Label, font, brush, textX, textY);
                 }
             }
             // Draw dashed detection borders last so coincident click borders remain distinguishable.
             if (ShowDetectionAreas)
             {
                 using var pen = new Pen(DetectionColor, 2) { DashStyle = DashStyle.Dash };
-                using var font = new Font("Arial", 11, FontStyle.Bold);
-                using var brush = new SolidBrush(DetectionColor);
+                using var font = new Font(SystemFonts.MessageBoxFont?.FontFamily ?? FontFamily.GenericSansSerif, 11, FontStyle.Bold);
                 foreach (var area in GetDetectionAreas(AreasToDraw))
                 {
                     var bounds = ToLocalArea(area.Condition!.DetectionArea, virtualScreen.Location);
@@ -168,10 +166,49 @@ namespace MouseClicker
                     var label = string.Format(Localization.Get("DetectionOverlayLabel"), area.Label);
                     var state = e.Graphics.Save();
                     e.Graphics.SetClip(bounds);
-                    e.Graphics.DrawString(label, font, brush, bounds.Left + 4, bounds.Top + 4);
+                    DrawLabel(e.Graphics, label, font, bounds.Left + 4, bounds.Top + 4);
                     e.Graphics.Restore(state);
                 }
             }
+        }
+
+        private static void DrawLabel(Graphics graphics, string text, Font font, float x, float y)
+        {
+            if (string.IsNullOrEmpty(text)) return;
+            const int padding = 3;
+            var size = graphics.MeasureString(text, font);
+            using var label = new Bitmap((int)Math.Ceiling(size.Width) + padding * 2,
+                (int)Math.Ceiling(size.Height) + padding * 2, PixelFormat.Format32bppArgb);
+            label.SetResolution(graphics.DpiX, graphics.DpiY);
+            using (var layer = Graphics.FromImage(label))
+            using (var path = new GraphicsPath())
+            using (var outline = new Pen(Color.FromArgb(35, 39, 45), 2) { LineJoin = LineJoin.Round })
+            using (var foreground = new SolidBrush(Color.White))
+            {
+                layer.SmoothingMode = SmoothingMode.AntiAlias;
+                path.AddString(text, font.FontFamily, (int)font.Style, font.SizeInPoints * graphics.DpiY / 72,
+                    new PointF(padding, padding), StringFormat.GenericDefault);
+                layer.DrawPath(outline, path);
+                layer.FillPath(foreground, path);
+            }
+
+            // A color-key window cannot blend partial alpha with the desktop. Keep the
+            // antialiasing inside the outline, but make its outside edge fully opaque or clear.
+            var data = label.LockBits(new Rectangle(Point.Empty, label.Size), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            try
+            {
+                var row = new byte[label.Width * 4];
+                for (int rowIndex = 0; rowIndex < label.Height; rowIndex++)
+                {
+                    var address = IntPtr.Add(data.Scan0, rowIndex * data.Stride);
+                    Marshal.Copy(address, row, 0, row.Length);
+                    for (int pixel = 3; pixel < row.Length; pixel += 4)
+                        row[pixel] = row[pixel] >= 128 ? (byte)255 : (byte)0;
+                    Marshal.Copy(row, 0, address, row.Length);
+                }
+            }
+            finally { label.UnlockBits(data); }
+            graphics.DrawImageUnscaled(label, (int)Math.Floor(x) - padding, (int)Math.Floor(y) - padding);
         }
     }
 }

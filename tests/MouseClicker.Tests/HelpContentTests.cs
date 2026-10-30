@@ -53,8 +53,65 @@ public class HelpContentTests
         Assert.Contains("不重叠", body);
         Assert.Contains("不点击鼠标", body);
         Assert.Contains("自动恢复", body);
-        Assert.Contains("检测区外", body);
+        Assert.Contains("检测区域外", body);
         foreach (int step in Enumerable.Range(1, 8)) Assert.Contains($"{step}.", body);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-CN")]
+    [InlineData("zh-TW")]
+    [InlineData("ja-JP")]
+    [InlineData("ko-KR")]
+    [InlineData("fr-FR")]
+    [InlineData("de-DE")]
+    [InlineData("es-ES")]
+    [InlineData("ru-RU")]
+    [InlineData("pt-BR")]
+    public void TimingGuideUsesTheSameSequenceNamesAsTheInterface(string language)
+    {
+        var page = HelpContent.GetCatalog(language).Pages.Single(item => item.Topic == HelpTopic.TimingAndOrder);
+        var body = string.Join("\n", page.Sections.Select(section => section.Body));
+        foreach (string key in new[] { "SequenceLoop", "SequenceRandom", "SequenceOnce" })
+            Assert.Contains(Localization.Get(language, key), body);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-CN")]
+    [InlineData("zh-TW")]
+    [InlineData("ja-JP")]
+    [InlineData("ko-KR")]
+    [InlineData("fr-FR")]
+    [InlineData("de-DE")]
+    [InlineData("es-ES")]
+    [InlineData("ru-RU")]
+    [InlineData("pt-BR")]
+    public void EveryGuideDocumentsAutomaticSessionRestore(string language)
+    {
+        var page = HelpContent.GetCatalog(language).Pages.Single(item => item.Topic == HelpTopic.HotkeysAndConfiguration);
+        var body = string.Join("\n", page.Sections.Select(section => section.Body));
+        Assert.Contains("last-session.json", body);
+    }
+
+    [Theory]
+    [InlineData("en-US")]
+    [InlineData("zh-CN")]
+    [InlineData("zh-TW")]
+    [InlineData("ja-JP")]
+    [InlineData("ko-KR")]
+    [InlineData("fr-FR")]
+    [InlineData("de-DE")]
+    [InlineData("es-ES")]
+    [InlineData("ru-RU")]
+    [InlineData("pt-BR")]
+    public void GuidesUseReadableTemplateSizeUnits(string language)
+    {
+        var body = string.Join("\n", HelpContent.GetCatalog(language).Pages
+            .SelectMany(page => page.Sections)
+            .Select(section => section.Body));
+        Assert.DoesNotContain("32 MiB", body);
+        Assert.DoesNotContain("32M", body);
     }
 
     [Fact]

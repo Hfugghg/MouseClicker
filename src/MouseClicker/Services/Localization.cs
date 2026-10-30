@@ -1456,14 +1456,14 @@ Obrigado por usar o aplicativo!
             Translations["en-US"]["ConditionErrorDecode"] = "The template PNG could not be decoded.";
             Translations["en-US"]["ConditionErrorEncoding"] = "Invalid template image encoding.";
             Translations["en-US"]["ConditionErrorPng"] = "The template must be a PNG image.";
-            Translations["en-US"]["ConditionErrorDimensions"] = "Invalid template dimensions: each side must be at least 2 pixels, with at most 32M pixels in total.";
+            Translations["en-US"]["ConditionErrorDimensions"] = "Invalid template dimensions: each side must be at least 2 pixels, with at most 33 megapixels in total.";
             Translations["en-US"]["ConditionErrorCaptureArea"] = "Invalid screen capture region.";
             Translations["en-US"]["ConditionErrorOutsideDisplays"] = "The detection region extends beyond the available displays.";
             Translations["en-US"]["ConditionErrorLowDetail"] = "The template has too little visual detail. Select a distinctive icon or text.";
             Translations["en-US"]["ConditionErrorTemplateFit"] = "The original-size template exceeds the detection image. Enable automatic sizing, crop the template, or enlarge detection.";
             Translations["en-US"]["ConditionErrorScore"] = "Image matching returned invalid scores.";
             Translations["en-US"]["ConditionErrorTemplateEmpty"] = "Capture or import a template image first.";
-            Translations["en-US"]["ConditionErrorTemplateSize"] = "Original templates are limited to 32 MiB and 32M pixels.";
+            Translations["en-US"]["ConditionErrorTemplateSize"] = "Original templates are limited to 32 MB (about 33 megapixels).";
             Translations["en-US"]["ConditionErrorTimeout"] = "Timed out waiting for the image condition.";
             Translations["en-US"]["ConditionErrorRecognition"] = "Image recognition failed.";
             Translations["zh-CN"]["ConditionErrorDetectionArea"] = "检测区域无效，最多支持 3200 万像素。";
@@ -1471,14 +1471,14 @@ Obrigado por usar o aplicativo!
             Translations["zh-CN"]["ConditionErrorDecode"] = "无法解码模板 PNG 图片。";
             Translations["zh-CN"]["ConditionErrorEncoding"] = "模板图片编码无效。";
             Translations["zh-CN"]["ConditionErrorPng"] = "模板必须为 PNG 图片。";
-            Translations["zh-CN"]["ConditionErrorDimensions"] = "模板尺寸无效：每边至少 2 像素，总计最多 32M 像素。";
+            Translations["zh-CN"]["ConditionErrorDimensions"] = "模板尺寸无效：每边至少 2 像素，总计最多约 3300 万像素。";
             Translations["zh-CN"]["ConditionErrorCaptureArea"] = "截图区域无效。";
             Translations["zh-CN"]["ConditionErrorOutsideDisplays"] = "检测区域超出可用显示器范围。";
             Translations["zh-CN"]["ConditionErrorLowDetail"] = "模板画面特征不足，请选择有明显图案或文字的区域。";
             Translations["zh-CN"]["ConditionErrorTemplateFit"] = "原尺寸模式下模板大于检测画面。请开启自动适应目标大小、裁剪模板或扩大检测区域。";
             Translations["zh-CN"]["ConditionErrorScore"] = "图像匹配返回了无效分数。";
             Translations["zh-CN"]["ConditionErrorTemplateEmpty"] = "请先截取或导入模板图片。";
-            Translations["zh-CN"]["ConditionErrorTemplateSize"] = "原始模板上限为 32 MiB、32M 像素。";
+            Translations["zh-CN"]["ConditionErrorTemplateSize"] = "原始模板上限为 32 MB（约 3300 万像素）。";
             Translations["zh-CN"]["ConditionErrorTimeout"] = "等待画面条件超时。";
             Translations["zh-CN"]["ConditionErrorRecognition"] = "画面识别失败。";
             Translations["zh-TW"]["ConditionErrorDetectionArea"] = "偵測區域無效，最多支援 3200 萬像素。";
@@ -1486,14 +1486,14 @@ Obrigado por usar o aplicativo!
             Translations["zh-TW"]["ConditionErrorDecode"] = "無法解碼範本 PNG 圖片。";
             Translations["zh-TW"]["ConditionErrorEncoding"] = "範本圖片編碼無效。";
             Translations["zh-TW"]["ConditionErrorPng"] = "範本必須為 PNG 圖片。";
-            Translations["zh-TW"]["ConditionErrorDimensions"] = "範本尺寸無效：每邊至少 2 像素，總計最多 32M 像素。";
+            Translations["zh-TW"]["ConditionErrorDimensions"] = "範本尺寸無效：每邊至少 2 像素，總計最多約 3300 萬像素。";
             Translations["zh-TW"]["ConditionErrorCaptureArea"] = "擷取區域無效。";
             Translations["zh-TW"]["ConditionErrorOutsideDisplays"] = "偵測區域超出可用顯示器範圍。";
             Translations["zh-TW"]["ConditionErrorLowDetail"] = "範本畫面特徵不足，請選擇有明顯圖案或文字的區域。";
             Translations["zh-TW"]["ConditionErrorTemplateFit"] = "原尺寸模式下範本大於偵測畫面。請啟用自動適應目標大小、裁切範本或擴大偵測區域。";
             Translations["zh-TW"]["ConditionErrorScore"] = "圖像比對傳回無效分數。";
             Translations["zh-TW"]["ConditionErrorTemplateEmpty"] = "請先擷取或匯入範本圖片。";
-            Translations["zh-TW"]["ConditionErrorTemplateSize"] = "原始範本上限為 32 MiB、32M 像素。";
+            Translations["zh-TW"]["ConditionErrorTemplateSize"] = "原始範本上限為 32 MB（約 3300 萬像素）。";
             Translations["zh-TW"]["ConditionErrorTimeout"] = "等待畫面條件逾時。";
             Translations["zh-TW"]["ConditionErrorRecognition"] = "畫面辨識失敗。";
             Translations["ja-JP"]["ConditionErrorDetectionArea"] = "検出範囲が無効です。最大3200万画素です。";
@@ -1501,14 +1501,14 @@ Obrigado por usar o aplicativo!
             Translations["ja-JP"]["ConditionErrorDecode"] = "テンプレートのPNG画像をデコードできません。";
             Translations["ja-JP"]["ConditionErrorEncoding"] = "テンプレート画像のエンコードが無効です。";
             Translations["ja-JP"]["ConditionErrorPng"] = "テンプレートはPNG画像にしてください。";
-            Translations["ja-JP"]["ConditionErrorDimensions"] = "無効な画像サイズです。各辺2画素以上、合計32M画素以下にしてください。";
+            Translations["ja-JP"]["ConditionErrorDimensions"] = "無効な画像サイズです。各辺2画素以上、合計約3300万画素以下にしてください。";
             Translations["ja-JP"]["ConditionErrorCaptureArea"] = "画面キャプチャ範囲が無効です。";
             Translations["ja-JP"]["ConditionErrorOutsideDisplays"] = "検出範囲がディスプレイの範囲外です。";
             Translations["ja-JP"]["ConditionErrorLowDetail"] = "画像の特徴が不足しています。はっきりした図柄や文字を選択してください。";
             Translations["ja-JP"]["ConditionErrorTemplateFit"] = "元サイズの画像が検出画像より大きいため、自動対応を有効にするか、切り抜くか、検出領域を広げてください。";
             Translations["ja-JP"]["ConditionErrorScore"] = "画像照合で無効なスコアが返されました。";
             Translations["ja-JP"]["ConditionErrorTemplateEmpty"] = "先にテンプレート画像を撮影または読み込んでください。";
-            Translations["ja-JP"]["ConditionErrorTemplateSize"] = "元画像の上限は32 MiB、32M画素です。";
+            Translations["ja-JP"]["ConditionErrorTemplateSize"] = "元画像の上限は32 MB（約3300万画素）です。";
             Translations["ja-JP"]["ConditionErrorTimeout"] = "画像条件の待機がタイムアウトしました。";
             Translations["ja-JP"]["ConditionErrorRecognition"] = "画像認識に失敗しました。";
             Translations["ko-KR"]["ConditionErrorDetectionArea"] = "감지 영역이 잘못되었습니다. 최대 3200만 픽셀입니다.";
@@ -1516,14 +1516,14 @@ Obrigado por usar o aplicativo!
             Translations["ko-KR"]["ConditionErrorDecode"] = "템플릿 PNG 이미지를 디코딩할 수 없습니다.";
             Translations["ko-KR"]["ConditionErrorEncoding"] = "템플릿 이미지 인코딩이 잘못되었습니다.";
             Translations["ko-KR"]["ConditionErrorPng"] = "템플릿은 PNG 이미지여야 합니다.";
-            Translations["ko-KR"]["ConditionErrorDimensions"] = "잘못된 템플릿 크기입니다. 각 변은 2픽셀 이상, 전체는 32M픽셀 이하여야 합니다.";
+            Translations["ko-KR"]["ConditionErrorDimensions"] = "잘못된 템플릿 크기입니다. 각 변은 2픽셀 이상, 전체는 약 3300만 픽셀 이하여야 합니다.";
             Translations["ko-KR"]["ConditionErrorCaptureArea"] = "캡처 영역이 잘못되었습니다.";
             Translations["ko-KR"]["ConditionErrorOutsideDisplays"] = "감지 영역이 사용 가능한 화면을 벗어났습니다.";
             Translations["ko-KR"]["ConditionErrorLowDetail"] = "템플릿 특징이 부족합니다. 뚜렷한 그림이나 글자를 선택하세요.";
             Translations["ko-KR"]["ConditionErrorTemplateFit"] = "원본 크기 템플릿이 감지 이미지보다 큽니다. 자동 조정을 켜거나 자르거나 감지 영역을 넓히세요.";
             Translations["ko-KR"]["ConditionErrorScore"] = "이미지 일치 점수가 잘못되었습니다.";
             Translations["ko-KR"]["ConditionErrorTemplateEmpty"] = "먼저 템플릿 이미지를 캡처하거나 가져오세요.";
-            Translations["ko-KR"]["ConditionErrorTemplateSize"] = "원본 템플릿 한도는 32 MiB, 32M픽셀입니다.";
+            Translations["ko-KR"]["ConditionErrorTemplateSize"] = "원본 템플릿 한도는 32 MB(약 3300만 픽셀)입니다.";
             Translations["ko-KR"]["ConditionErrorTimeout"] = "이미지 조건 대기 시간이 초과되었습니다.";
             Translations["ko-KR"]["ConditionErrorRecognition"] = "이미지 인식에 실패했습니다.";
             Translations["fr-FR"]["ConditionErrorDetectionArea"] = "Zone de détection invalide (32 mégapixels maximum).";
@@ -1531,14 +1531,14 @@ Obrigado por usar o aplicativo!
             Translations["fr-FR"]["ConditionErrorDecode"] = "Impossible de décoder le modèle PNG.";
             Translations["fr-FR"]["ConditionErrorEncoding"] = "Encodage du modèle invalide.";
             Translations["fr-FR"]["ConditionErrorPng"] = "Le modèle doit être une image PNG.";
-            Translations["fr-FR"]["ConditionErrorDimensions"] = "Dimensions invalides : au moins 2 pixels par côté et au plus 32M pixels au total.";
+            Translations["fr-FR"]["ConditionErrorDimensions"] = "Dimensions invalides : au moins 2 pixels par côté et au plus 33 mégapixels au total.";
             Translations["fr-FR"]["ConditionErrorCaptureArea"] = "Zone de capture invalide.";
             Translations["fr-FR"]["ConditionErrorOutsideDisplays"] = "La zone de détection dépasse les écrans disponibles.";
             Translations["fr-FR"]["ConditionErrorLowDetail"] = "Le modèle manque de détails. Sélectionnez une icône ou un texte distinctif.";
             Translations["fr-FR"]["ConditionErrorTemplateFit"] = "Le modèle à sa taille d’origine dépasse la zone. Activez l’adaptation, recadrez ou agrandissez la zone.";
             Translations["fr-FR"]["ConditionErrorScore"] = "La détection a renvoyé des scores invalides.";
             Translations["fr-FR"]["ConditionErrorTemplateEmpty"] = "Capturez ou importez d’abord une image modèle.";
-            Translations["fr-FR"]["ConditionErrorTemplateSize"] = "Les modèles originaux sont limités à 32 MiB et 32M pixels.";
+            Translations["fr-FR"]["ConditionErrorTemplateSize"] = "Les modèles sont limités à 32 Mo (environ 33 mégapixels).";
             Translations["fr-FR"]["ConditionErrorTimeout"] = "Le délai d’attente de la condition visuelle est écoulé.";
             Translations["fr-FR"]["ConditionErrorRecognition"] = "La reconnaissance visuelle a échoué.";
             Translations["de-DE"]["ConditionErrorDetectionArea"] = "Ungültiger Suchbereich (maximal 32 Megapixel).";
@@ -1546,14 +1546,14 @@ Obrigado por usar o aplicativo!
             Translations["de-DE"]["ConditionErrorDecode"] = "Die PNG-Vorlage konnte nicht dekodiert werden.";
             Translations["de-DE"]["ConditionErrorEncoding"] = "Ungültige Bildkodierung der Vorlage.";
             Translations["de-DE"]["ConditionErrorPng"] = "Die Vorlage muss ein PNG-Bild sein.";
-            Translations["de-DE"]["ConditionErrorDimensions"] = "Ungültige Vorlagengröße: mindestens 2 Pixel je Seite und insgesamt höchstens 32M Pixel.";
+            Translations["de-DE"]["ConditionErrorDimensions"] = "Ungültige Vorlagengröße: mindestens 2 Pixel je Seite und insgesamt höchstens 33 Megapixel.";
             Translations["de-DE"]["ConditionErrorCaptureArea"] = "Ungültiger Aufnahmebereich.";
             Translations["de-DE"]["ConditionErrorOutsideDisplays"] = "Der Suchbereich liegt außerhalb der verfügbaren Bildschirme.";
             Translations["de-DE"]["ConditionErrorLowDetail"] = "Die Vorlage enthält zu wenig Details. Wählen Sie ein markantes Symbol oder Text.";
             Translations["de-DE"]["ConditionErrorTemplateFit"] = "Die Originalvorlage übersteigt den Suchbereich. Größenanpassung aktivieren, Vorlage zuschneiden oder Bereich vergrößern.";
             Translations["de-DE"]["ConditionErrorScore"] = "Die Bilderkennung lieferte ungültige Werte.";
             Translations["de-DE"]["ConditionErrorTemplateEmpty"] = "Bitte zuerst eine Vorlage aufnehmen oder importieren.";
-            Translations["de-DE"]["ConditionErrorTemplateSize"] = "Originalvorlagen sind auf 32 MiB und 32M Pixel begrenzt.";
+            Translations["de-DE"]["ConditionErrorTemplateSize"] = "Vorlagen sind auf 32 MB (etwa 33 Megapixel) begrenzt.";
             Translations["de-DE"]["ConditionErrorTimeout"] = "Zeitlimit beim Warten auf die Bildbedingung erreicht.";
             Translations["de-DE"]["ConditionErrorRecognition"] = "Die Bilderkennung ist fehlgeschlagen.";
             Translations["es-ES"]["ConditionErrorDetectionArea"] = "Zona de detección no válida (máximo 32 megapíxeles).";
@@ -1561,14 +1561,14 @@ Obrigado por usar o aplicativo!
             Translations["es-ES"]["ConditionErrorDecode"] = "No se pudo decodificar la plantilla PNG.";
             Translations["es-ES"]["ConditionErrorEncoding"] = "Codificación de plantilla no válida.";
             Translations["es-ES"]["ConditionErrorPng"] = "La plantilla debe ser una imagen PNG.";
-            Translations["es-ES"]["ConditionErrorDimensions"] = "Dimensiones no válidas: cada lado debe tener al menos 2 píxeles y el total no debe superar 32M píxeles.";
+            Translations["es-ES"]["ConditionErrorDimensions"] = "Dimensiones no válidas: cada lado debe tener al menos 2 píxeles y el total no debe superar los 33 megapíxeles.";
             Translations["es-ES"]["ConditionErrorCaptureArea"] = "Zona de captura no válida.";
             Translations["es-ES"]["ConditionErrorOutsideDisplays"] = "La zona de detección supera las pantallas disponibles.";
             Translations["es-ES"]["ConditionErrorLowDetail"] = "La plantilla tiene pocos detalles. Seleccione un icono o texto distintivo.";
             Translations["es-ES"]["ConditionErrorTemplateFit"] = "La plantilla original supera el área. Active adaptación, recorte o amplíe el área.";
             Translations["es-ES"]["ConditionErrorScore"] = "La detección devolvió puntuaciones no válidas.";
             Translations["es-ES"]["ConditionErrorTemplateEmpty"] = "Primero capture o importe una imagen de plantilla.";
-            Translations["es-ES"]["ConditionErrorTemplateSize"] = "Las plantillas originales tienen un límite de 32 MiB y 32M píxeles.";
+            Translations["es-ES"]["ConditionErrorTemplateSize"] = "Las plantillas tienen un límite de 32 MB (unos 33 megapíxeles).";
             Translations["es-ES"]["ConditionErrorTimeout"] = "Se agotó el tiempo de espera de la condición visual.";
             Translations["es-ES"]["ConditionErrorRecognition"] = "Falló el reconocimiento visual.";
             Translations["ru-RU"]["ConditionErrorDetectionArea"] = "Недопустимая область поиска (не более 32 мегапикселей).";
@@ -1576,14 +1576,14 @@ Obrigado por usar o aplicativo!
             Translations["ru-RU"]["ConditionErrorDecode"] = "Не удалось декодировать шаблон PNG.";
             Translations["ru-RU"]["ConditionErrorEncoding"] = "Недопустимая кодировка шаблона.";
             Translations["ru-RU"]["ConditionErrorPng"] = "Шаблон должен быть изображением PNG.";
-            Translations["ru-RU"]["ConditionErrorDimensions"] = "Недопустимые размеры: каждая сторона не менее 2 пикселей, всего не более 32M пикселей.";
+            Translations["ru-RU"]["ConditionErrorDimensions"] = "Недопустимые размеры: каждая сторона не менее 2 пикселей, всего не более 33 мегапикселей.";
             Translations["ru-RU"]["ConditionErrorCaptureArea"] = "Недопустимая область снимка.";
             Translations["ru-RU"]["ConditionErrorOutsideDisplays"] = "Область поиска выходит за пределы доступных экранов.";
             Translations["ru-RU"]["ConditionErrorLowDetail"] = "В шаблоне слишком мало деталей. Выберите характерный значок или текст.";
             Translations["ru-RU"]["ConditionErrorTemplateFit"] = "Исходный шаблон больше области. Включите подбор размера, обрежьте шаблон или увеличьте область.";
             Translations["ru-RU"]["ConditionErrorScore"] = "Сопоставление вернуло недопустимые оценки.";
             Translations["ru-RU"]["ConditionErrorTemplateEmpty"] = "Сначала снимите или загрузите изображение шаблона.";
-            Translations["ru-RU"]["ConditionErrorTemplateSize"] = "Исходный шаблон ограничен 32 MiB и 32M пикселей.";
+            Translations["ru-RU"]["ConditionErrorTemplateSize"] = "Исходный шаблон ограничен 32 МБ (около 33 мегапикселей).";
             Translations["ru-RU"]["ConditionErrorTimeout"] = "Время ожидания условия изображения истекло.";
             Translations["ru-RU"]["ConditionErrorRecognition"] = "Не удалось распознать изображение.";
             Translations["pt-BR"]["ConditionErrorDetectionArea"] = "Área de detecção inválida (máximo de 32 megapixels).";
@@ -1591,14 +1591,14 @@ Obrigado por usar o aplicativo!
             Translations["pt-BR"]["ConditionErrorDecode"] = "Não foi possível decodificar o modelo PNG.";
             Translations["pt-BR"]["ConditionErrorEncoding"] = "Codificação do modelo inválida.";
             Translations["pt-BR"]["ConditionErrorPng"] = "O modelo deve ser uma imagem PNG.";
-            Translations["pt-BR"]["ConditionErrorDimensions"] = "Dimensões inválidas: pelo menos 2 pixels por lado e no máximo 32M pixels no total.";
+            Translations["pt-BR"]["ConditionErrorDimensions"] = "Dimensões inválidas: pelo menos 2 pixels por lado e no máximo 33 megapixels no total.";
             Translations["pt-BR"]["ConditionErrorCaptureArea"] = "Área de captura inválida.";
             Translations["pt-BR"]["ConditionErrorOutsideDisplays"] = "A área de detecção ultrapassa as telas disponíveis.";
             Translations["pt-BR"]["ConditionErrorLowDetail"] = "O modelo tem poucos detalhes. Selecione um ícone ou texto distinto.";
             Translations["pt-BR"]["ConditionErrorTemplateFit"] = "O modelo original supera a área. Ative adaptação, recorte ou amplie a área.";
             Translations["pt-BR"]["ConditionErrorScore"] = "A detecção retornou pontuações inválidas.";
             Translations["pt-BR"]["ConditionErrorTemplateEmpty"] = "Primeiro capture ou importe uma imagem de modelo.";
-            Translations["pt-BR"]["ConditionErrorTemplateSize"] = "Modelos originais têm limite de 32 MiB e 32M pixels.";
+            Translations["pt-BR"]["ConditionErrorTemplateSize"] = "Modelos têm limite de 32 MB (cerca de 33 megapixels).";
             Translations["pt-BR"]["ConditionErrorTimeout"] = "O tempo de espera da condição visual acabou.";
             Translations["pt-BR"]["ConditionErrorRecognition"] = "O reconhecimento visual falhou.";
             Translations["zh-CN"]["ShowDetectionOverlay"] = "显示检测区域";
@@ -1688,7 +1688,7 @@ Obrigado por usar o aplicativo!
             Translations["en-US"]["TemplateCropHint"] = "Drag inside the image to select a crop. Drag the selection to move it or its corner handles to resize. The crop keeps original pixels without scaling.";
             Translations["en-US"]["TemplateCropConfirm"] = "Use crop";
             Translations["en-US"]["TemplateCropDimensions"] = "Crop {0} × {1} px · Maximum {2} × {3} px";
-            Translations["en-US"]["ConditionImportTooLarge"] = "Imported images are limited to 32 MiB and about 32 million pixels. Reduce the source image first.";
+            Translations["en-US"]["ConditionImportTooLarge"] = "Imported images are limited to 32 MB (about 33 megapixels). Reduce the source image first.";
             Translations["zh-CN"]["TemplateCaptureInstructions"] = "拖动框内可移到任意位置，拖动边或角可调整大小。Enter 确认截图 · Esc 取消 使用 ↔ 手柄或方向键移动，Shift 加速。";
             Translations["zh-CN"]["TemplateCaptureSize"] = "模板：{0} × {1} 像素　最大：{2} × {3} 像素";
             Translations["zh-CN"]["TemplateCaptureInvalidArea"] = "请将整个截图框放在可见屏幕内，避开显示器之间的空隙；必要时缩小截图框。";
@@ -1696,7 +1696,7 @@ Obrigado por usar o aplicativo!
             Translations["zh-CN"]["TemplateCropHint"] = "在图片内拖动框选，拖动选框可移动，拖动四角可调整大小。裁剪保留原始像素，不会缩放。";
             Translations["zh-CN"]["TemplateCropConfirm"] = "确认裁剪";
             Translations["zh-CN"]["TemplateCropDimensions"] = "当前 {0} × {1} 像素 · 最大 {2} × {3} 像素";
-            Translations["zh-CN"]["ConditionImportTooLarge"] = "导入原图最多 32 MiB、约 3200 万像素。请先缩小原图。";
+            Translations["zh-CN"]["ConditionImportTooLarge"] = "导入原图最多 32 MB（约 3300 万像素）。请先缩小原图。";
             Translations["zh-TW"]["TemplateCaptureInstructions"] = "拖曳框內可移到任意位置，拖曳邊或角可調整大小。Enter 確認擷取 · Esc 取消 使用 ↔ 把手或方向鍵移動，Shift 加速。";
             Translations["zh-TW"]["TemplateCaptureSize"] = "範本：{0} × {1} 像素　最大：{2} × {3} 像素";
             Translations["zh-TW"]["TemplateCaptureInvalidArea"] = "請將整個擷取框放在可見螢幕內，避開顯示器之間的空隙；必要時縮小擷取框。";
@@ -1704,7 +1704,7 @@ Obrigado por usar o aplicativo!
             Translations["zh-TW"]["TemplateCropHint"] = "在圖片內拖曳框選，拖曳選框可移動，拖曳四角可調整大小。裁切保留原始像素，不會縮放。";
             Translations["zh-TW"]["TemplateCropConfirm"] = "確認裁切";
             Translations["zh-TW"]["TemplateCropDimensions"] = "目前 {0} × {1} 像素 · 最大 {2} × {3} 像素";
-            Translations["zh-TW"]["ConditionImportTooLarge"] = "匯入原圖最多 32 MiB、約 3200 萬像素。請先縮小原圖。";
+            Translations["zh-TW"]["ConditionImportTooLarge"] = "匯入原圖最多 32 MB（約 3300 萬像素）。請先縮小原圖。";
             Translations["ja-JP"]["TemplateCaptureInstructions"] = "枠内をドラッグして移動し、辺や角でサイズを変更します。Enter：撮影・Esc：キャンセル ↔ ハンドルか矢印キーで移動。Shiftで加速。";
             Translations["ja-JP"]["TemplateCaptureSize"] = "テンプレート：{0} × {1} px　最大：{2} × {3} px";
             Translations["ja-JP"]["TemplateCaptureInvalidArea"] = "枠全体を画面内に収め、モニター間の隙間を避けてください。必要に応じて枠を小さくしてください。";
@@ -1712,7 +1712,7 @@ Obrigado por usar o aplicativo!
             Translations["ja-JP"]["TemplateCropHint"] = "画像内をドラッグして範囲を選択します。枠の内側で移動、四隅でサイズ変更ができます。元の画素を保ち、拡大縮小しません。";
             Translations["ja-JP"]["TemplateCropConfirm"] = "切り抜きを確定";
             Translations["ja-JP"]["TemplateCropDimensions"] = "選択 {0} × {1} px · 最大 {2} × {3} px";
-            Translations["ja-JP"]["ConditionImportTooLarge"] = "読込画像は32 MiB、約3200万画素までです。元画像を小さくしてください。";
+            Translations["ja-JP"]["ConditionImportTooLarge"] = "読込画像は32 MB（約3300万画素）までです。元画像を小さくしてください。";
             Translations["ko-KR"]["TemplateCaptureInstructions"] = "프레임 안을 끌어 이동하고 가장자리나 모서리를 끌어 크기를 조절하세요. Enter: 캡처 · Esc: 취소 ↔ 손잡이나 방향키로 이동합니다. Shift로 빠르게 이동합니다.";
             Translations["ko-KR"]["TemplateCaptureSize"] = "템플릿: {0} × {1} 픽셀　최대: {2} × {3} 픽셀";
             Translations["ko-KR"]["TemplateCaptureInvalidArea"] = "프레임 전체를 화면 안에 놓고 모니터 사이 빈 공간을 피하세요. 필요하면 프레임을 줄이세요.";
@@ -1720,7 +1720,7 @@ Obrigado por usar o aplicativo!
             Translations["ko-KR"]["TemplateCropHint"] = "이미지 안에서 드래그하여 선택하세요. 선택 영역을 끌어 이동하고 모서리를 끌어 크기를 조절하세요. 원본 픽셀을 유지하며 확대하거나 축소하지 않습니다.";
             Translations["ko-KR"]["TemplateCropConfirm"] = "자르기 확인";
             Translations["ko-KR"]["TemplateCropDimensions"] = "선택 {0} × {1} px · 최대 {2} × {3} px";
-            Translations["ko-KR"]["ConditionImportTooLarge"] = "가져올 원본은 32 MiB, 약 3200만 픽셀까지입니다. 먼저 원본 크기를 줄이세요.";
+            Translations["ko-KR"]["ConditionImportTooLarge"] = "가져올 원본은 32 MB(약 3300만 픽셀)까지입니다. 먼저 원본 크기를 줄이세요.";
             Translations["fr-FR"]["TemplateCaptureInstructions"] = "Déplacez le cadre par son intérieur, redimensionnez par un bord ou un coin. Entrée : capturer · Échap : annuler Déplacez avec la poignée ↔ ou les flèches ; Maj accélère.";
             Translations["fr-FR"]["TemplateCaptureSize"] = "Modèle : {0} × {1} px　Maximum : {2} × {3} px";
             Translations["fr-FR"]["TemplateCaptureInvalidArea"] = "Placez le cadre entièrement sur les écrans, sans espace vide entre moniteurs. Réduisez-le si nécessaire.";
@@ -1728,7 +1728,7 @@ Obrigado por usar o aplicativo!
             Translations["fr-FR"]["TemplateCropHint"] = "Tracez une sélection dans l’image. Déplacez-la en la faisant glisser ou redimensionnez-la avec ses coins. Les pixels d’origine sont conservés, sans mise à l’échelle.";
             Translations["fr-FR"]["TemplateCropConfirm"] = "Valider le recadrage";
             Translations["fr-FR"]["TemplateCropDimensions"] = "Sélection {0} × {1} px · Maximum {2} × {3} px";
-            Translations["fr-FR"]["ConditionImportTooLarge"] = "L’image importée est limitée à 32 MiB et environ 32 millions de pixels. Réduisez d’abord l’original.";
+            Translations["fr-FR"]["ConditionImportTooLarge"] = "L’image importée est limitée à 32 Mo (environ 33 mégapixels). Réduisez d’abord l’original.";
             Translations["de-DE"]["TemplateCaptureInstructions"] = "Im Rahmen ziehen zum Verschieben; Kanten oder Ecken ziehen zum Skalieren. Eingabe: aufnehmen · Esc: abbrechen Mit ↔-Griff oder Pfeiltasten verschieben; Umschalt beschleunigt.";
             Translations["de-DE"]["TemplateCaptureSize"] = "Vorlage: {0} × {1} px　Maximum: {2} × {3} px";
             Translations["de-DE"]["TemplateCaptureInvalidArea"] = "Der gesamte Rahmen muss auf sichtbaren Bildschirmen liegen, ohne Lücken zwischen Monitoren. Bei Bedarf verkleinern.";
@@ -1736,7 +1736,7 @@ Obrigado por usar o aplicativo!
             Translations["de-DE"]["TemplateCropHint"] = "Ziehen Sie eine Auswahl im Bild. Ziehen Sie innen zum Verschieben oder an den Ecken zur Größenänderung. Originalpixel bleiben ohne Skalierung erhalten.";
             Translations["de-DE"]["TemplateCropConfirm"] = "Zuschnitt übernehmen";
             Translations["de-DE"]["TemplateCropDimensions"] = "Auswahl {0} × {1} px · Maximal {2} × {3} px";
-            Translations["de-DE"]["ConditionImportTooLarge"] = "Importierte Bilder sind auf 32 MiB und etwa 32 Millionen Pixel begrenzt. Verkleinern Sie zuerst das Original.";
+            Translations["de-DE"]["ConditionImportTooLarge"] = "Importierte Bilder sind auf 32 MB (etwa 33 Megapixel) begrenzt. Verkleinern Sie zuerst das Original.";
             Translations["es-ES"]["TemplateCaptureInstructions"] = "Arrastre dentro para mover el marco; use los bordes o esquinas para ajustar el tamaño. Intro: capturar · Esc: cancelar Mueva con el asa ↔ o las flechas; Mayús acelera.";
             Translations["es-ES"]["TemplateCaptureSize"] = "Plantilla: {0} × {1} px　Máximo: {2} × {3} px";
             Translations["es-ES"]["TemplateCaptureInvalidArea"] = "Coloque todo el marco en las pantallas, evitando huecos entre monitores. Reduzca el marco si es necesario.";
@@ -1744,7 +1744,7 @@ Obrigado por usar o aplicativo!
             Translations["es-ES"]["TemplateCropHint"] = "Arrastre en la imagen para seleccionar. Arrastre la selección para moverla o sus esquinas para cambiar el tamaño. Se conservan los píxeles originales, sin escalar.";
             Translations["es-ES"]["TemplateCropConfirm"] = "Confirmar recorte";
             Translations["es-ES"]["TemplateCropDimensions"] = "Selección {0} × {1} px · Máximo {2} × {3} px";
-            Translations["es-ES"]["ConditionImportTooLarge"] = "La imagen importada admite hasta 32 MiB y unos 32 millones de píxeles. Reduzca primero el original.";
+            Translations["es-ES"]["ConditionImportTooLarge"] = "La imagen importada admite hasta 32 MB (unos 33 megapíxeles). Reduzca primero el original.";
             Translations["ru-RU"]["TemplateCaptureInstructions"] = "Перетащите внутри рамки для перемещения, край или угол — для размера. Enter: снимок · Esc: отмена Перемещайте ручкой ↔ или стрелками; Shift ускоряет.";
             Translations["ru-RU"]["TemplateCaptureSize"] = "Шаблон: {0} × {1} пикс.　Максимум: {2} × {3} пикс.";
             Translations["ru-RU"]["TemplateCaptureInvalidArea"] = "Разместите всю рамку на видимых экранах без промежутков между мониторами. При необходимости уменьшите рамку.";
@@ -1752,7 +1752,7 @@ Obrigado por usar o aplicativo!
             Translations["ru-RU"]["TemplateCropHint"] = "Выделите область на изображении. Перетаскивайте её для перемещения или тяните за углы для изменения размера. Исходные пиксели сохраняются без масштабирования.";
             Translations["ru-RU"]["TemplateCropConfirm"] = "Применить обрезку";
             Translations["ru-RU"]["TemplateCropDimensions"] = "Выделено {0} × {1} пкс · Максимум {2} × {3} пкс";
-            Translations["ru-RU"]["ConditionImportTooLarge"] = "Исходное изображение ограничено 32 MiB и примерно 32 миллионами пикселей. Сначала уменьшите оригинал.";
+            Translations["ru-RU"]["ConditionImportTooLarge"] = "Исходное изображение ограничено 32 МБ (около 33 мегапикселей). Сначала уменьшите оригинал.";
             Translations["pt-BR"]["TemplateCaptureInstructions"] = "Arraste por dentro para mover; arraste bordas ou cantos para redimensionar. Enter: capturar · Esc: cancelar Mova com a alça ↔ ou as setas; Shift acelera.";
             Translations["pt-BR"]["TemplateCaptureSize"] = "Modelo: {0} × {1} px　Máximo: {2} × {3} px";
             Translations["pt-BR"]["TemplateCaptureInvalidArea"] = "Mantenha todo o quadro nas telas, sem espaços entre monitores. Reduza o quadro se necessário.";
@@ -1760,7 +1760,7 @@ Obrigado por usar o aplicativo!
             Translations["pt-BR"]["TemplateCropHint"] = "Arraste na imagem para selecionar. Arraste a seleção para movê-la ou os cantos para ajustar o tamanho. Os pixels originais são preservados, sem redimensionamento.";
             Translations["pt-BR"]["TemplateCropConfirm"] = "Confirmar recorte";
             Translations["pt-BR"]["TemplateCropDimensions"] = "Seleção {0} × {1} px · Máximo {2} × {3} px";
-            Translations["pt-BR"]["ConditionImportTooLarge"] = "A imagem importada tem limite de 32 MiB e cerca de 32 milhões de pixels. Reduza primeiro a imagem original.";
+            Translations["pt-BR"]["ConditionImportTooLarge"] = "A imagem importada tem limite de 32 MB (cerca de 33 megapixels). Reduza primeiro a imagem original.";
             Translations["en-US"]["TemplateCropKeyboardHint"] = "For tiny selections, press Tab to focus the image and move with arrow keys (1 pixel, or 10 with Shift).";
             Translations["zh-CN"]["TemplateCropKeyboardHint"] = "选框过小时，可按 Tab 聚焦图片，再用方向键每次移动 1 像素；按住 Shift 每次移动 10 像素。";
             Translations["zh-TW"]["TemplateCropKeyboardHint"] = "選框太小時，可按 Tab 聚焦圖片，再用方向鍵每次移動 1 像素；按住 Shift 每次移動 10 像素。";
@@ -1881,6 +1881,27 @@ Obrigado por usar o aplicativo!
             Translations["pt-BR"]["MainAreasHint"] = "Adicione uma área; as condições visuais são opcionais.";
             Translations["pt-BR"]["MainEmptyAreas"] = "Clique em Adicionar para selecionar a primeira área";
             Translations["pt-BR"]["MainRunHint"] = "{0} para iniciar ou parar · Esc para parar imediatamente";
+            var recognitionTestMessages = new Dictionary<string, string[]>
+            {
+                ["en-US"] = ["Testing recognition…", "Test complete: matched · score {0:F3} / threshold {1:F3}", "Test complete: no match · score {0:F3} / threshold {1:F3}", "Recognition test error: {0}"],
+                ["zh-CN"] = ["正在测试识别…", "测试完成：已匹配 · 匹配分数 {0:F3} / 阈值 {1:F3}", "测试完成：未匹配 · 匹配分数 {0:F3} / 阈值 {1:F3}", "测试时出错：{0}"],
+                ["zh-TW"] = ["正在測試辨識…", "測試完成：已比對 · 比對分數 {0:F3} / 閾值 {1:F3}", "測試完成：未比對 · 比對分數 {0:F3} / 閾值 {1:F3}", "測試時發生錯誤：{0}"],
+                ["ja-JP"] = ["認識テスト中…", "テスト完了：一致 · スコア {0:F3} / しきい値 {1:F3}", "テスト完了：不一致 · スコア {0:F3} / しきい値 {1:F3}", "認識テストでエラーが発生しました：{0}"],
+                ["ko-KR"] = ["인식 테스트 중…", "테스트 완료: 일치 · 점수 {0:F3} / 임계값 {1:F3}", "테스트 완료: 불일치 · 점수 {0:F3} / 임계값 {1:F3}", "인식 테스트 오류: {0}"],
+                ["fr-FR"] = ["Test de reconnaissance en cours…", "Test terminé : correspondance · score {0:F3} / seuil {1:F3}", "Test terminé : aucune correspondance · score {0:F3} / seuil {1:F3}", "Erreur du test de reconnaissance : {0}"],
+                ["de-DE"] = ["Erkennung wird getestet…", "Test beendet: gefunden · Übereinstimmungswert {0:F3} / Schwelle {1:F3}", "Test beendet: nicht gefunden · Übereinstimmungswert {0:F3} / Schwelle {1:F3}", "Fehler beim Erkennungstest: {0}"],
+                ["es-ES"] = ["Probando detección…", "Prueba finalizada: coincidencia · Puntuación {0:F3} / umbral {1:F3}", "Prueba finalizada: sin coincidencia · Puntuación {0:F3} / umbral {1:F3}", "Error en la prueba de detección: {0}"],
+                ["ru-RU"] = ["Проверка распознавания…", "Тест завершён: совпадение · Оценка {0:F3} / порог {1:F3}", "Тест завершён: нет совпадения · Оценка {0:F3} / порог {1:F3}", "Ошибка теста распознавания: {0}"],
+                ["pt-BR"] = ["Testando reconhecimento…", "Teste concluído: correspondência · Pontuação {0:F3} / limiar {1:F3}", "Teste concluído: sem correspondência · Pontuação {0:F3} / limiar {1:F3}", "Erro no teste de reconhecimento: {0}"]
+            };
+            foreach (var (languageCode, messages) in recognitionTestMessages)
+            {
+                var language = Translations[languageCode];
+                language["ConditionTesting"] = messages[0];
+                language["ConditionTestMatched"] = messages[1];
+                language["ConditionTestNotMatched"] = messages[2];
+                language["ConditionTestError"] = messages[3];
+            }
             foreach (var language in Translations.Values)
             {
                 language["HelpTutorialContent"] += "\n\n" + language["ConditionEdit"] + ":\n" +
@@ -1889,9 +1910,11 @@ Obrigado por usar o aplicativo!
             }
         }
 
-        public static string Get(string key)
+        public static string Get(string key) => Get(Language, key);
+
+        internal static string Get(string languageCode, string key)
         {
-            if (Translations.TryGetValue(Language, out var language) && language.TryGetValue(key, out var translated))
+            if (Translations.TryGetValue(languageCode, out var language) && language.TryGetValue(key, out var translated))
                 return translated;
             return Translations["en-US"].TryGetValue(key, out var fallback) ? fallback : key;
         }

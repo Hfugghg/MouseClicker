@@ -16,7 +16,7 @@ public class MainFormLayoutTests(ITestOutputHelper output)
     [InlineData(true)]
     public void RepeatedWindowMovesKeepWindowAndControlsTheSameSize(bool overflow) => OnSta(() =>
     {
-        using var form = new Form1();
+        using var form = new Form1(null, null);
         if (overflow)
             Field<Label>(form, "areasHint").Text = string.Join(" ", Enumerable.Repeat("Context requiring scrolling.", 300));
         if (overflow) typeof(Form1).GetMethod("PerformLayoutLayout", Private)!.Invoke(form, null);
@@ -44,7 +44,7 @@ public class MainFormLayoutTests(ITestOutputHelper output)
     [InlineData(true)]
     public void RepeatedTimingSpinnerClicksKeepWindowAndControlsTheSameSize(bool overflow) => OnSta(() =>
     {
-        using var form = new Form1();
+        using var form = new Form1(null, null);
         if (overflow)
         {
             Field<Label>(form, "areasHint").Text = string.Join(" ", Enumerable.Repeat("Context requiring scrolling.", 300));
@@ -89,7 +89,7 @@ public class MainFormLayoutTests(ITestOutputHelper output)
     [InlineData(true)]
     public void MovingWithinTheSameDisplaySkipsLayoutAndPreservesScroll(bool overflow) => OnSta(() =>
     {
-        using var form = new Form1();
+        using var form = new Form1(null, null);
         // AutoScroll needs a visible native window. Keep it transparent, and suppress
         // startup network work/dialogs so the test only exercises layout and scrolling.
         typeof(Form1).GetField("_updateCheckStarted", Private)!.SetValue(form, true);
@@ -131,7 +131,7 @@ public class MainFormLayoutTests(ITestOutputHelper output)
     [InlineData("layoutDpi")]
     public void ChangedDisplayLayoutKeyTriggersOneRecalculation(string cachedField) => OnSta(() =>
     {
-        using var form = new Form1();
+        using var form = new Form1(null, null);
         FieldInfo cache = typeof(Form1).GetField(cachedField, Private)!;
         object expected = cache.GetValue(form)!;
         cache.SetValue(form, cachedField == "layoutDpi" ? (object)0 : Size.Empty);

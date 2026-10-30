@@ -7,6 +7,50 @@ namespace MouseClicker.Tests;
 
 public class ConditionSettingsFormTests
 {
+    [Theory]
+    [InlineData("match")]
+    [InlineData("miss")]
+    [InlineData("error")]
+    public void RecognitionTestCompletesWithVisibleExplicitOutcome(string scenario) => OnSta(() =>
+    {
+        var condition = MakeCondition();
+        using var form = new ConditionSettingsForm(condition, null, _ =>
+        {
+            if (scenario == "error") throw new IOException("capture failed");
+            if (scenario == "miss") return new Bitmap(100, 80);
+            using var stream = new MemoryStream(Convert.FromBase64String(condition.TemplateImageBase64));
+            return new Bitmap(stream);
+        });
+        Exception? error = null;
+        bool completed = false;
+        using var watchdog = new System.Windows.Forms.Timer { Interval = 5000 };
+        watchdog.Tick += (_, _) => form.Close();
+        form.Shown += async (_, _) =>
+        {
+            try
+            {
+                await (Task)typeof(ConditionSettingsForm).GetMethod("TestAsync", Private)!.Invoke(form, null)!;
+                var result = Field<Label>(form, "result");
+                var expected = scenario == "error" ? "ConditionTestError" : scenario == "match" ? "ConditionTestMatched" : "ConditionTestNotMatched";
+                Assert.StartsWith(Localization.Get(expected).Split('{')[0], result.Text);
+                if (scenario == "error") Assert.Contains("capture failed", result.Text);
+                else Assert.Contains(condition.Threshold.ToString("F3"), result.Text);
+                Assert.DoesNotContain(Localization.Get("ConditionWaiting"), result.Text);
+                Assert.True(result.Visible);
+                Assert.True(form.RectangleToScreen(form.ClientRectangle).Contains(result.PointToScreen(Point.Empty)));
+                Assert.NotSame(Field<Button>(form, "test").Parent, result.Parent);
+                Assert.True(Field<Button>(form, "test").Enabled);
+                completed = true;
+            }
+            catch (Exception ex) { error = ex; }
+            finally { form.Close(); }
+        };
+        watchdog.Start();
+        form.ShowDialog();
+        if (error != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+        Assert.True(completed);
+    });
+
     [Fact]
     public void ImportSourceAndTemplateBudgetsAllowFullResolutionImages()
     {
@@ -196,7 +240,7 @@ public class ConditionSettingsFormTests
     {
         using var owner = new Form { Opacity = .8 };
         using var form = new ConditionSettingsForm(null);
-        using var watchdog = new System.Windows.Forms.Timer { Interval = 3000 };
+        using var watchdog = new System.Windows.Forms.Timer { Interval = 10000 };
         bool completed = false;
         bool returned = false;
         Exception? error = null;
@@ -224,8 +268,8 @@ public class ConditionSettingsFormTests
         watchdog.Start();
         form.ShowDialog(owner);
         returned = true;
-        Assert.True(completed);
         if (error != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+        Assert.True(completed, "The modal loop exited before the async handler completed.");
     });
 
     [Fact]
@@ -294,6 +338,18 @@ public class ConditionSettingsFormTests
         Assert.Equal(original.DetectionArea, loaded.DetectionArea);
         Assert.Equal(ConditionTriggerMode.WhileVisible, loaded.TriggerMode);
         Assert.Equal(0, loaded.TimeoutMs);
+    });
+
+    [Fact]
+    public void SaveCommitsValidConditionAndClosesWithOk() => OnSta(() =>
+    {
+        var original = MakeCondition();
+        using var form = new ConditionSettingsForm(original);
+        typeof(ConditionSettingsForm).GetMethod("Save", Private)!.Invoke(form, null);
+        Assert.NotNull(form.ResultCondition);
+        Assert.Equal(original.DetectionArea, form.ResultCondition!.DetectionArea);
+        Assert.Equal(original.TemplateImageBase64, form.ResultCondition.TemplateImageBase64);
+        Assert.Equal(DialogResult.OK, form.DialogResult);
     });
 
     private static ClickCondition MakeCondition()

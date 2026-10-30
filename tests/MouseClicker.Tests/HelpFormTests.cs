@@ -50,7 +50,7 @@ public class HelpFormTests
     [Fact]
     public void ModelessHelpKeepsMainEnabledReusesInstanceAndDisposesWithOwner() => Sta(() =>
     {
-        using var main = new Form1 { Opacity = 0, ShowInTaskbar = false };
+        using var main = new Form1(null, null) { Opacity = 0, ShowInTaskbar = false };
         _ = main.Handle;
         int initialDepth = (int)typeof(Form1).GetField("_modalDepth", BindingFlags.Instance | BindingFlags.NonPublic)!.GetValue(main)!;
         main.ShowHelp(HelpTopic.QuickStart);

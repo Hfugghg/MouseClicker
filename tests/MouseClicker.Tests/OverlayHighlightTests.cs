@@ -13,7 +13,7 @@ namespace MouseClicker.Tests
             {
                 try
                 {
-                    using var main = new Form1 { Opacity = 0, ShowInTaskbar = false };
+                    using var main = new Form1(null, null) { Opacity = 0, ShowInTaskbar = false };
                     const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
                     object Field(string name) => typeof(Form1).GetField(name, flags)!.GetValue(main)!;
                     var clicks = (System.Windows.Forms.CheckBox)Field("showOverlayCheckBox");
@@ -79,6 +79,39 @@ namespace MouseClicker.Tests
                     overlay.Render(graphics);
                     Assert.Equal(Color.Red.ToArgb(), bitmap.GetPixel(10, 30).ToArgb());
                     Assert.Equal(Color.Magenta.ToArgb(), bitmap.GetPixel(130, 80).ToArgb());
+                }
+                catch (Exception ex) { error = ex; }
+            });
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            Assert.True(thread.Join(TimeSpan.FromSeconds(10)));
+            if (error != null) System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(error).Throw();
+        }
+
+        [Fact]
+        public void OverlayLabelsDrawOpaqueTextWithoutTintingTheDesktop()
+        {
+            Exception? error = null;
+            var thread = new Thread(() =>
+            {
+                try
+                {
+                    var origin = System.Windows.Forms.SystemInformation.VirtualScreen.Location;
+                    using var overlay = new RenderedOverlay { ShowClickAreas = true, ShowDetectionAreas = false };
+                    overlay.AreasToDraw = [new ClickArea { Label = "A", Area = new Rectangle(origin.X + 20, origin.Y + 20, 120, 60) }];
+                    using var bitmap = new Bitmap(200, 120, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                    using var graphics = Graphics.FromImage(bitmap);
+                    graphics.Clear(Color.Magenta);
+                    overlay.Render(graphics);
+                    bool sawOpaqueText = false;
+                    for (int y = 20; y < 80 && !sawOpaqueText; y++)
+                        for (int x = 20; x < 140; x++)
+                        {
+                            Color pixel = bitmap.GetPixel(x, y);
+                            if (pixel.R > 230 && pixel.G > 230 && pixel.B > 230) { sawOpaqueText = true; break; }
+                        }
+                    Assert.True(sawOpaqueText, "Expected opaque label pixels inside the click area.");
+                    Assert.Equal(Color.Magenta.ToArgb(), bitmap.GetPixel(180, 100).ToArgb());
                 }
                 catch (Exception ex) { error = ex; }
             });

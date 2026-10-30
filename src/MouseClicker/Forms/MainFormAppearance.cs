@@ -134,7 +134,8 @@ public partial class Form1
         Enable(moveUpButton, editable && index > 0);
         Enable(moveDownButton, editable && index >= 0 && index < areasListBox.Items.Count - 1);
         bool empty = areasListBox.Items.Count == 0;
-        if (emptyAreasLabel.Visible != empty) emptyAreasLabel.Visible = empty;
+        // Visible also reflects parent visibility; set the intended state even before the form is shown.
+        emptyAreasLabel.Visible = empty;
         Enable(emptyAreasLabel, editable);
         Color background = _isClicking ? Color.FromArgb(180, 48, 48) : Accent;
         Color hover = _isClicking ? Color.FromArgb(155, 38, 38) : Color.FromArgb(28, 78, 150);

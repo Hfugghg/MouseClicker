@@ -13,8 +13,8 @@ namespace MouseClicker.Tests
         public void Dispose() => Localization.Language = _originalLanguage;
 
         [Theory]
-        [InlineData("zh-CN", "请先截取或导入模板图片。", "原始模板上限为 32 MiB、32M 像素。")]
-        [InlineData("en-US", "Capture or import a template image first.", "Original templates are limited to 32 MiB and 32M pixels.")]
+        [InlineData("zh-CN", "请先截取或导入模板图片。", "原始模板上限为 32 MB（约 3300 万像素）。")]
+        [InlineData("en-US", "Capture or import a template image first.", "Original templates are limited to 32 MB (about 33 megapixels).")]
         public void ConditionTemplateErrors_DistinguishMissingFromOversized(string language, string emptyMessage, string sizeMessage)
         {
             Localization.Language = language;
@@ -214,6 +214,10 @@ namespace MouseClicker.Tests
         [InlineData("ConditionScaleHint")]
         [InlineData("ConditionCropTemplate")]
         [InlineData("ConditionMatchScale")]
+        [InlineData("ConditionTesting")]
+        [InlineData("ConditionTestMatched")]
+        [InlineData("ConditionTestNotMatched")]
+        [InlineData("ConditionTestError")]
         public void RequiredKeys_ExistInAllTenLanguages(string key)
         {
             var translations = GetTranslations();
@@ -233,7 +237,7 @@ namespace MouseClicker.Tests
             {
                 "SaveConfigError", "LoadConfigError", "AboutMessage", "UpdateAvailableVersion",
                 "UpdateSkipped", "UpdatePreferencesError", "OpenLinkError", "HotkeyUnavailable",
-                "MouseInputError", "DetectionOverlayLabel", "MainRunHint"
+                "MouseInputError", "DetectionOverlayLabel", "MainRunHint", "ConditionTestError"
             };
             foreach (var language in GetTranslations())
             {
@@ -243,6 +247,7 @@ namespace MouseClicker.Tests
                     int argumentCount = entry.Key switch
                     {
                         "ConditionTemplateDimensions" => 2,
+                        "ConditionTestMatched" or "ConditionTestNotMatched" => 2,
                         "ConditionMatchScale" => 3,
                         "ConditionDetectionDimensions" or "ConditionTemplateFit" or "TemplateCaptureSize" or "TemplateCropDimensions" => 4,
                         _ => formattedKeys.Contains(entry.Key) ? 1 : 0
@@ -250,13 +255,18 @@ namespace MouseClicker.Tests
                     Assert.Equal(argumentCount, format.MinimumArgumentCount);
                     if (argumentCount > 0)
                     {
-                        var arguments = Enumerable.Range(0, argumentCount).Select(index => entry.Key == "ConditionMatchScale" ? (object)(index + .5) : $"test-value-{index}").ToArray();
+                        var arguments = Enumerable.Range(0, argumentCount).Select(index => entry.Key is "ConditionMatchScale" or "ConditionTestMatched" or "ConditionTestNotMatched" ? (object)(index + .5) : $"test-value-{index}").ToArray();
                         var rendered = string.Format(CultureInfo.InvariantCulture, entry.Value, arguments);
                         if (entry.Key == "ConditionMatchScale")
                         {
                             Assert.Contains("50", rendered);
                             Assert.Contains("1.5", rendered);
                             Assert.Contains("2.5", rendered);
+                        }
+                        else if (entry.Key is "ConditionTestMatched" or "ConditionTestNotMatched")
+                        {
+                            Assert.Contains("0.500", rendered);
+                            Assert.Contains("1.500", rendered);
                         }
                         else foreach (var argument in arguments) Assert.Contains((string)argument, rendered);
                     }

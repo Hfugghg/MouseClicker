@@ -37,20 +37,23 @@ internal sealed class ConditionSettingsForm : Form
     private readonly List<Control> operationControls = [];
     private bool busy;
     private bool closed;
+    private readonly Func<Rectangle, Bitmap> captureScreen;
     internal ClickCondition? ResultCondition { get; private set; }
 
     internal ConditionSettingsForm(ClickCondition? original) : this(original, null) { }
 
-    internal ConditionSettingsForm(ClickCondition? original, Action<HelpTopic>? onHelpRequested)
+    internal ConditionSettingsForm(ClickCondition? original, Action<HelpTopic>? onHelpRequested, Func<Rectangle, Bitmap>? captureScreen = null)
     {
+        this.captureScreen = captureScreen ?? ScreenCapture.Capture;
         Text = Localization.Get("ConditionEdit");
         StartPosition = FormStartPosition.CenterParent;
         AutoScaleMode = AutoScaleMode.Dpi;
         ClientSize = new Size(590, 680);
         MinimumSize = new Size(610, 720);
-        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 2 };
+        var layout = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, RowCount = 3 };
         layout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
         layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+        layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         layout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         Controls.Add(layout);
         var table = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 1, AutoScroll = true, Padding = new Padding(16) };
@@ -94,13 +97,15 @@ internal sealed class ConditionSettingsForm : Form
         test.AutoSize = true;
         test.Click += async (_, _) => await TestAsync();
         table.Controls.Add(test);
-        table.Controls.Add(result);
+        result.Dock = DockStyle.Fill;
+        result.Margin = new Padding(16, 8, 16, 8);
+        layout.Controls.Add(result, 0, 1);
         var actions = new FlowLayoutPanel { AutoSize = true, Dock = DockStyle.Fill, Padding = new Padding(16, 8, 16, 12), WrapContents = false };
         save.Text = Localization.Get("ConditionSave");
         var cancel = new Button { Text = Localization.Get("ConditionCancel"), DialogResult = DialogResult.Cancel, AutoSize = true };
         save.Click += (_, _) => Save();
         actions.Controls.AddRange([save, cancel]);
-        layout.Controls.Add(actions, 0, 1);
+        layout.Controls.Add(actions, 0, 2);
         CancelButton = cancel;
         enabled.Checked = original != null;
         if (original != null)
@@ -321,11 +326,13 @@ internal sealed class ConditionSettingsForm : Form
             var condition = BuildCondition();
             busy = true;
             UpdateSetupState();
+            result.ForeColor = SystemColors.ControlText;
+            result.Text = Localization.Get("ConditionTesting");
             await WithTransparentWindowsAsync(async () =>
             {
                 var sample = await Task.Run(() =>
                 {
-                    var bitmap = ScreenCapture.Capture(condition.DetectionArea);
+                    var bitmap = captureScreen(condition.DetectionArea);
                     try
                     {
                         using var stream = new MemoryStream(Convert.FromBase64String(condition.TemplateImageBase64));
@@ -345,13 +352,26 @@ internal sealed class ConditionSettingsForm : Form
                 });
                 if (closed || IsDisposed || Disposing) { sample.bitmap.Dispose(); return; }
                 ReplacePreview(sample.bitmap);
-                result.Text = Localization.Get(sample.detected.Score >= condition.Threshold ? "ConditionMatched" : "ConditionWaiting") +
-                    "  " + sample.detected.Score.ToString("F3") + "  " + sample.detected.MatchBounds + "\n" +
-                    string.Format(Localization.Get("ConditionMatchScale"), sample.detected.Scale, sample.detected.MatchBounds.Width, sample.detected.MatchBounds.Height);
+                DisplayTestResult(sample.detected, condition.Threshold);
             });
         }
-        catch (Exception ex) { if (!closed && !IsDisposed) result.Text = ex.Message; }
+        catch (Exception ex) { if (!closed && !IsDisposed) DisplayTestError(ex); }
         finally { busy = false; if (!closed && !IsDisposed) UpdateSetupState(); }
+    }
+
+    internal void DisplayTestResult(DetectionResult detected, double requiredScore)
+    {
+        bool matched = detected.Score >= requiredScore;
+        result.ForeColor = matched ? Color.DarkGreen : Color.Firebrick;
+        result.Text = string.Format(Localization.Get(matched ? "ConditionTestMatched" : "ConditionTestNotMatched"), detected.Score, requiredScore) +
+            Environment.NewLine + detected.MatchBounds + "  " +
+            string.Format(Localization.Get("ConditionMatchScale"), detected.Scale, detected.MatchBounds.Width, detected.MatchBounds.Height);
+    }
+
+    internal void DisplayTestError(Exception error)
+    {
+        result.ForeColor = Color.Firebrick;
+        result.Text = string.Format(Localization.Get("ConditionTestError"), error.Message);
     }
 
     protected override void OnFormClosed(FormClosedEventArgs e)

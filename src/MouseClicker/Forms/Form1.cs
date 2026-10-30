@@ -21,6 +21,9 @@ namespace MouseClicker
 
         // --- 核心逻辑字段 ---
         private readonly MouseController _mouseController;
+        private readonly SessionConfigStore? _sessionConfigStore;
+        private Exception? _sessionRestoreError;
+        private bool _sessionSaveBlocked;
         private List<ClickArea> _clickAreas = new List<ClickArea>();
         private OverlayForm _overlayForm = null!;
         private ClickArea? _hoveredArea;
@@ -74,10 +77,11 @@ namespace MouseClicker
         private LinkLabel updateAvailableLinkLabel = null!;
 
         // 主窗口构造函数
-        public Form1() : this(null, null) { }
+        public Form1() : this(null, null, sessionConfigStore: new SessionConfigStore()) { }
 
-        internal Form1(HttpClient? updateClient, UpdatePreferencesStore? preferences, Version? currentVersion = null)
+        internal Form1(HttpClient? updateClient, UpdatePreferencesStore? preferences, Version? currentVersion = null, SessionConfigStore? sessionConfigStore = null)
         {
+            _sessionConfigStore = sessionConfigStore;
             _ownsUpdateHttpClient = updateClient == null;
             _updateHttpClient = updateClient ?? new HttpClient { Timeout = TimeSpan.FromSeconds(10) };
             _updateService = new GitHubUpdateService(_updateHttpClient);
@@ -121,6 +125,7 @@ namespace MouseClicker
             PerformLayoutLayout();
             _overlayForm = new OverlayForm();
             UpdateOverlayState();
+            RestoreSessionConfig();
             this.Disposed += (_, _) => DisposeUpdateResources();
         }
 
@@ -137,6 +142,13 @@ namespace MouseClicker
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            if (_sessionRestoreError != null)
+            {
+                var error = _sessionRestoreError;
+                _sessionRestoreError = null;
+                ShowMessageBox(string.Format(Localization.Get("LoadConfigError"), error.Message),
+                    Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
             var hotkeyError = _hotkeyInitializationError;
             if (hotkeyError != null && !_hotkeyFailureShown)
             {
@@ -235,6 +247,7 @@ namespace MouseClicker
         {
             base.OnFormClosing(e);
             if (e.Cancel) return;
+            SaveSessionConfig();
             _isClosing = true;
             _updateCancellation.Cancel();
             StopClicking();
@@ -596,17 +609,7 @@ namespace MouseClicker
                 using (BeginModalScope()) dialogResult = saveFileDialog.ShowDialog();
                 if (dialogResult == DialogResult.OK && !string.IsNullOrWhiteSpace(saveFileDialog.FileName))
                 {
-                    var configData = new ConfigData
-                    {
-                        ClickAreas = _clickAreas,
-                        Interval = intervalNumericUpDown.Value,
-                        Jitter = jitterNumericUpDown.Value,
-                        SequenceIndex = sequenceComboBox.SelectedIndex,
-                        ShowOverlay = showOverlayCheckBox.Checked,
-                        ShowDetectionOverlay = showDetectionOverlayCheckBox.Checked,
-                        HighlightCurrentArea = highlightCurrentAreaCheckBox.Checked,
-                        HardwareMode = hardwareModeCheckBox.Checked
-                    };
+                    var configData = CaptureConfig();
 
                     try
                     {
@@ -643,26 +646,7 @@ namespace MouseClicker
                         if (configData != null)
                         {
                             // 在修改当前界面或配置之前，先校验整个文件。
-                            configData.Validate(
-                                intervalNumericUpDown.Minimum,
-                                intervalNumericUpDown.Maximum,
-                                jitterNumericUpDown.Minimum,
-                                jitterNumericUpDown.Maximum,
-                                sequenceComboBox.Items.Count);
-
-                            // 只有所有字段都通过校验后才应用。
-                            ClearHoveredArea();
-                            _activeClickArea = null;
-                            _clickAreas = configData.ClickAreas;
-                            intervalNumericUpDown.Value = configData.Interval;
-                            jitterNumericUpDown.Value = configData.Jitter;
-                            sequenceComboBox.SelectedIndex = configData.SequenceIndex;
-                            showOverlayCheckBox.Checked = configData.ShowOverlay;
-                            showDetectionOverlayCheckBox.Checked = configData.ShowDetectionOverlay;
-                            highlightCurrentAreaCheckBox.Checked = configData.HighlightCurrentArea;
-                            hardwareModeCheckBox.Checked = configData.HardwareMode;
-
-                            RefreshAreaList();
+                            ApplyConfig(configData);
                             ShowMessageBox(Localization.Get("ConfigLoadedSuccess"), Localization.Get("Success"), MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         else
@@ -675,6 +659,80 @@ namespace MouseClicker
                         ShowMessageBox(string.Format(Localization.Get("LoadConfigError"), ex.Message), Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
+            }
+        }
+
+        private ConfigData CaptureConfig() => new ConfigData
+        {
+            ClickAreas = _clickAreas,
+            Interval = intervalNumericUpDown.Value,
+            Jitter = jitterNumericUpDown.Value,
+            SequenceIndex = sequenceComboBox.SelectedIndex,
+            ShowOverlay = showOverlayCheckBox.Checked,
+            ShowDetectionOverlay = showDetectionOverlayCheckBox.Checked,
+            HighlightCurrentArea = highlightCurrentAreaCheckBox.Checked,
+            HardwareMode = hardwareModeCheckBox.Checked
+        };
+
+        private void ApplyConfig(ConfigData configData)
+        {
+            configData.Validate(
+                intervalNumericUpDown.Minimum,
+                intervalNumericUpDown.Maximum,
+                jitterNumericUpDown.Minimum,
+                jitterNumericUpDown.Maximum,
+                sequenceComboBox.Items.Count);
+
+            // 只有所有字段都通过校验后才应用。
+            ClearHoveredArea();
+            _activeClickArea = null;
+            _clickAreas = configData.ClickAreas;
+            intervalNumericUpDown.Value = configData.Interval;
+            jitterNumericUpDown.Value = configData.Jitter;
+            sequenceComboBox.SelectedIndex = configData.SequenceIndex;
+            showOverlayCheckBox.Checked = configData.ShowOverlay;
+            showDetectionOverlayCheckBox.Checked = configData.ShowDetectionOverlay;
+            highlightCurrentAreaCheckBox.Checked = configData.HighlightCurrentArea;
+            hardwareModeCheckBox.Checked = configData.HardwareMode;
+
+            RefreshAreaList();
+        }
+
+        private void RestoreSessionConfig()
+        {
+            if (_sessionConfigStore == null) return;
+            try
+            {
+                var config = _sessionConfigStore.Load();
+                if (config != null) ApplyConfig(config);
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or ArgumentException or NotSupportedException)
+            {
+                _sessionRestoreError = ex;
+                try { _sessionConfigStore.BackupUnreadableConfig(); }
+                catch (Exception backupError) when (backupError is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
+                {
+                    // Keep the original intact when it cannot be backed up.
+                    _sessionSaveBlocked = true;
+                    _sessionRestoreError = new IOException(ex.Message + Environment.NewLine + backupError.Message, ex);
+                }
+            }
+        }
+
+        private void SaveSessionConfig()
+        {
+            if (_sessionConfigStore == null || _sessionSaveBlocked) return;
+            try
+            {
+                var config = CaptureConfig();
+                config.Validate(intervalNumericUpDown.Minimum, intervalNumericUpDown.Maximum,
+                    jitterNumericUpDown.Minimum, jitterNumericUpDown.Maximum, sequenceComboBox.Items.Count);
+                _sessionConfigStore.Save(config);
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or JsonException or ArgumentException or NotSupportedException)
+            {
+                ShowMessageBox(string.Format(Localization.Get("SaveConfigError"), ex.Message),
+                    Localization.Get("Error"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

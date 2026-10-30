@@ -239,7 +239,7 @@ public class MainFormInteractionTests
 
     private static Form1 CreateShownForm(bool scroll)
     {
-        var form = new Form1 { Opacity = 0, ShowInTaskbar = false };
+        var form = new Form1(null, null) { Opacity = 0, ShowInTaskbar = false };
         typeof(Form1).GetField("_updateCheckStarted", Private)!.SetValue(form, true);
         typeof(Form1).GetField("_hotkeyFailureShown", Private)!.SetValue(form, true);
         Field<CheckBox>(form, "showOverlayCheckBox").Checked = false;
