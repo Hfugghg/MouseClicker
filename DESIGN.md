@@ -1,43 +1,125 @@
-# Design
+﻿# Design
 
 ## Source of truth
-Status: Active. Updated: 2026-10-29. Surface: the Windows desktop main window and hotkey dialog. Evidence: `Forms/Form1.cs`, `Forms/HotkeySettingsForm.cs`, `Services/Localization.cs`, README, and existing GUI render probes under `.omc/artifacts/usability-probe/`. User direction: improve the existing interface, keep it simple, and move hotkeys into a separate Settings menu.
+
+状态：Active。日期：2026-11-05。范围：MouseClicker 原生 WPF 主窗口及常规弹窗的视觉重设计。本文是设计与验收依据，不表示所有效果已完成渲染验收。
+
+已检查 README.md、src/MouseClicker/Wpf/MainWindow.xaml、DialogLayout.cs、tests/MouseClicker.Tests/WpfLayoutTests.cs，以及 docs/screenshots/wpf-main-zh-CN.png。迁移事实及验证边界见 MIGRATION-WPF.md。旧 WinForms 界面仅作为功能与行为参考。
+
+重设计前截图可观察到圆角卡片与方形按钮风格不一致、列表灰底占比大、底部主操作像横条，默认尺寸下部分设置需要滚动。设计判断是需要改善层级、密度和组件一致性。项目没有额外品牌规范或用户研究材料；以下采用轻量 Windows 工具的产品定位作为假设，不声称来自用户调研。
 
 ## Brand
-A practical, calm desktop utility. Familiar Windows controls and clear feedback build trust. Avoid decorative dashboards, excessive icons, gradients, and extra navigation.
+
+简洁、可靠、平静的 Windows 桌面工具。采用克制的浅色 Fluent 视觉语言，保留原生标题栏和熟悉的桌面交互。通过清楚的任务结构、稳定的控件状态和明确的停止入口建立信任。
+
+避免装饰仪表盘、无功能导航栏、大片渐变、玻璃特效、过多图标和持续动画。蓝色用于操作与选择。
 
 ## Product goals
-Make the first successful click task obvious: add a region, adjust timing/order, start. Keep region conditions discoverable and preserve all existing execution behavior. Success means users can identify the next action without reading the tutorial.
+
+用户打开窗口后，可以辨认“点击哪里、如何点击、如何显示、如何启停”。区域列表成为任务主体，参数与显示选项作为辅助；开始／停止始终容易找到。
+
+保留现有功能、JSON 配置兼容、快捷键与右键操作，不新增业务功能，不以外观改动改变点击和识图语义。
+
+成功信号：默认尺寸下主要分组及运行入口清楚、核心设置完整可见；缩小时内容可达；同类控件和弹窗一致；配置、语言、运行及停止通过回归；实际截图能够呈现层级、间距和状态改进。
 
 ## Personas and jobs
-People automating repetitive desktop clicks, from a single target to several conditional targets. They need to select screen regions, inspect the configuration, and stop reliably.
+
+主要用户是需要重复点击的 Windows 用户：添加和命名屏幕区域，调整节奏及顺序，必要时设置识图条件，然后通过按钮或热键启停。
+
+使用场景包括边操作目标应用边调整配置、并排阅读帮助、多显示器选择区域。优先降低误操作和查找成本，不将工具设计成监控大屏。
 
 ## Information architecture
-Top menus: File for configuration import/export, Settings for hotkeys, Language, Help, About. Main content follows region management, click parameters, optional display controls, and start/stop. Context menus and double-click editing remain available alongside visible condition editing.
+
+顶部保留文件、设置、语言、帮助、关于；热键继续位于设置菜单。不新增侧边导航。
+
+用户明确要求保持原版工具的紧凑感，默认窗口必须直接看全，无需向下滚动。采用紧凑单列：区域列表、点击参数、显示选项、固定运行区。默认尺寸为 560×650 DIP；以宽度不超过 600 DIP、高度不超过 700 DIP 作为防止膨胀的测试约束。区域列表内部允许滚动，不能借此隐藏工具栏或其他设置。不再采用 980×780 双栏工作区。
+
+区域管理包含标题与短提示、列表及操作栏。添加最突出，移除与排序保持次要。保留双击编辑条件、右键切换鼠标按键及重复点击取消选择。
+
+条件编辑、热键、标签及关于使用独立弹窗；帮助保持非模态。更新入口作为次级操作，不能争夺开始／停止的视觉优先级。
 
 ## Design principles
-Use grouping and spacing to explain the workflow. Give the start/stop action the strongest emphasis. Keep optional settings visually secondary. Prefer explicit text to unexplained symbols. Preserve established workflows and configuration compatibility.
+
+- 层次先于装饰：使用字号、留白、边框和分组，不增加无意义模块。
+- 一类控件一种语言：按钮、输入框、下拉框、列表和焦点使用统一尺度。
+- 主要操作稳定：开始／停止位置固定，异步停止完成前不允许重启。
+- 紧凑且默认完整：默认窗口所有设置和操作直接可见；仅主动缩小到最小尺寸时允许整页滚动兜底。不以装饰留白牺牲信息密度。
+- 视觉服从行为：复用本地化与验证，截图和选区期间继续隐藏辅助窗口。
 
 ## Visual language
-Light neutral window background, white content groups, dark readable headings, muted secondary text, and one blue accent for the main action. Reserve red for stopping/errors. Use the Windows UI font, consistent spacing, restrained borders, and no animation. Overlay colors retain their existing meanings.
+
+色彩基准由主窗口和共享 WPF 资源维护；允许因系统高对比模式使用系统画刷替代。具体资源值在保持可读性和视觉一致性的前提下可微调。
+
+| 用途 | 基准色 | 使用规则 |
+| --- | --- | --- |
+| 页面背景 | #F3F5F9 | 浅灰蓝，衬托白色内容 |
+| 内容表面 | #FFFFFF | 卡片和输入区域 |
+| 次级表面 | #F7F9FC | 列表和柔和分组底色 |
+| 主文字 | #18263B | 标题与主要内容 |
+| 次级文字 | #526075 | 提示与辅助说明 |
+| 边框 | #DCE3ED | 精细分隔，不单独传达状态 |
+| 主操作 | #2563B9 | 开始、主要确认、焦点 |
+| 主操作悬停 | #1E52A0 | 保持白色文字可读 |
+| 选择底色 | #EAF1FD | 配合蓝色边界或选中标识 |
+| 停止／危险 | #B42332 | 配合明确操作文字 |
+
+字体采用系统适用的无衬线字体及中文、多语言回退。主窗口正文和表单 12–13 DIP，说明 11–12 DIP，分组标题 14 DIP、半粗。产品名由原生标题栏承载，正文不再重复大图标和产品标题。常规弹窗维持可读字号。
+
+主窗口采用 4 DIP 间距节奏：标签与内容 4–6，控件之间 6–8，分组内边距 10–12，分组间 8，外边距 10–12。常规输入和按钮高度约 28–30 DIP，主运行按钮约 36 DIP；长文案允许增加高度。常规弹窗可使用更宽松的既有间距，不随本轮主窗口调整一并压缩。
+
+卡片圆角 12–14 DIP，输入和按钮圆角约 8 DIP。细边框优先于重阴影；不多层发光。图标只用于辅助辨认操作，复用现有资产或简单矢量，不添加装饰图片和无关依赖。
+
+不使用持续或装饰动画，悬停、按下、选中和焦点即时反馈。屏幕覆盖层继续使用蓝色定位、绿色当前点击、橙色检测范围，并保留文字含义。
 
 ## Components
-Reuse native buttons, menus, numeric inputs, checkboxes, combo boxes, and the toggle-selection list. Main-window styling belongs in the main form or its UI helper. Section headings, empty-list guidance, selection actions, and the primary action must share consistent spacing and typography.
+
+主窗口负责组合与命名控件的行为绑定；主题资源负责画刷、字体和控件样式。常规弹窗通过共享资源和 DialogLayout 继承同一视觉语言，禁止各窗口复制另一套主题。选区、捕获、覆盖层和裁剪属于专门画布交互，不受常规窗口背景或隐式样式误伤。
+
+- 卡片：标题、必要短提示、内容区之间有稳定间距。
+- 按钮：主操作蓝底白字，普通操作浅色细边框；危险操作有明确文字。提供悬停、按下、禁用及键盘焦点状态。
+- 输入与下拉：统一高度、内边距、边框和焦点强调；保留光标、选择、滚动和下拉功能。
+- 区域列表：柔和底色、清楚行间距、悬停与选中状态。空状态沿用添加引导，不填示例假数据。
+- 运行区：独立表面和细边界，按钮与说明有留白；停止文案与颜色同步变化。
+- 弹窗：标题、内容、操作形成阅读路径，确认与取消层次稳定；条件预览、识别结果与操作不遮挡。
 
 ## Accessibility
-Keep keyboard navigation, visible focus, readable contrast, accessible names, and existing global stop behavior. Never convey state by color alone. Disabled actions must reflect unavailable operations. Respect DPI scaling and avoid clipped translated text.
+
+以适用于桌面的 WCAG AA 对比度目标作为设计检查参考：普通文字 4.5:1，大号文字及关键控件边界 3:1。这不是完成可访问性认证的声明。浅边框仅作装饰时，控件仍应通过文字、表面和布局辨认。
+
+保留键盘导航、可见焦点、输入标签和自动化名称。自定义模板不能移除 Tab、Space、Enter、Esc、文本选择或列表键盘操作。状态同时使用文字与颜色，主要操作不能仅悬停时出现。
+
+遵循系统字体回退与缩放；高对比模式应采用系统颜色或等效可读状态。无持续动画。自动化覆盖名称、布局与行为；屏幕阅读器和真实辅助技术体验仍需人工确认。
 
 ## Responsive behavior
-This remains a compact desktop utility. Size content from actual font/text measurements and scale spacing with DPI. Long translations and jitter warnings must expand or wrap cleanly. Avoid introducing a navigation sidebar or demanding a large monitor.
+
+保留最小窗口 520×420 DIP。默认采用不超过 600×700 DIP 的紧凑单列，不再使用 800 DIP 双栏断点；菜单与运行区固定。默认高度下主内容没有纵向滚动，只有区域列表可独立滚动；主动缩小时中间内容允许纵向滚动兜底，不通过横向滚动访问主要输入。
+
+工具栏窄时换行，长标签允许换行，不依赖固定汉字宽度。检查十语言在最小尺寸与紧凑默认尺寸下的表现，默认尺寸须在更新提醒可见、至少三个区域的状态下验证主内容无滚动、所有操作位于可见客户区。布局测量不能替代真实渲染。
+
+弹窗高度不超过工作区，可滚动访问内容和操作。屏幕交互继续处理负坐标、物理像素与每屏 DPI，美化不得改变坐标换算。
 
 ## Interaction states
-Empty region list explains how to add a region. Selection enables only applicable edit/remove/reorder actions. Running clearly changes Start to Stop and locks configuration mutations as before. Update checking remains unobtrusive. Hotkey failures retain existing explanatory feedback.
+
+空列表引导添加；选中后才能移除、排序和编辑条件。运行期间禁用会改变执行配置的操作，保留停止；等待停止时显示现有状态并阻止重启。
+
+无效参数保留输入及明确原因，不能只显示红框。识别测试避免重复提交，完成后明确显示匹配、未匹配或错误；关闭后不能发布过期结果。
+
+更新检查后台执行，离线或慢网络不阻塞。损坏配置不静默覆盖，保存失败保留已有返回或放弃流程。
 
 ## Content voice
-Short, concrete action labels in all ten supported languages. Use consistent terms for click region, detection region, template, and condition. Put detailed explanations in Help rather than repeating them on the main screen.
+
+简明直接，沿用现有十语言资源与术语。不新增口号、营销文案或无必要技术细节。按钮使用操作动词，提示只解释当前任务需要的信息。
+
+新增用户可见文案必须本地化，不把中文写死在布局中。代码注释、任务追踪和开发文档使用中文。
 
 ## Implementation constraints
-.NET 10 Windows Forms; no additional UI framework or visual asset dependency. Preserve localization, configuration schema, overlay behavior, session cancellation, modal hotkey guards, and update handling. Build and run the existing tests; render representative languages and inspect the resulting main-window images before completion.
+
+.NET 10 原生 WPF，复用 OpenCV、Win32 输入和已有 JSON。保留旧 WinForms 代码及测试作过渡回归基线；默认入口打开 WPF，不通过 WindowsFormsHost 包装实现。无需新增第三方 UI 套件或位图资产。
+
+命名控件、事件入口、热键、无效配置处理与生命周期继续受测试保护。测试不得执行真实点击或写用户真实配置。
+
+验收需要 Release 无新增警告、相关回归通过、十语言布局检查，以及主窗口常态、列表选择、运行／停止、常规弹窗和窄窗口渲染检查。截图核对对应本次程序集；渲染不能替代功能测试。新增样式检查焦点、禁用及高对比状态；未完成的检查应明确记录。
 
 ## Open questions
-None blocking. Scope assumes the existing light desktop appearance; additional themes and a redesign of the condition editor are outside this iteration.
+
+无阻塞设计问题。根据用户最新反馈改为紧凑单列、默认全览，保持浅色视觉语言。真实混合 DPI、多显示器拖拽与辅助技术体验仍为人工验收边界，不从几何测试或静态截图推定通过。

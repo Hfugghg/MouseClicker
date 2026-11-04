@@ -8,8 +8,8 @@
 MouseClicker 按你框选的屏幕区域和设定的节奏自动点击鼠标。可以管理多个点击区域、设置间隔与顺序，也可以用一张模板图片判断目标出现后再点击。
 
 <p align="center">
-  <img src="docs/screenshots/main-zh-CN.png" alt="MouseClicker 主界面" width="620"><br>
-  <sub>主界面：点击区域、时间间隔与执行顺序</sub>
+  <img src="docs/screenshots/wpf-main-zh-CN.png" alt="MouseClicker WPF 主界面" width="620"><br>
+  <sub>WPF 主界面：点击区域、时间间隔与执行顺序（示例配置）</sub>
 </p>
 
 ## 📥 下载
@@ -86,12 +86,12 @@ MouseClicker 按你框选的屏幕区域和设定的节奏自动点击鼠标。�
 5. 使用“测试识别”查看当前画面的匹配分数和命中位置，确认后保存条件，再开始任务。测试识别不会点击鼠标。
 
 <p align="center">
-  <img src="docs/screenshots/condition-editor-zh-CN.png" alt="识图条件编辑器" width="560"><br>
+  <img src="docs/screenshots/wpf-condition-editor-zh-CN.png" alt="WPF 识图条件编辑器" width="560"><br>
   <sub>识图条件编辑器：模板、阈值、触发方式与识别测试</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/help-guide-zh-CN.png" alt="使用指南中的识图教程" width="760"><br>
+  <img src="docs/screenshots/wpf-help-guide-zh-CN.png" alt="WPF 使用指南中的识图教程" width="760"><br>
   <sub>使用指南：识图从零配置</sub>
 </p>
 
@@ -106,16 +106,19 @@ MouseClicker 按你框选的屏幕区域和设定的节奏自动点击鼠标。�
 ## 🛠️ 技术栈
 
 *   **语言**：C#
-*   **框架**：.NET 10 / Windows Forms（正式版本）；.NET Framework 4.8 / Windows Forms（实验分支）
+*   **框架**：.NET 10 / WPF（当前源码的默认界面）；保留 WinForms 实现用于迁移回归，.NET Framework 4.8 / Windows Forms 仍为实验分支
 *   **图像识别**：OpenCvSharp / OpenCV，Windows x64 原生运行库；发布时自动替换为仓库内置的精简原生库（见 [native/README.md](native/README.md)）
-*   **测试**：xUnit 自动化测试（包括配置数据与边界条件验证）
+*   **测试**：xUnit 自动化测试，覆盖配置、执行服务、WPF 交互与布局，以及旧 WinForms 回归基线
+
+当前源码已迁至 WPF，现有 JSON 配置、自动保存位置和热键设置保持兼容。下载区的历史发行包不随源码迁移自动更新；迁移任务和验证边界见 [WPF 迁移记录](MIGRATION-WPF.md)。
 
 ## 📁 项目结构
 
 ```
 MouseClicker/
 ├── src/MouseClicker/
-│   ├── Forms/          # UI 窗体
+│   ├── Wpf/            # 当前 WPF 窗口与界面
+│   ├── Forms/          # 迁移期保留的 WinForms 回归基线及共享几何
 │   ├── Models/         # 数据模型
 │   ├── Services/       # 业务逻辑
 │   ├── Resources/      # 图标等资源
@@ -154,6 +157,14 @@ dotnet publish .\src\MouseClicker\MouseClicker.csproj --configuration Release --
 ```powershell
 dotnet test .\MouseClicker.sln --configuration Release
 ```
+
+仅运行 WPF 专项测试：
+
+```powershell
+dotnet test .\MouseClicker.sln --configuration Release --filter FullyQualifiedName~Wpf
+```
+
+WPF 测试需要 Windows 桌面环境，使用替身验证鼠标执行，不发送真实点击。坐标数学和窗口边界已有自动化检查；真实混合 DPI 多显示器上的拖拽、跨屏缩放及辅助技术体验仍需人工验收。
 
 ## 🧪 实验分支：.NET Framework 4.8
 
