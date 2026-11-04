@@ -6,6 +6,7 @@
     <Version>1.3.0</Version>
     <Nullable>enable</Nullable>
     <UseWindowsForms>true</UseWindowsForms>
+    <UseWPF>true</UseWPF>
     <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <ImplicitUsings>enable</ImplicitUsings>
     <ApplicationIcon>Resources/logo.ico</ApplicationIcon>
@@ -14,6 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Using Include="System.IO" />
     <PackageReference Include="OpenCvSharp4" Version="4.13.0.20260627" />
     <PackageReference Include="OpenCvSharp4.runtime.win.slim" Version="4.13.0.20260627" />
     <InternalsVisibleTo Include="MouseClicker.Tests" />

@@ -11,6 +11,10 @@ static class Program
         // 若要自定义应用程序配置（例如设置高 DPI 设置或默认字体），
         // 请参阅 https://aka.ms/applicationconfiguration。
         ApplicationConfiguration.Initialize();
-        Application.Run(new Form1());
+        var application = new System.Windows.Application
+        {
+            ShutdownMode = System.Windows.ShutdownMode.OnMainWindowClose
+        };
+        application.Run(new Wpf.MainWindow());
     }    
 }

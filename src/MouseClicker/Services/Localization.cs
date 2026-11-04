@@ -1902,6 +1902,20 @@ Obrigado por usar o aplicativo!
                 language["ConditionTestNotMatched"] = messages[2];
                 language["ConditionTestError"] = messages[3];
             }
+            var closeWithoutSaving = new Dictionary<string, string>
+            {
+                ["en-US"] = "Close without saving these changes? Choose No to return and fix the problem.",
+                ["zh-CN"] = "是否放弃保存本次修改并退出？选择“否”可返回修正问题。",
+                ["zh-TW"] = "是否放棄儲存本次修改並結束？選擇「否」可返回修正問題。",
+                ["ja-JP"] = "変更を保存せずに終了しますか？「いいえ」で戻って問題を修正できます。",
+                ["ko-KR"] = "변경 사항을 저장하지 않고 종료할까요? 아니요를 선택하면 돌아가 문제를 수정할 수 있습니다.",
+                ["fr-FR"] = "Fermer sans enregistrer ces modifications ? Choisissez Non pour revenir et corriger le problème.",
+                ["de-DE"] = "Ohne Speichern der Änderungen schließen? Mit Nein können Sie das Problem beheben.",
+                ["es-ES"] = "¿Cerrar sin guardar los cambios? Elija No para volver y corregir el problema.",
+                ["ru-RU"] = "Закрыть без сохранения изменений? Выберите «Нет», чтобы вернуться и исправить проблему.",
+                ["pt-BR"] = "Fechar sem salvar as alterações? Escolha Não para voltar e corrigir o problema."
+            };
+            foreach (var (code, message) in closeWithoutSaving) Translations[code]["CloseWithoutSaving"] = message;
             foreach (var language in Translations.Values)
             {
                 language["HelpTutorialContent"] += "\n\n" + language["ConditionEdit"] + ":\n" +
