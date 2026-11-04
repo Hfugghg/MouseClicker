@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.Loader;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Text;
 using Xunit;
 
@@ -330,22 +331,42 @@ namespace MouseClicker.Tests
         [InlineData("", "en-US")]
         public void Language_DefaultsToDeviceUiCultureOnFirstInitialization(string cultureName, string expected)
         {
-            var originalCulture = CultureInfo.CurrentUICulture;
-            var context = new AssemblyLoadContext("localization-device-default", isCollectible: true);
-            try
+            // WPF 依据程序集名称缓存资源；同一进程内加载另一份同名程序集会污染后续 XAML 解析。
+            // 使用独立进程验证真正的首次静态初始化，既不重置字段，也不依赖测试执行顺序。
+            string host = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH")
+                ?? Path.GetFullPath(Path.Combine(RuntimeEnvironment.GetRuntimeDirectory(), "..", "..", "..", "dotnet.exe"));
+            var start = new ProcessStartInfo(host)
             {
-                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo(cultureName);
-                // 全新的上下文会执行生产代码的静态初始化器，而测试本身不会给 Language 赋值。
-                var assembly = context.LoadFromAssemblyPath(typeof(Localization).Assembly.Location);
-                var type = assembly.GetType("MouseClicker.Localization", throwOnError: true)!;
-                var field = type.GetField("Language", BindingFlags.Public | BindingFlags.Static)!;
-                Assert.Equal(expected, Assert.IsType<string>(field.GetValue(null)));
-            }
-            finally
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            start.ArgumentList.Add(typeof(LocalizationTests).Assembly.Location);
+            start.ArgumentList.Add("--localization-probe");
+            start.ArgumentList.Add(cultureName);
+            using var process = Process.Start(start) ?? throw new InvalidOperationException("无法启动本地化初始化探针。");
+            if (!process.WaitForExit(10000))
             {
-                CultureInfo.CurrentUICulture = originalCulture;
-                context.Unload();
+                process.Kill(entireProcessTree: true);
+                throw new TimeoutException("本地化初始化探针执行超时。");
             }
+            string output = process.StandardOutput.ReadToEnd().Trim();
+            string error = process.StandardError.ReadToEnd();
+            Assert.True(process.ExitCode == 0, $"本地化初始化探针退出码 {process.ExitCode}：{error}");
+            Assert.Equal(expected, output);
+        }
+
+        [Fact]
+        public void FirstInitializationProbeDoesNotPoisonWpfResourceResolution()
+        {
+            Language_DefaultsToDeviceUiCultureOnFirstInitialization("fr-CA", "fr-FR");
+            WpfTestHost.Run(() =>
+            {
+                var window = new MouseClicker.Wpf.MainWindow(null, enableHotkeys: false);
+                try { Assert.NotNull(window.Content); }
+                finally { window.Close(); }
+            });
         }
     }
 }
